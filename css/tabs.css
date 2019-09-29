@@ -1,0 +1,159 @@
+.etabs-tabgroup {
+  display: inline-flex;
+  padding-top: 10px;
+  padding-left: 10px;
+  position: fixed;
+  width: auto;
+  -webkit-app-region: no-drag;
+  z-index: 5;
+  float: left;
+  height: 32px;
+  background-color: transparent;
+  cursor: default;
+  font: caption;
+  font-size: 14px;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.etabs-tabs {}
+
+.etabs-tab {
+  display: none;
+  position: relative;
+  color: #333;
+  height: 22px;
+  padding: 8px 10px 4px 5px;;
+  border-bottom: none;
+  border-left: none;
+  background: linear-gradient(to bottom, #F5F5F5 0%, #F5F5F5 100%);
+  font: caption;
+  font-size: 14px;
+  background-color: white;
+  cursor: default;
+}
+
+/* Dragula */
+.etabs-tab.gu-mirror {
+  padding-bottom: 0;
+}
+
+.etabs-tab:first-child {
+  border-left: none;
+}
+
+.etabs-tab.visible {
+  display: inline-flex;
+  float: left;
+  border-radius: 10px;
+  bottom: 3px;
+  padding-bottom: 6px;
+}
+
+.etabs-tab.active {
+  background: #fff;
+  /* border-left: 1px #eeeeee solid;
+  border-top: 1px #eeeeee solid;
+  border-right: 1px #eeeeee solid; */
+}
+
+.etabs-tab.flash {
+  background: linear-gradient(to bottom, #F5F5F5 0%, #F5F5F5 100%);
+}
+
+.etabs-buttons {
+  float: left;
+}
+
+.etabs-buttons button {
+  float: left;
+  color: #333;
+  background: none;
+  border: none;
+  font-size: 17px;
+  margin-top: 3px;
+  border-radius: 2px;
+  margin-left: 6px;
+  width: 20px;
+  text-align: center;
+  padding: 5px 22px 1px 5px;
+  transition: 0.1s all;
+}
+
+.etabs-buttons button:hover {
+  background-color: #eee;
+}
+
+.etabs-tab-badge {
+  position: absolute;
+  right: 0;
+  top: -7px;
+  background: red;
+  border-radius: 100%;
+  text-align: center;
+  font-size: 10px;
+  padding: 0 5px;
+}
+
+.etabs-tab-badge.hidden {
+  display: none;
+}
+
+.etabs-tab-icon {
+  display: inline-block;
+  height: 16px;
+  margin-left: 10px;
+}
+
+.etabs-tab-icon img {
+  position: absolute;
+  max-width: 16px;
+  max-height: 16px;
+  top: 0;
+  bottom: 0;
+  margin: auto;
+}
+
+.etabs-tab-title {
+  letter-spacing: -0.25px;
+  width: 200px;
+  white-space: nowrap;
+  overflow: hidden;
+  margin-top: 2px;
+  text-overflow: ellipsis;
+  display: inline-block;
+  margin-left: 30px;
+}
+
+.etabs-tab-buttons {
+  display: inline-block;
+  margin-left: 10px;
+}
+
+.etabs-tab-buttons button {
+  display: inline-block;
+  color: #333;
+  background: none;
+  border: none;
+  width: 20px;
+  text-align: center;
+  border-radius: 5px;
+  padding-right: 16px;
+  padding-bottom: 3px;
+  transition: 0.1s all;
+}
+
+.etabs-tab-buttons button:hover {
+  background-color: #eee;
+}
+
+.etabs-views {
+  border-top: 1px solid #eee;
+  height: calc(100% - 98px);
+  width: 100%;
+  position: fixed;
+  margin-top: 97px;
+  background: white;
+}
+
+.etab-view {}
