@@ -1,0 +1,76 @@
+#tabs
+{
+    width: 100%;
+    left: 0;
+    display: block;
+    overflow-y: hidden;
+    overflow-x: auto;
+    white-space: nowrap;
+    height: 40px;
+    padding: 0;
+    margin: 0;
+    background: rgba($blue, 0.7);
+    &::-webkit-scrollbar
+    {
+        background: red;
+        outline: none;
+        border: none;
+        height: 3px;
+    }
+    &::-webkit-scrollbar-thumb
+    {
+        background: white;
+    }
+    .tab 
+    {
+        margin: 0;
+        width: 100px;
+        background: $blue;
+        display: inline-block;
+        height: 40px;
+        margin-left: -4px;
+        color: $white;
+        text-align: left;
+        white-space: nowrap;
+        position: relative;
+        overflow: hidden;
+        text-overflow: ellipsis; 
+        cursor: pointer;
+        box-sizing: border-box;
+        border-right: $white 1px solid;
+        line-height: 32px;
+        .close 
+        {
+            position: absolute;
+            right: 0;
+            top: 0;
+            height: 20px;
+            width: 20px;
+            text-align: right;
+            font-size: 14px;
+            line-height: 0;
+            font-family: monospace;
+            background: $blue;
+            &:hover{
+                color: darkred;
+            }
+        }
+        &:first-of-type {
+            margin-left: 0;
+        }
+    }
+}
+
+#views {
+  position: relative;
+}
+
+.page {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: calc(100vh - 28px);
+}

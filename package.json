@@ -1,0 +1,52 @@
+{
+	"name": "peacock-browser",
+	"version": "2.0.0",
+	"description": "The browser of the future; built on speed, powered by innovation.",
+	"main": "main.js",
+	"repository": "https://github.com/electron/electron-quick-start",
+	"keywords": [
+		"browser",
+		"web",
+		"web3",
+		"blockchain",
+		"privacy"
+	],
+	"build": {
+		"appId": "com.codiscite.peacock"
+	},
+	"scripts": {
+		"start": "electron .",
+		"pack": "electron-builder --dir",
+		"dist": "electron-builder",
+		"dist-all": "electron-builder -mwl"
+	},
+	"author": "Codiscite",
+	"license": "ISC",
+	"devDependencies": {
+		"blockstack": "^19.3.0",
+		"dragula": "^3.7.2",
+		"electron": "^1.8.8",
+		"electron-chrome-extension": "^4.0.3",
+		"electron-tabs": "^0.9.5",
+		"favicon-getter": "^1.1.3",
+		"gulp": "^3.9.1",
+		"gulp-sass": "^3.1.0",
+		"jsonfile": "^2.4.0",
+		"uuid": "^3.0.1"
+	},
+	"dependencies": {
+		"@cliqz/adblocker-electron": "^1.1.0",
+		"blockstack": "^19.3.0",
+		"cross-fetch": "^3.0.4",
+		"dragula": "^3.7.2",
+		"electron-chrome-extension": "^4.0.3",
+		"electron-extensions": "^4.0.0",
+		"electron-log": "^3.0.8",
+		"electron-tabs": "^0.9.5",
+		"favicon-getter": "^1.1.3",
+		"gulp": "^3.9.1",
+		"gulp-sass": "^3.1.0",
+		"jsonfile": "^2.4.0",
+		"uuid": "^3.0.1"
+	}
+}
