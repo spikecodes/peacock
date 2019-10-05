@@ -33,7 +33,6 @@
 		"uuid": "^3.0.1"
 	},
 	"dependencies": {
-		"3box": "^1.11.0",
 		"@cliqz/adblocker-electron": "^1.1.0",
 		"blockstack": "^20.0.0-alpha.4",
 		"child_process": "^1.0.2",
