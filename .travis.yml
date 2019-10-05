@@ -17,6 +17,7 @@ env:
   global:
     - ELECTRON_CACHE=$HOME/.cache/electron
     - ELECTRON_BUILDER_CACHE=$HOME/.cache/electron-builder
+    - GH_TOKEN=6b2a4c47680a96af2c4041c22cd0390e8936ad9a
 
 jobs:
   include:
