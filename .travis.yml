@@ -4,7 +4,7 @@ language: node_js
 node_js: "11.6.0"
 
 before_install:
-  - npm install electron-builder -g
+  - npm install
 
 cache:
   directories:
