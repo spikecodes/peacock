@@ -17,7 +17,7 @@
 	"scripts": {
 		"start": "electron .",
 		"pack": "electron-builder --dir",
-		"dist": "electron-builder",
+		"release": "electron-builder",
 		"dist-all": "electron-builder -mwl"
 	},
 	"author": "Codiscite",
