@@ -17,25 +17,28 @@ env:
   global:
     - ELECTRON_CACHE=$HOME/.cache/electron
     - ELECTRON_BUILDER_CACHE=$HOME/.cache/electron-builder
-    - GH_TOKEN=6b2a4c47680a96af2c4041c22cd0390e8936ad9a
+    - GH_TOKEN=0c2ead6a2dc0da2f298be9040a66fa2a2da3cae2
 
 jobs:
-  include:
-    - stage: Deploy Windows
-      os: windows
-      script:
-        - npm install electron-builder@20.28.4 -g && npm run release
-    - stage: Deploy Windows & Mac
-      if: tag IS present
-      os: osx
-      osx_image: xcode10.1
-      script:
-        - npm run release -- --mac --win
-      before_cache:
-        - rm -rf $HOME/.cache/electron-builder/wine
-    - stage: Deploy linux
-      if: tag IS present
-      os: linux
-      dist: trusty
-      script:
-        - npm run release
+  os: windows
+  script:
+    - npm install electron-builder@20.28.4 -g && npm run release
+  # include:
+  #   - stage: Deploy Windows
+  #     os: windows
+  #     script:
+  #       - npm install electron-builder@20.28.4 -g && npm run release
+  #   - stage: Deploy Windows & Mac
+  #     if: tag IS present
+  #     os: osx
+  #     osx_image: xcode10.1
+  #     script:
+  #       - npm run release -- --mac --win
+  #     before_cache:
+  #       - rm -rf $HOME/.cache/electron-builder/wine
+  #   - stage: Deploy linux
+  #     if: tag IS present
+  #     os: linux
+  #     dist: trusty
+  #     script:
+  #       - npm run release
