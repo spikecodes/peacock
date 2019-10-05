@@ -47,6 +47,7 @@
 		"cors": "^2.8.5",
 		"cross-fetch": "^3.0.4",
 		"dragula": "^3.7.2",
+		"electron": "^6.0.11",
 		"electron-chrome-extension": "^4.0.3",
 		"electron-extensions": "^4.0.1",
 		"electron-log": "^3.0.8",
