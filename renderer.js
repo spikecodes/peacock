@@ -18,6 +18,8 @@ const {
 const ElectronBlocker = require('@cliqz/adblocker-electron').ElectronBlocker;
 const fetch = require('cross-fetch').fetch; // required 'fetch'
 
+var userSession = new blockstack.UserSession();
+
 var ById = function(id) {
 	return document.getElementById(id);
 }
@@ -57,6 +59,20 @@ let tab = tabGroup.addTab({
 	active: true
 });
 
+ipcRenderer.on('blockstackSignIn', function(event, token) {
+	if(userSession.isUserSignedIn()){
+		alert("We did it boys!");
+		tabGroup.getActiveTab().close();
+	} else {
+	  userSession.handlePendingSignIn(token);
+		tabGroup.getActiveTab().close();
+	}
+});
+
+// ipcRenderer.on('window-closing', function(event, input) {
+// 	uploadHistory();
+// });
+
 Mousetrap.bind(['ctrl+shift+a', 'command+shift+a'], function() {
 	toggleAdblock();
 });
@@ -82,15 +98,71 @@ Mousetrap.bind(['ctrl+shift+tab', 'command+shift+tab'], function() {
 		tabGroup.getTab(id-1).activate();
 	}
 });
+Mousetrap.bind(['ctrl+h', 'command+h'], function() {
+	if(userSession.isUserSignedIn()){
+		userSession.getFile("history.txt").then(data => {
+			alert(data);
+		});
+	} else {
+		signIntoBlockstack();
+	}
+});
+Mousetrap.bind(['ctrl+l', 'command+l'], function() {
+	if(userSession.isUserSignedIn()){
+		userSession.putFile("history.txt", "");
+	} else {
+		signIntoBlockstack();
+	}
+});
+Mousetrap.bind(['ctrl+j', 'command+j'], function() {
+	if(userSession.isUserSignedIn()){
+		userSession.getFile("history.txt", "").then(data => alert(data));
+	} else {
+		signIntoBlockstack();
+	}
+});
 
 omni.focus();
 
-function reloadView() {
-	tabGroup.getActiveTab().webview.reload();
+console.log(window.foo);
+
+function uploadHistory() {
+	if(userSession.isUserSignedIn()){
+		userSession.getFile("history.txt").then(data => {
+			console.log("|" + data + "|");
+			let content;
+			if(data != ""){
+				content = data + "," + history;
+			} else {
+				content = "" + history;
+			}
+			userSession.putFile("history.txt", content).then(() => {
+				ipcRenderer.send('close-window', "now");
+			});
+		});
+	} else {
+		signIntoBlockstack();
+	}
+}
+
+function signIntoBlockstack() {
+	const transitPrivateKey = userSession.generateAndStoreTransitKey();
+  const redirectURI = 'http://127.0.0.1:9876/callback';
+  const manifestURI = 'http://127.0.0.1:9876/manifest.json';
+  const scopes = blockstack.DEFAULT_SCOPE;
+  const appDomain = 'http://127.0.0.1:9876';
+  var authRequest = blockstack.makeAuthRequest(transitPrivateKey, redirectURI, manifestURI, scopes, appDomain);
+	let url = "http://browser.blockstack.org/auth?authRequest=" + authRequest;
+	tabGroup.addTab({
+		title: "Blockstack",
+		src: url,
+		visible: true,
+		active: true
+	});
 }
 
 function changeAdBlock(toWhat) {
-	ipcRenderer.send('request-mainprocess-action', "adblock:" + toWhat);
+	ipcRenderer.send('adblock-change', "adblock:" + toWhat);
 
 	if (toWhat === "on") {
 		shield.src = "images/Peacock Shield.svg";
@@ -115,9 +187,12 @@ function toggleAdblock() {
 	}
 }
 
+function reloadView() {
+	tabGroup.getActiveTab().webview.reload();
+}
+
 function backView() {
 	tabGroup.getActiveTab().webview.goBack();
-	//blockstack.redirectToSignIn();
 }
 
 function forwardView() {
@@ -128,12 +203,15 @@ function updateURL(event) {
 	if (event.keyCode === 13) {
 		omni.blur();
 		let val = omni.value.toLowerCase();
-		if (val.startsWith('https://')) {
+		if (val.startsWith('peacock://')) {
+			let url = path.normalize(`${__dirname}/pages/${val.substr(10)}.html`);
+			tabGroup.getActiveTab().webview.loadURL(url);
+		} else if (val.startsWith('https://')) {
 			tabGroup.getActiveTab().webview.loadURL(val);
 		} else if (val.startsWith('http://')) {
 			tabGroup.getActiveTab().webview.loadURL(val);
 		} else {
-			tabGroup.getActiveTab().webview.loadURL('http://' + val);
+			tabGroup.getActiveTab().webview.loadURL('https://' + val);
 		}
 	}
 }
@@ -212,16 +290,30 @@ function handleUrl(event) {
 }
 
 function updateNav(event) {
-	omni.value = tabGroup.getActiveTab().webview.src;
 	tabGroup.getActiveTab().setTitle(tabGroup.getActiveTab().webview.getTitle());
-	let url = tabGroup.getActiveTab().webview.src;
-	favicon(url).then(function(fav) {
-		if (fav != 'blank favicon') {
-			tabGroup.getActiveTab().setIcon(fav);
-		} else {
-			tabGroup.getActiveTab().setIcon('images/blank.png');
-		}
-	});
+	let currentURL = tabGroup.getActiveTab().webview.src.substr(8).replace(/\//g, '\\');
+
+	if(currentURL.startsWith(path.normalize(`${__dirname}\\pages\\`))) {
+		let protocolVal = currentURL.replace(path.normalize(`${__dirname}\\pages\\`), "").split(".")[0];
+		omni.value = 'peacock://' + protocolVal;
+	} else {
+		userSession.getFile("history.txt").then(data => {
+			let content = data + tabGroup.getActiveTab().webview.src + ",";
+			userSession.putFile("history.txt", content);
+		});
+
+		omni.value = tabGroup.getActiveTab().webview.src;
+
+		let url = tabGroup.getActiveTab().webview.src;
+		favicon(url).then(function(fav) {
+			if (fav != 'blank favicon') {
+				tabGroup.getActiveTab().setIcon(fav);
+			} else {
+				tabGroup.getActiveTab().setIcon('images/blank.png');
+			}
+		});
+	}
+
 }
 
 function updateTargetURL(event) {
