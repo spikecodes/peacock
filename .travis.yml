@@ -21,8 +21,9 @@ env:
 jobs:
   include:
     - stage: Deploy Windows
+      os: windows
       script:
-        - npm run release
+        - npm install electron-builder -g && npm run release
     - stage: Deploy Windows & Mac
       if: tag IS present
       os: osx
