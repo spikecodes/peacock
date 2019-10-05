@@ -12,7 +12,14 @@ article, aside, details, figcaption, figure, footer, header, hgroup, menu, nav, 
 }
 
 body {
-  line-height: 1
+  line-height: 1;
+  height: 100%;
+  width: 100%;
+  display: block;
+  background: #f5f5f5;
+  overflow-y: hidden;
+  /* padding-right: 17px; /* Increase/decrease this value for cross-browser compatibility */ */
+  box-sizing: content-box; /* So the width will be 100% + 17px */
 }
 
 ol, ul {
@@ -39,14 +46,28 @@ html {
   overflow: hidden;
 }
 
-body {
-  height: 100%;
+#permission-container {
+  padding: 0px 25px;
+  padding-top: 1px;
+  border-radius: 25px;
+  vertical-align: middle;
+  line-height: 30px;
+  color: #050708;
+  position: relative;
+  float: left;
+  left: 40px;
+  font-size: 15px;
+}
+
+#permissions {
+  bottom: 25px;
+  position: fixed;
+  background: grey;
+  z-index: 11;
+  font-family: Roboto;
   width: 100%;
+  width: auto;
   display: block;
-  background: #f5f5f5;
-  overflow-y: hidden;
-  /* padding-right: 17px; /* Increase/decrease this value for cross-browser compatibility */ */
-  box-sizing: content-box; /* So the width will be 100% + 17px */
 }
 
 #titlebar {
@@ -202,7 +223,7 @@ body {
   top: 29px;
   width: 180px;
   height: auto;
-  z-index: 20;
+  z-index: 10;
   padding: 15px;
   overflow-y: auto;
   overflow-x: hidden;
@@ -339,7 +360,7 @@ body {
 #dialog-container {
   bottom: 25px;
   position: fixed;
-  z-index: 10;
+  z-index: 11;
   font-family: Roboto;
   width: 100%;
   display: none;

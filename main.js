@@ -1,11 +1,13 @@
 const electron = require('electron')
-const { ipcMain } = require('electron')
+const {
+	ipcMain
+} = require('electron')
 // Module to control application life.
 const app = electron.app
 // Module to create native browser window.
 const BrowserWindow = electron.BrowserWindow
-
 const session = electron.session
+const protocol = electron.protocol
 
 // const ExtensibleSession = require('electron-extensions/main').ExtensibleSession;
 
@@ -15,11 +17,29 @@ const url = require('url')
 const ElectronBlocker = require('@cliqz/adblocker-electron').ElectronBlocker;
 const fetch = require('cross-fetch').fetch; // required 'fetch'
 
+const blockstack = require('blockstack');
+const queryString = require('query-string').queryString;
+const cp = require('child_process');
+
+// Start process to serve manifest file
+const server = cp.fork(__dirname + '/server.js');
+
+var force_quit = false;
+
+// Quit server process if main app will quit
+app.on('will-quit', () => {
+	server.send('quit');
+});
+
+server.on('message', (m) => {
+	authCallback(m.authResponse)
+});
+
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
-let mainWindow
+let mainWindow;
 
-ipcMain.on('request-mainprocess-action', (event, arg) => {
+ipcMain.on('adblock-change', (event, arg) => {
 	var data = arg.split(":");
 	if (data[1] === "on") {
 		enableAdBlocking();
@@ -28,15 +48,45 @@ ipcMain.on('request-mainprocess-action', (event, arg) => {
 	}
 });
 
+ipcMain.on('test-message', (event, arg) => {
+	console.log(arg);
+});
+
+// ipcMain.on('close-window', (event, arg) => {
+//   force_quit = true;
+// 	app.quit();
+// });
+
+function authCallback(authResponse) {
+	// Bring app window to front
+	mainWindow.focus();
+
+	const token = blockstack.decodeToken(authResponse);
+	console.log(authResponse);
+	mainWindow.webContents.send('blockstackSignIn', authResponse);
+	// const profileURL = tokenPayload.profile_url
+	// fetch(profileURL)
+	//   .then(response => {
+	//     if (!response.ok) {
+	//       console.log("Error fetching user profile")
+	//     } else {
+	//       response.text()
+	//       .then(responseText => JSON.parse(responseText))
+	//       .then(wrappedProfile => wrappedProfile[0])
+	//       .then(token => {
+	//         mainWindow.webContents.send('blockstackSignIn', token);
+	//       })
+	//     }
+	//   })
+};
+
 function enableAdBlocking() {
-	console.log('yat');
 	ElectronBlocker.fromPrebuiltAdsAndTracking(fetch).then((blocker) => {
 		blocker.enableBlockingInSession(session.defaultSession);
 	});
 }
 
 function disableAdBlocking() {
-	console.log('yee');
 	ElectronBlocker.fromPrebuiltAdsAndTracking(fetch).then((blocker) => {
 		blocker.disableBlockingInSession(session.defaultSession);
 	});
@@ -50,17 +100,37 @@ function createWindow() {
 		frame: false,
 		backgroundColor: '#FFF',
 		webPreferences: {
-			nodeIntegration: true
+			nodeIntegration: true,
+      preload: path.join(app.getAppPath(), 'preload.js')
 		},
 		width: screenElectron.width,
 		height: screenElectron.height,
-		icon: path.join(__dirname, 'images/download.ico')
+		icon: path.join(__dirname, 'images/Peacock2.0.ico')
 	});
 
 	enableAdBlocking();
 
+	const filter = {
+		urls: ["http://*/*", "https://*/*"]
+	}
+
+	session.defaultSession.webRequest.onBeforeSendHeaders(filter, (details, callback) => {
+		details.requestHeaders['DNT'] = "1";
+		callback({
+			cancel: false,
+			requestHeaders: details.requestHeaders
+		})
+	});
+
+	session.defaultSession.setPermissionRequestHandler((webContents, permission, callback) => {
+		const url = webContents.getURL()
+
+    console.log(permission);
+		callback(true);
+	});
+
 	// const extensions = new ExtensibleSession(session.defaultSession);
-  // extensions.loadExtension('Grammarly'); // Path to the extension to load
+	// extensions.loadExtension('Grammarly'); // Path to the extension to load
 
 	// and load the index.html of the app.
 	mainWindow.loadURL(url.format({
@@ -68,6 +138,16 @@ function createWindow() {
 		protocol: 'file:',
 		slashes: true
 	}));
+
+	// Continue to handle mainWindow "close" event here
+	// mainWindow.on('close', function(e) {
+	//   if(!force_quit){
+	//       e.preventDefault();
+	//       mainWindow.hide();
+	//       console.log("yes");
+	//       mainWindow.webContents.send('window-closing', "now");
+	//   }
+	// });
 
 	mainWindow.maximize();
 
@@ -93,9 +173,12 @@ app.on('window-all-closed', function() {
 	// On OS X it is common for applications and their menu bar
 	// to stay active until the user quits explicitly with Cmd + Q
 	if (process.platform !== 'darwin') {
-		app.quit();
+		if (mainWindow) {
+			mainWindow.webContents.closeDevTools()
+		}
+		app.quit()
 	}
-});
+})
 
 app.on('activate', function() {
 	// On OS X it's common to re-create a window in the app when the
