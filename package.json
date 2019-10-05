@@ -12,7 +12,24 @@
 		"privacy"
 	],
 	"build": {
-		"appId": "com.codiscite.peacock"
+
+	},
+	"build": {
+		"appId": "com.codiscite.peacock",
+		"win": {
+			"target": "nsis",
+			"icon": "images/Peacock2.0.ico"
+		},
+		"mac": {
+			"category": "app.category",
+			"target": [
+				"zip",
+				"dmg"
+			]
+		},
+		"nsis": {
+			"perMachine": true
+		}
 	},
 	"scripts": {
 		"start": "electron .",
