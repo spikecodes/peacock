@@ -3,6 +3,9 @@ sudo: false
 language: node_js
 node_js: "11.6.0"
 
+before_install:
+  - npm install electron-builder -g
+
 cache:
   directories:
     - node_modules
