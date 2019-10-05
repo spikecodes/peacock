@@ -18,6 +18,7 @@ lib-cov
 coverage
 
 .travis.yml
+*.yml
 
 # nyc test coverage
 .nyc_output
