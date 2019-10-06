@@ -64,20 +64,6 @@ function authCallback(authResponse) {
 	const token = blockstack.decodeToken(authResponse);
 	console.log(authResponse);
 	mainWindow.webContents.send('blockstackSignIn', authResponse);
-	// const profileURL = tokenPayload.profile_url
-	// fetch(profileURL)
-	//   .then(response => {
-	//     if (!response.ok) {
-	//       console.log("Error fetching user profile")
-	//     } else {
-	//       response.text()
-	//       .then(responseText => JSON.parse(responseText))
-	//       .then(wrappedProfile => wrappedProfile[0])
-	//       .then(token => {
-	//         mainWindow.webContents.send('blockstackSignIn', token);
-	//       })
-	//     }
-	//   })
 };
 
 function enableAdBlocking() {
@@ -100,8 +86,7 @@ function createWindow() {
 		frame: false,
 		backgroundColor: '#FFF',
 		webPreferences: {
-			nodeIntegration: true,
-      preload: path.join(app.getAppPath(), 'preload.js')
+			nodeIntegration: true
 		},
 		width: screenElectron.width,
 		height: screenElectron.height,

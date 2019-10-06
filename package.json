@@ -12,9 +12,6 @@
 		"privacy"
 	],
 	"build": {
-
-	},
-	"build": {
 		"appId": "com.codiscite.peacock",
 		"win": {
 			"target": "nsis",
@@ -41,20 +38,14 @@
 	"license": "ISC",
 	"devDependencies": {
 		"@cliqz/adblocker-electron": "^1.1.0",
-		"blockstack": "^20.0.0-alpha.4",
-		"child_process": "^1.0.2",
-		"cors": "^2.8.5",
-		"cross-fetch": "^3.0.4",
+		"blockstack": "^19.3.0",
 		"dragula": "^3.7.2",
-		"electron": "^6.0.11",
-		"electron-builder": "^20.28.4",
+		"electron": "^1.8.8",
 		"electron-chrome-extension": "^4.0.3",
-		"electron-extensions": "^4.0.1",
-		"electron-log": "^3.0.8",
 		"electron-tabs": "^0.9.5",
-		"express": "^4.17.1",
 		"favicon-getter": "^1.1.3",
 		"gulp": "^3.9.1",
+		"gulp-sass": "^3.1.0",
 		"jsonfile": "^2.4.0",
 		"uuid": "^3.0.1"
 	},
