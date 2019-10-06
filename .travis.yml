@@ -21,12 +21,9 @@ env:
 jobs:
   include:
     - stage: Deploy Windows
-      os: osx
-      osx_image: xcode10.1
+      os: windows
       script:
-        - npm install electron-builder@20.28.4 -g && npm run release -- --mac
-      before_cache:
-        - rm -rf $HOME/.cache/electron-builder/wine
+        - npm install electron-builder@20.28.4 -g && npm run release
     - stage: Deploy Windows & Mac
       if: tag IS present
       os: osx
