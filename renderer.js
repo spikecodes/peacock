@@ -18,6 +18,18 @@ const {
 const ElectronBlocker = require('@cliqz/adblocker-electron').ElectronBlocker;
 const fetch = require('cross-fetch').fetch; // required 'fetch'
 
+// const client = require('discord-rich-presence')('627363592408137749');
+//
+// client.updatePresence({
+//   state: 'slithering',
+//   details: '🐍',
+//   startTimestamp: Date.now(),
+//   endTimestamp: Date.now() + 1337,
+//   largeImageKey: 'peacock',
+//   smallImageKey: 'peacock',
+//   instance: true,
+// });
+
 var userSession = new blockstack.UserSession();
 
 var ById = function(id) {
@@ -52,6 +64,7 @@ var tabGroup = new TabGroup({
 		active: true
 	}
 });
+
 let tab = tabGroup.addTab({
 	title: "Google",
 	src: "https://google.com",
@@ -123,8 +136,6 @@ Mousetrap.bind(['ctrl+j', 'command+j'], function() {
 });
 
 omni.focus();
-
-console.log(window.foo);
 
 function uploadHistory() {
 	if(userSession.isUserSignedIn()){
