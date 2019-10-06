@@ -12,9 +12,6 @@
 		"privacy"
 	],
 	"build": {
-
-	},
-	"build": {
 		"appId": "com.codiscite.peacock",
 		"win": {
 			"target": "nsis",
