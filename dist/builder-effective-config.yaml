@@ -1,0 +1,15 @@
+directories:
+  output: dist
+  buildResources: build
+appId: com.codiscite.peacock
+win:
+  target: nsis
+  icon: images/Peacock2.0.ico
+mac:
+  category: books
+  target:
+    - zip
+    - dmg
+nsis:
+  perMachine: true
+electronVersion: 1.8.8
