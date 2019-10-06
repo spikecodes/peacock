@@ -21,7 +21,7 @@
 			"icon": "images/Peacock2.0.ico"
 		},
 		"mac": {
-			"category": "app.category",
+			"category": "books",
 			"target": [
 				"zip",
 				"dmg"
