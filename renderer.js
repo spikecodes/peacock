@@ -27,7 +27,7 @@ const fetch = require('cross-fetch').fetch; // required 'fetch'
 //   endTimestamp: Date.now() + 1337,
 //   largeImageKey: 'peacock',
 //   smallImageKey: 'peacock',
-//   instance: true,
+//   instance: true
 // });
 
 var userSession = new blockstack.UserSession();
