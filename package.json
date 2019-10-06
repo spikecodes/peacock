@@ -31,7 +31,7 @@
 		"start": "electron .",
 		"pack": "electron-builder --dir",
 		"release": "electron-builder",
-		"dist-all": "electron-builder -mwl"
+		"dist-all": "electron-builder -mwl --publish=always"
 	},
 	"author": "Codiscite",
 	"license": "ISC",
