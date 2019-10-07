@@ -1,6 +1,6 @@
 {
 	"name": "peacock",
-	"version": "2.0.4",
+	"version": "2.0.41",
 	"description": "Open source privacy-first browser that hosts your data on the blockchain.",
 	"main": "main.js",
 	"repository": "https://github.com/Codiscite/peacock/",
@@ -30,7 +30,7 @@
 	"scripts": {
 		"start": "electron .",
 		"pack": "electron-builder --dir",
-		"release": "electron-builder",
+		"release": "electron-builder --publish=always",
 		"dist-all": "electron-builder -mwl --publish=always"
 	},
 	"author": "Codiscite",
