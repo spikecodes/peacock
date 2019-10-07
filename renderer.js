@@ -18,17 +18,43 @@ const {
 const ElectronBlocker = require('@cliqz/adblocker-electron').ElectronBlocker;
 const fetch = require('cross-fetch').fetch; // required 'fetch'
 
-// const client = require('discord-rich-presence')('627363592408137749');
-//
-// client.updatePresence({
-//   state: 'slithering',
-//   details: '🐍',
-//   startTimestamp: Date.now(),
-//   endTimestamp: Date.now() + 1337,
-//   largeImageKey: 'peacock',
-//   smallImageKey: 'peacock',
-//   instance: true
-// });
+const { Client } = require('discord-rpc');
+
+//Discord Rich Presence
+const clientId = '627363592408137749';
+
+const rpclient = new Client({ transport: 'ipc'});
+const startDate = new Date();
+const startTimestamp = startDate.getTime()
+
+async function setActivity() {
+  if (!rpclient) {
+    return;
+  }
+	var details = 'Peacock Browser';
+	var state = 'Exploring the internet...';
+  rpclient.setActivity({
+    details: details,
+    state: state,
+    startTimestamp,
+
+    largeImageKey: 'peacock',
+    largeImageText: `Peacock Browser v2.0.5`,
+    instance: false
+  })
+};
+
+rpclient.on('ready', () => {
+  console.log('Loaded Discord RPC');
+  setActivity();
+
+  setInterval(() => {
+    setActivity();
+  }, 15e3);
+});
+
+rpclient.login({ clientId }).catch(console.error);
+//Discord Rich Presence
 
 var userSession = new blockstack.UserSession();
 
