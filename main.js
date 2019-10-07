@@ -84,9 +84,18 @@ function createWindow() {
 
 	mainWindow = new BrowserWindow({
 		frame: false,
+		minWidth: 500,
+    minHeight: 450,
+		titleBarStyle: 'hiddenInset',
 		backgroundColor: '#FFF',
 		webPreferences: {
-			nodeIntegration: true
+			nodeIntegration: true,
+			plugins: true,
+      nodeIntegration: true,
+      contextIsolation: false,
+      experimentalFeatures: true,
+      enableBlinkFeatures: 'OverlayScrollbars',
+      webviewTag: true
 		},
 		width: screenElectron.width,
 		height: screenElectron.height,

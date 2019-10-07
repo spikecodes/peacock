@@ -344,6 +344,11 @@ html {
 }
 
 #dialog {
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  max-width: 1000px;
+
   padding: 0px 25px;
   padding-top: 1px;
   border-radius: 25px;

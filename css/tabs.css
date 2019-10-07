@@ -1,5 +1,5 @@
 .etabs-tabgroup {
-  display: inline-flex;
+  display: inline-flex !important;
   padding-top: 10px;
   padding-left: 10px;
   position: fixed;
