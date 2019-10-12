@@ -57,6 +57,10 @@ body {
   color: white;
 }
 
+#header-text{
+  text-shadow: 0px 3px 0px #545B62;
+}
+
 .dropdown {
   background-color: #3c3e42;
   border-radius: 5px;
@@ -73,4 +77,16 @@ body {
 .dropdown-item:hover{
   background-color: #545B62;
   color: white;
+}
+
+#navigation #fave-popup, #navigation #fave-popup .link .favicon {
+  background-color: #3c3e42;
+}
+
+#navigation #fave-popup .link {
+  color: white;
+}
+
+#navigation #fave-popup .link:hover {
+  background-color: #545B62;
 }
