@@ -155,6 +155,11 @@ function createWindow() {
 		// when you should delete the corresponding element.
 		mainWindow = null;
 	});
+
+	// var notif = new window.Notification('Peacock is Fabulous! ⭐', {
+	//   "Love, Spike",
+	//   silent: true // We'll play our own sound
+	// });
 }
 
 // This method will be called when Electron has finished

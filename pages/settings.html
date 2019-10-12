@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>Peacock Settings</title>
+    <link href="https://fonts.googleapis.com/css?family=Roboto&display=swap" rel="stylesheet">
+
+    <script>window.$ = window.jQuery = require('jquery');</script>
+
+    <link rel="stylesheet" href="../css/titlebar.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <script src="../js/jquery-3.3.1.slim.min.js"></script>
+    <script src="../js/popper.min.js"></script>
+    <script src="../js/bootstrap.min.js"></script>
+    <style>
+      h1, h2, h3, h4, h5, h6, p{
+        font-family: 'Nexa', sans-serif;
+      }
+
+      #back-arrow {
+        outline: none;
+        border: 0px;
+        background-color: transparent;
+        position: fixed;
+        left: 20px;
+        top: 25px;
+        height: 40px;
+        width: 40px;
+        font-family: Nexa;
+        font-weight: 500;
+        font-size: 30px;
+        border-radius: 5px;
+        transition: all 0.05s;
+      }
+
+      #back-arrow:hover {
+        background-color: rgba(0, 0, 0, 0.04)
+      }
+
+      #content {
+        padding-top: 100px;
+        padding-left: 100px;
+      }
+
+      #title {
+        margin-top: 50px;
+        font-size: 40px;
+        color: #313A43;
+        font-weight: 700;
+      }
+
+      #header-icon{
+        width: 35px;
+        height: auto;
+      }
+
+      #header-text {
+        margin: 0;
+        margin-top: 7px;
+        font-size: 21px;
+        text-shadow: 0px 3px 0px rgba(0, 0, 0, 0.1);
+        font-family: Nexa;
+        font-weight: 700;
+        color: #313A43;
+      }
+
+      .heading{
+        margin-top: 100px;
+        font-size: 19px;
+      }
+
+      .heading-title{
+        font-weight: 500;
+        color: #313A43;
+        margin-bottom: 20px;
+      }
+
+      .heading-element {
+        justify-content: left;
+        align-items: center;
+        padding-left: 50px;
+        height: 50px;
+        width: 500px;
+      }
+
+      .dropdown {
+        float: right;
+      }
+
+      .dropdown-toggle {
+        border-radius: 5px;
+        border: none;
+        background-color: rgba(0, 0, 0, 0.05);
+        color: #313A43;
+        transition: all 0.1s;
+      }
+
+      .label {
+        display: inline-block;
+        font-size: 22px;
+      }
+    </style>
+  </head>
+  <body>
+    <button id="back-arrow">←</button>
+    <header id="titlebar">
+      <div id="drag-region">
+        <div id="window-controls">
+          <div class="button" id="min-button">
+            <span>&#xE921;</span>
+          </div>
+          <div class="button" id="max-button">
+            <span>&#xE922;</span>
+          </div>
+          <div class="button" id="restore-button">
+            <span>&#xE923;</span>
+          </div>
+          <div class="button" id="close-button">
+            <span>&#xE8BB;</span>
+          </div>
+        </div>
+      </div>
+    </header>
+    <div id="content">
+      <div>
+        <img id="header-icon" src="../images/Peacock2.0.png">
+        <p id="header-text">Peacock</p>
+      </div>
+      <h1 id="title">Settings</h1>
+      <section class="heading">
+        <h2 class="heading-title">Customization</h2>
+        <div class="heading-element" data-key="search_engine">
+          <p class="label">Search Engine</p>
+          <div class="dropdown">
+            <button class="btn btn-secondary dropdown-toggle" data-toggle="dropdown" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+              Google
+            </button>
+            <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+              <a class="dropdown-item" href="#">Google</a>
+              <a class="dropdown-item" href="#">DuckDuckGo</a>
+              <a class="dropdown-item" href="#">Ecosia</a>
+              <a class="dropdown-item" href="#">Bing</a>
+              <a class="dropdown-item" href="#">Yahoo</a>
+              <a class="dropdown-item" href="#">Qwant</a>
+            </div>
+          </div>
+        </div>
+        <div class="heading-element" data-key="theme">
+          <p class="label">Theme</p>
+          <div class="dropdown">
+            <button class="btn btn-secondary dropdown-toggle" data-toggle="dropdown" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+              Default
+            </button>
+            <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+              <a class="dropdown-item" href="#">Default</a>
+              <a class="dropdown-item" href="#">Light</a>
+              <a class="dropdown-item" href="#">Dark</a>
+              <a class="dropdown-item" href="#">Hackerman</a>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </body>
+  <script>
+    require('../js/settings.js');
+    require('../titlebar.js');
+  </script>
+</html>
