@@ -10,6 +10,7 @@ const dragula = require("dragula");
 const bookmarks = path.join(__dirname, 'bookmarks.json');
 const blockstack = require("blockstack");
 
+const session = require('electron').remote.session;
 const remote = require('electron').remote;
 const {
 	ipcRenderer
@@ -19,40 +20,48 @@ const ElectronBlocker = require('@cliqz/adblocker-electron').ElectronBlocker;
 const fetch = require('cross-fetch').fetch; // required 'fetch'
 
 //Discord Rich Presence
-const { Client } = require('discord-rpc');
+const {
+	Client
+} = require('discord-rpc');
 const clientId = '627363592408137749';
 
-const rpclient = new Client({ transport: 'ipc'});
+const rpclient = new Client({
+	transport: 'ipc'
+});
 const startDate = new Date();
 const startTimestamp = startDate.getTime()
 
+var theme = "light";
+
 async function setActivity() {
-  if (!rpclient) {
-    return;
-  }
+	if (!rpclient) {
+		return;
+	}
 	var details = 'Peacock Browser';
 	var state = 'Exploring the internet...';
-  rpclient.setActivity({
-    details: details,
-    state: state,
-    startTimestamp,
+	rpclient.setActivity({
+		details: details,
+		state: state,
+		startTimestamp,
 
-    largeImageKey: 'peacock',
-    largeImageText: `Peacock Browser v2.0.5`,
-    instance: false
-  })
+		largeImageKey: 'peacock',
+		largeImageText: `Peacock Browser v2.0.5`,
+		instance: false
+	})
 };
 
 rpclient.on('ready', () => {
-  console.log('Loaded Discord RPC');
-  setActivity();
+	console.log('Loaded Discord RPC');
+	setActivity();
 
-  setInterval(() => {
-    setActivity();
-  }, 15e3);
+	setInterval(() => {
+		setActivity();
+	}, 15e3);
 });
 
-rpclient.login({ clientId }).catch(console.error);
+rpclient.login({
+	clientId
+}).catch(console.error);
 //Discord Rich Presence
 
 var userSession = new blockstack.UserSession();
@@ -86,7 +95,11 @@ var tabGroup = new TabGroup({
 		title: "Google",
 		src: "https://google.com",
 		visible: true,
-		active: true
+		active: true,
+		webviewAttributes: {
+		  useragent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) peacock/2.0.43 Chrome/77.0.3865.90 Electron/3.1.13 Safari/537.36",
+			partition: "persist:peacock"
+		}
 	}
 });
 
@@ -94,15 +107,19 @@ let tab = tabGroup.addTab({
 	title: "Google",
 	src: "https://google.com",
 	visible: true,
-	active: true
+	active: true,
+	webviewAttributes: {
+		useragent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) peacock/2.0.43 Chrome/77.0.3865.90 Electron/3.1.13 Safari/537.36",
+		partition: "persist:peacock"
+	}
 });
 
 ipcRenderer.on('blockstackSignIn', function(event, token) {
-	if(userSession.isUserSignedIn()){
+	if (userSession.isUserSignedIn()) {
 		alert("We did it boys!");
 		tabGroup.getActiveTab().close();
 	} else {
-	  userSession.handlePendingSignIn(token);
+		userSession.handlePendingSignIn(token);
 		tabGroup.getActiveTab().close();
 	}
 });
@@ -117,27 +134,27 @@ Mousetrap.bind(['ctrl+shift+a', 'command+shift+a'], function() {
 Mousetrap.bind(['ctrl+tab', 'command+tab'], function() {
 	let id = tabGroup.getActiveTab().id;
 	let length = tabGroup.getTabs().length;
-	if(length === 1){
+	if (length === 1) {
 		// Do nothing
-	} else if (id === length - 1){
+	} else if (id === length - 1) {
 		tabGroup.getTab(0).activate();
 	} else {
-		tabGroup.getTab(id+1).activate();
+		tabGroup.getTab(id + 1).activate();
 	}
 });
 Mousetrap.bind(['ctrl+shift+tab', 'command+shift+tab'], function() {
 	let id = tabGroup.getActiveTab().id;
 	let length = tabGroup.getTabs().length;
-	if(length === 1){
+	if (length === 1) {
 		// Do nothing
-	} else if (id === 0){
+	} else if (id === 0) {
 		tabGroup.getTab(length - 1).activate();
 	} else {
-		tabGroup.getTab(id-1).activate();
+		tabGroup.getTab(id - 1).activate();
 	}
 });
 Mousetrap.bind(['ctrl+h', 'command+h'], function() {
-	if(userSession.isUserSignedIn()){
+	if (userSession.isUserSignedIn()) {
 		userSession.getFile("history.txt").then(data => {
 			alert(data);
 		});
@@ -146,7 +163,7 @@ Mousetrap.bind(['ctrl+h', 'command+h'], function() {
 	}
 });
 Mousetrap.bind(['ctrl+l', 'command+l'], function() {
-	if(userSession.isUserSignedIn()){
+	if (userSession.isUserSignedIn()) {
 		userSession.putFile("history.txt", "");
 	} else {
 		signIntoBlockstack();
@@ -163,35 +180,36 @@ Mousetrap.bind(['ctrl+shift+s', 'command+shift+s'], function() {
 omni.focus();
 
 function loadTheme() {
-	jsonfile.readFile("data/settings.json", function (err, obj) {
-	  if (err) console.error(err);
-		let theme = obj.theme.toLowerCase();
-	  if(theme === "light"){
-			// Do Nothing
-		} else if (theme === "default") {
+	jsonfile.readFile("data/settings.json", function(err, obj) {
+		if (err) console.error(err);
+		let themeObj = obj.theme.toLowerCase();
+		if (themeObj === "light") {
+			theme = "light";
+		} else if (themeObj === "default") {
+			theme = "light";
 			console.log("checking");
 			if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
 				// If Dark Mode
-				console.log("dark");
+				theme = "dark";
 				$('head').append('<link rel="stylesheet" href="css/themes/dark.css">');
 			}
 		} else {
-			$('head').append('<link rel="stylesheet" href="css/themes/' + theme + '.css">');
+			$('head').append('<link rel="stylesheet" href="css/themes/' + themeObj + '.css">');
+			theme = "dark";
 		}
 	});
 }
-
 loadTheme();
 
 function getSearchEnginePrefix(cb) {
-	jsonfile.readFile("data/settings.json", function (err, objecteroonie) {
-	  if (err) console.error(err);
+	jsonfile.readFile("data/settings.json", function(err, objecteroonie) {
+		if (err) console.error(err);
 
 		let searchEngine = objecteroonie.search_engine;
 
 		jsonfile.readFile("data/search_engines.json", function(err, obj) {
 			for (var i = 0; i < obj.length; i++) {
-				if(obj[i].name === searchEngine){
+				if (obj[i].name === searchEngine) {
 					cb(obj[i].url);
 				}
 			}
@@ -200,11 +218,11 @@ function getSearchEnginePrefix(cb) {
 }
 
 function uploadHistory() {
-	if(userSession.isUserSignedIn()){
+	if (userSession.isUserSignedIn()) {
 		userSession.getFile("history.txt").then(data => {
 			console.log("|" + data + "|");
 			let content;
-			if(data != ""){
+			if (data != "") {
 				content = data + "," + history;
 			} else {
 				content = "" + history;
@@ -220,11 +238,11 @@ function uploadHistory() {
 
 function signIntoBlockstack() {
 	const transitPrivateKey = userSession.generateAndStoreTransitKey();
-  const redirectURI = 'http://127.0.0.1:9876/callback';
-  const manifestURI = 'http://127.0.0.1:9876/manifest.json';
-  const scopes = blockstack.DEFAULT_SCOPE;
-  const appDomain = 'http://127.0.0.1:9876';
-  var authRequest = blockstack.makeAuthRequest(transitPrivateKey, redirectURI, manifestURI, scopes, appDomain);
+	const redirectURI = 'http://127.0.0.1:9876/callback';
+	const manifestURI = 'http://127.0.0.1:9876/manifest.json';
+	const scopes = blockstack.DEFAULT_SCOPE;
+	const appDomain = 'http://127.0.0.1:9876';
+	var authRequest = blockstack.makeAuthRequest(transitPrivateKey, redirectURI, manifestURI, scopes, appDomain);
 	let url = "http://browser.blockstack.org/auth?authRequest=" + authRequest;
 	tabGroup.addTab({
 		title: "Blockstack",
@@ -237,15 +255,24 @@ function signIntoBlockstack() {
 function changeAdBlock(toWhat) {
 	ipcRenderer.send('adblock-change', "adblock:" + toWhat);
 
-	if (toWhat === "on") {
-		shield.src = "images/Peacock Shield.svg";
-	} else if (toWhat === "off") {
-		shield.src = "images/Peacock Shield Empty.svg";
+	if (theme === "light") {
+		shield.src = "images/loading-light.gif";
+	} else if (theme === "dark") {
+		shield.src = "images/loading-dark.gif";
 	} else {
-		alert("Error: Adblocker not working.");
+		console.error("Theme not specified.");
 	}
 
-	tabGroup.getActiveTab().webview.reload();
+	setTimeout(function() {
+		tabGroup.getActiveTab().webview.reload();
+		if (toWhat === "on") {
+			shield.src = "images/Peacock Shield.svg";
+		} else if (toWhat === "off") {
+			shield.src = "images/Peacock Shield Empty.svg";
+		} else {
+			alert("Error: Adblocker not working.");
+		}
+	}, 3000);
 }
 
 function toggleAdblock() {
@@ -284,11 +311,15 @@ function updateURL(event) {
 		} else if (val.startsWith('http://')) {
 			tabGroup.getActiveTab().webview.loadURL(val);
 		} else {
-			getSearchEnginePrefix(function(prefix) {
-				console.log(prefix + val);
-				//tabGroup.getActiveTab().webview.loadURL('https://' + val);
-				tabGroup.getActiveTab().webview.loadURL(prefix + val);
-			});
+			if (val.includes(".") && !val.includes(" ")) {
+				tabGroup.getActiveTab().webview.loadURL("https://" + val);
+			} else {
+				getSearchEnginePrefix(function(prefix) {
+					console.log(prefix + val);
+					//tabGroup.getActiveTab().webview.loadURL('https://' + val);
+					tabGroup.getActiveTab().webview.loadURL(prefix + val);
+				});
+			}
 		}
 	}
 }
@@ -366,11 +397,11 @@ function handleUrl(event) {
 	}
 }
 
-function updateNav(event) {
+function finishLoad(event) {
 	tabGroup.getActiveTab().setTitle(tabGroup.getActiveTab().webview.getTitle());
 	let currentURL = tabGroup.getActiveTab().webview.src.substr(8).replace(/\//g, '\\');
 
-	if(currentURL.startsWith(path.normalize(`${__dirname}\\pages\\`))) {
+	if (currentURL.startsWith(path.normalize(`${__dirname}\\pages\\`))) {
 		let protocolVal = currentURL.replace(path.normalize(`${__dirname}\\pages\\`), "").split(".")[0];
 		omni.value = 'peacock://' + protocolVal;
 	} else {
@@ -419,8 +450,18 @@ function leaveFullscreen() {
 	etabsViews.style.marginTop = '100px';
 }
 
+function loadStart(event) {
+	if (theme === "light") {
+		tabGroup.getActiveTab().setIcon("images/loading-light.gif");
+	} else if (theme === "dark") {
+		tabGroup.getActiveTab().setIcon("images/loading-dark.gif");
+	} else {
+		console.error("Theme not specified.");
+	}
+}
+
 tabGroup.on("tab-active", (tab, tabGroup) => {
-	tabGroup.getActiveTab().webview.addEventListener('did-finish-load', updateNav);
+	tabGroup.getActiveTab().webview.addEventListener('did-finish-load', finishLoad);
 	tabGroup.getActiveTab().webview.addEventListener('enter-html-full-screen', enterFullscreen);
 	tabGroup.getActiveTab().webview.addEventListener('leave-html-full-screen', leaveFullscreen);
 	tabGroup.getActiveTab().webview.addEventListener('update-target-url', updateTargetURL);
@@ -442,28 +483,44 @@ omni.addEventListener('keydown', updateURL);
 fave.addEventListener('click', addBookmark);
 list.addEventListener('click', openPopUp);
 popup.addEventListener('click', handleUrl);
-tabGroup.getActiveTab().webview.addEventListener('did-finish-load', updateNav);
+tabGroup.getActiveTab().webview.addEventListener('did-start-loading', loadStart);
+// tabGroup.getActiveTab().webview.addEventListener('did-stop-loading', loadStop);
+tabGroup.getActiveTab().webview.addEventListener('did-finish-load', finishLoad);
 tabGroup.getActiveTab().webview.addEventListener('enter-html-full-screen', enterFullscreen);
 tabGroup.getActiveTab().webview.addEventListener('leave-html-full-screen', leaveFullscreen);
 tabGroup.getActiveTab().webview.addEventListener('update-target-url', updateTargetURL);
-tabGroup.getActiveTab().webview.addEventListener('dom-ready', function () {
-	tabGroup.getActiveTab().webview.insertCSS(`
-	html {
-	  scroll-behavior: smooth;
-	}
+tabGroup.getActiveTab().webview.addEventListener('dom-ready', function() {
+	if (theme === "dark") {
+		tabGroup.getActiveTab().webview.insertCSS(`
+		html {
+		  scroll-behavior: smooth;
+		}
 
-	::-webkit-scrollbar
-	{
-	  width: 10px; /* for vertical scrollbars */
-	}
+		::-webkit-scrollbar
+		{
+		  width: 10px; /* for vertical scrollbars */
+		}
 
-	::-webkit-scrollbar-track
-	{
-	  background: #2e3033;
-	}
+		::-webkit-scrollbar-track
+		{
+		  background: #2e3033;
+		}
 
-	::-webkit-scrollbar-thumb
-	{
-		background-color: rgba(255,255,255,0.5);
-	}`);
+		::-webkit-scrollbar-thumb
+		{
+			background-color: rgba(255,255,255,0.5);
+		}`);
+	}
+});
+
+const sess = session.fromPartition('persist:peacock');
+const filter = {
+	urls: ["http://*/*", "https://*/*"]
+}
+sess.webRequest.onBeforeSendHeaders(filter, (details, callback) => {
+	details.requestHeaders['DNT'] = "1";
+	callback({
+		cancel: false,
+		requestHeaders: details.requestHeaders
+	})
 });

@@ -82,6 +82,10 @@ body {
   color: #25ed0e;
 }
 
+#header-text{
+  text-shadow: 0px 3px 0px #545B62;
+}
+
 .dropdown-menu{
   background: #3c3e42;
 }
@@ -93,4 +97,16 @@ body {
 .dropdown-item:hover{
   background-color: #25ed0e;
   color: #3c3e42;
+}
+
+#navigation #fave-popup, #navigation #fave-popup .link .favicon {
+  background-color: #3c3e42;
+}
+
+#navigation #fave-popup .link {
+  color: white;
+}
+
+#navigation #fave-popup .link:hover {
+  background-color: #545B62;
 }
