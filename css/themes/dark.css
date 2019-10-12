@@ -1,0 +1,76 @@
+body {
+  background: #2e3033;
+}
+
+#window-controls .button:hover {
+  background: rgba(255,255,255,0.1);
+}
+
+.etabs-tab-buttons button:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.etabs-buttons button:hover {
+  background: rgba(255,255,255,0.1);
+}
+
+.etabs-tab.active {
+  background: #41454c;
+}
+
+.etabs-tab {
+  background: linear-gradient(to bottom, #2e3033 0%, #2e3033 100%);
+}
+
+#navigation, #topbar {
+  background: #2e3033;
+}
+
+#shieldIMG {
+  content:url('../../images/Peacock Shield.png');
+}
+
+#navigation div:not(#omnibox):not(#fave-popup):not(#shield) img, #back-arrow {
+  filter: invert(100%) sepia(100%) saturate(0%) hue-rotate(288deg) brightness(102%) contrast(102%);
+}
+
+#navigation div:not(#omnibox):not(#fave-popup):hover{
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+#navigation #omnibox input{
+  background-color: #3c3e42;
+  color: #fefefe;
+}
+
+.etabs-views{
+  border: none;
+}
+
+#dialog {
+  color: white;
+  background-color: rgb(46, 48, 51);
+}
+
+#header-text, #title, .label, .heading-title, .etabs-buttons button,
+.etabs-tab-title, .etabs-tab-buttons button, #window-controls .button, .dropdown-toggle {
+  color: white;
+}
+
+.dropdown {
+  background-color: #3c3e42;
+  border-radius: 5px;
+}
+
+.dropdown-menu{
+  background: #3c3e42;
+}
+
+.dropdown-item{
+  color: white;
+}
+
+.dropdown-item:hover{
+  background-color: #545B62;
+  color: white;
+}

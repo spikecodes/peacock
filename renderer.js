@@ -18,9 +18,8 @@ const {
 const ElectronBlocker = require('@cliqz/adblocker-electron').ElectronBlocker;
 const fetch = require('cross-fetch').fetch; // required 'fetch'
 
-const { Client } = require('discord-rpc');
-
 //Discord Rich Presence
+const { Client } = require('discord-rpc');
 const clientId = '627363592408137749';
 
 const rpclient = new Client({ transport: 'ipc'});
@@ -154,14 +153,51 @@ Mousetrap.bind(['ctrl+l', 'command+l'], function() {
 	}
 });
 Mousetrap.bind(['ctrl+j', 'command+j'], function() {
-	if(userSession.isUserSignedIn()){
-		userSession.getFile("history.txt", "").then(data => alert(data));
-	} else {
-		signIntoBlockstack();
-	}
+	tabGroup.getActiveTab().webview.openDevTools();
+});
+Mousetrap.bind(['ctrl+shift+s', 'command+shift+s'], function() {
+	let url = path.normalize(`${__dirname}/pages/settings.html`);
+	window.location.href = url;
 });
 
 omni.focus();
+
+function loadTheme() {
+	jsonfile.readFile("data/settings.json", function (err, obj) {
+	  if (err) console.error(err);
+		let theme = obj.theme.toLowerCase();
+	  if(theme === "light"){
+			// Do Nothing
+		} else if (theme === "default") {
+			console.log("checking");
+			if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+				// If Dark Mode
+				console.log("dark");
+				$('head').append('<link rel="stylesheet" href="css/themes/dark.css">');
+			}
+		} else {
+			$('head').append('<link rel="stylesheet" href="css/themes/' + theme + '.css">');
+		}
+	});
+}
+
+loadTheme();
+
+function getSearchEnginePrefix(cb) {
+	jsonfile.readFile("data/settings.json", function (err, objecteroonie) {
+	  if (err) console.error(err);
+
+		let searchEngine = objecteroonie.search_engine;
+
+		jsonfile.readFile("data/search_engines.json", function(err, obj) {
+			for (var i = 0; i < obj.length; i++) {
+				if(obj[i].name === searchEngine){
+					cb(obj[i].url);
+				}
+			}
+		});
+	});
+}
 
 function uploadHistory() {
 	if(userSession.isUserSignedIn()){
@@ -242,13 +278,17 @@ function updateURL(event) {
 		let val = omni.value.toLowerCase();
 		if (val.startsWith('peacock://')) {
 			let url = path.normalize(`${__dirname}/pages/${val.substr(10)}.html`);
-			tabGroup.getActiveTab().webview.loadURL(url);
+			window.location.href = url;
 		} else if (val.startsWith('https://')) {
 			tabGroup.getActiveTab().webview.loadURL(val);
 		} else if (val.startsWith('http://')) {
 			tabGroup.getActiveTab().webview.loadURL(val);
 		} else {
-			tabGroup.getActiveTab().webview.loadURL('https://' + val);
+			getSearchEnginePrefix(function(prefix) {
+				console.log(prefix + val);
+				//tabGroup.getActiveTab().webview.loadURL('https://' + val);
+				tabGroup.getActiveTab().webview.loadURL(prefix + val);
+			});
 		}
 	}
 }
@@ -406,3 +446,24 @@ tabGroup.getActiveTab().webview.addEventListener('did-finish-load', updateNav);
 tabGroup.getActiveTab().webview.addEventListener('enter-html-full-screen', enterFullscreen);
 tabGroup.getActiveTab().webview.addEventListener('leave-html-full-screen', leaveFullscreen);
 tabGroup.getActiveTab().webview.addEventListener('update-target-url', updateTargetURL);
+tabGroup.getActiveTab().webview.addEventListener('dom-ready', function () {
+	tabGroup.getActiveTab().webview.insertCSS(`
+	html {
+	  scroll-behavior: smooth;
+	}
+
+	::-webkit-scrollbar
+	{
+	  width: 10px; /* for vertical scrollbars */
+	}
+
+	::-webkit-scrollbar-track
+	{
+	  background: #2e3033;
+	}
+
+	::-webkit-scrollbar-thumb
+	{
+		background-color: rgba(255,255,255,0.5);
+	}`);
+});

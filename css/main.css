@@ -37,7 +37,7 @@ blockquote:before, blockquote:after, q:before, q:after {
 
 table {
   border-collapse: collapse;
-  border-spacing: 0
+  border-spacing: 0;
 }
 
 html {
@@ -64,73 +64,10 @@ html {
   position: fixed;
   background: grey;
   z-index: 11;
-  font-family: Roboto;
+  font-family: 'Roboto', sans-serif;
   width: 100%;
   width: auto;
   display: block;
-}
-
-#titlebar {
-  position: fixed;
-  font-family: "Segoe UI", sans-serif;
-  height: 32px;
-  background: transparent;
-  width: 100%;
-  display: block;
-}
-
-#titlebar #drag-region {
-  float: right;
-  height: 100%;
-  width: 100%;
-  /* -webkit-app-region: drag; */
-}
-
-#window-controls {
-  display: grid;
-  grid-template-columns: repeat(3, 46px);
-  position: absolute;
-  top: 0;
-  right: 0;
-  height: 100%;
-  font-family: "Segoe MDL2 Assets";
-  font-size: 10px;
-}
-#window-controls .button {
-  grid-row: 1 / span 1;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 100%;
-  height: 100%;
-}
-#window-controls #min-button {
-  grid-column: 1;
-}
-#window-controls #max-button, #window-controls #restore-button {
-  grid-column: 2;
-}
-#window-controls #close-button {
-  grid-column: 3;
-}
-
-#window-controls {
-  -webkit-app-region: no-drag;
-}
-#window-controls .button {
-  user-select: none;
-  cursor: default;
-  color: #050708;
-}
-#window-controls .button:hover {
-  background: rgba(0,0,0,0.1);
-}
-#window-controls #close-button:hover {
-  background: #E81123;
-  color: #FFF;
-}
-#window-controls #restore-button {
-  display: none;
 }
 
 #navigation #back, #navigation #forward, #navigation #refresh, #navigation #fave, #navigation #list, #navigation #shield {
@@ -153,14 +90,14 @@ html {
 }
 
 #navigation div:not(#omnibox):not(#fave-popup){
-  border-radius: 50px;
+  border-radius: 5px;
   transition: all 0.1s;
   position: relative;
   margin-top: -2px;
 }
 
 #navigation div:not(#omnibox):not(#fave-popup):hover{
-  background-color: rgba(0, 0, 0, 0.05);
+  background-color: rgba(0, 0, 0, 0.075);
 }
 
 #topbar {
@@ -202,8 +139,7 @@ html {
   padding: 5px 15px;
   color: #2e3033;
   background-color: #F5F5F5;
-  font-weight: bold;
-  font-family: Roboto;
+  font-weight: 600;
   margin: -2px 10px 0px 10px;
 }
 
@@ -239,7 +175,7 @@ html {
   height: 32px;
   color: #050708;
   font-size: 13px;
-  font-family: Roboto;
+  font-family: 'Roboto', sans-serif;
   text-decoration: none;
   text-align: left;
   display: block;
@@ -366,7 +302,7 @@ html {
   bottom: 25px;
   position: fixed;
   z-index: 11;
-  font-family: Roboto;
+  font-family: 'Roboto', sans-serif;
   width: 100%;
   display: none;
 }
