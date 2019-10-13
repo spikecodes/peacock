@@ -26,6 +26,12 @@ body {
   background: #2e3033;
 }
 
+#omnibox:hover > #url {
+  background-color: #494c50;
+  color: #fefefe;
+  transition: all 0.1s;
+}
+
 #shieldIMG {
   content:url('../../images/Peacock Shield.png');
 }

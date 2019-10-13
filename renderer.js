@@ -72,14 +72,12 @@ var ById = function(id) {
 
 var back = ById('back'),
 	forward = ById('forward'),
-	refresh = ById('refresh'),
 	omni = ById('url'),
 	fave = ById('fave'),
 	nav = ById('navigation'),
 	titlebar = ById('titlebar'),
 	dialog = ById('dialog'),
 	dialogContainer = ById('dialog-container'),
-	list = ById('list'),
 	etabsGroup = ById('etabs-tabgroup'),
 	etabsViews = ById('etabs-views'),
 	popup = ById('fave-popup'),
@@ -342,6 +340,8 @@ function updateURL(event) {
 		} else {
 			if (val.includes(".") && !val.includes(" ")) {
 				tabGroup.getActiveTab().webview.loadURL("https://" + val);
+			} else if (val.includes("://") && !val.includes(" ")) {
+				tabGroup.getActiveTab().webview.loadURL(val);
 			} else {
 				getSearchEnginePrefix(function(prefix) {
 					console.log(prefix + val);
@@ -434,10 +434,12 @@ function finishLoad(event) {
 		let protocolVal = currentURL.replace(path.normalize(`${__dirname}\\pages\\`), "").split(".")[0];
 		omni.value = 'peacock://' + protocolVal;
 	} else {
-		userSession.getFile("history.txt").then(data => {
-			let content = data + tabGroup.getActiveTab().webview.src + ",";
-			userSession.putFile("history.txt", content);
-		});
+		if(userSession.isUserSignedIn()){
+			userSession.getFile("history.txt").then(data => {
+				let content = data + tabGroup.getActiveTab().webview.src + ",";
+				userSession.putFile("history.txt", content);
+			});
+		}
 
 		omni.value = tabGroup.getActiveTab().webview.src;
 
@@ -489,12 +491,23 @@ function loadStart(event) {
 	}
 }
 
-tabGroup.on("tab-active", (tab, tabGroup) => {
-	tabGroup.getActiveTab().webview.addEventListener('did-finish-load', finishLoad);
-	tabGroup.getActiveTab().webview.addEventListener('enter-html-full-screen', enterFullscreen);
-	tabGroup.getActiveTab().webview.addEventListener('leave-html-full-screen', leaveFullscreen);
-	tabGroup.getActiveTab().webview.addEventListener('update-target-url', updateTargetURL);
+function loadStop(event) {
 	let url = tabGroup.getActiveTab().webview.src;
+	favicon(url).then(function(fav) {
+		if (fav != 'blank favicon') {
+			tabGroup.getActiveTab().setIcon(fav);
+		} else {
+			tabGroup.getActiveTab().setIcon('images/blank.png');
+		}
+	});
+}
+
+tabGroup.on("tab-active", (tab, tabGroup) => {
+	tab.webview.addEventListener('did-finish-load', finishLoad);
+	tab.webview.addEventListener('enter-html-full-screen', enterFullscreen);
+	tab.webview.addEventListener('leave-html-full-screen', leaveFullscreen);
+	tab.webview.addEventListener('update-target-url', updateTargetURL);
+	let url = tab.webview.src;
 	favicon(url).then(function(fav) {
 		if (fav != 'blank favicon') {
 			tab.setIcon(fav);
@@ -505,15 +518,21 @@ tabGroup.on("tab-active", (tab, tabGroup) => {
 });
 
 ById("shield").addEventListener('click', toggleAdblock);
-refresh.addEventListener('click', reloadView);
-back.addEventListener('click', backView);
-forward.addEventListener('click', forwardView);
+$("#refresh").click(reloadView);
+$("#back").click(backView);
+$("#forward").click(forwardView);
 omni.addEventListener('keydown', updateURL);
-fave.addEventListener('click', addBookmark);
-list.addEventListener('click', openPopUp);
+$("#url").focus(function () { $(this).select(); });;
+$("#fave").click(addBookmark);
+$("#list").click(openPopUp);
+$("#settings").click(function () {
+	let url = path.normalize(`${__dirname}/pages/settings.html`);
+	window.location.href = url;
+});
 popup.addEventListener('click', handleUrl);
+
 tabGroup.getActiveTab().webview.addEventListener('did-start-loading', loadStart);
-// tabGroup.getActiveTab().webview.addEventListener('did-stop-loading', loadStop);
+tabGroup.getActiveTab().webview.addEventListener('did-stop-loading', loadStop);
 tabGroup.getActiveTab().webview.addEventListener('did-finish-load', finishLoad);
 tabGroup.getActiveTab().webview.addEventListener('enter-html-full-screen', enterFullscreen);
 tabGroup.getActiveTab().webview.addEventListener('leave-html-full-screen', leaveFullscreen);
@@ -540,6 +559,28 @@ tabGroup.getActiveTab().webview.addEventListener('dom-ready', function() {
 			background-color: rgba(255,255,255,0.5);
 		}`);
 	}
+});
+tabGroup.getActiveTab().webview.addEventListener('new-window', (e) => {
+	let thisTab = tabGroup.addTab({
+		title: "",
+		src: e.url,
+		visible: true,
+		active: true,
+		webviewAttributes: {
+			useragent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) peacock/2.0.43 Chrome/77.0.3865.90 Electron/3.1.13 Safari/537.36",
+			partition: "persist:peacock"
+		}
+	});
+	favicon(e.url).then(function(fav) {
+		if (fav != 'blank favicon') {
+			thisTab.setIcon(fav);
+		} else {
+			thisTab.setIcon('images/blank.png');
+		}
+	});
+});
+tabGroup.getActiveTab().webview.addEventListener('page-favicon-updated', (e) => {
+	tabGroup.getActiveTab().setIcon(e.favicons);
 });
 
 const sess = session.fromPartition('persist:peacock');

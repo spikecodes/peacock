@@ -69,15 +69,18 @@ $(document).on('click', '.dropdown-item', function(event) {
   let text = $(this).text();
   let key = $(this).parent().parent().parent().attr("data-key");
 	$(this).parent().siblings(".dropdown-toggle").text(text);
-	saveSettings({ [key]: text })
+	saveSettings({ [key]: text });
+  if(key === "theme") { setTimeout(function () { loadTheme(); }, 1000); }
 });
 
 function loadTheme() {
 	jsonfile.readFile("data/settings.json", function (err, obj) {
 	  if (err) console.error(err);
 		let theme = obj.theme.toLowerCase();
-	  if(theme === "default" || theme === "light"){
-			// Do Nothing
+	  if (theme === "default" || theme === "light"){
+			if ($('.dropdown-menu').css("background").includes("rgb(60, 62, 66)")){
+        window.location.reload(false);
+      }
 		} else {
 			$('head').append('<link rel="stylesheet" href="../css/themes/' + theme + '.css">');
 		}
