@@ -1,20 +1,30 @@
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
   <head>
-    <meta charset="utf-8">
+    <meta charset="utf-8" />
     <title>Peacock Settings</title>
-    <link href="https://fonts.googleapis.com/css?family=Roboto&display=swap" rel="stylesheet">
-    <link href="../css/fonts/Nexa/Nexa.css" rel="stylesheet">
+    <link
+      href="https://fonts.googleapis.com/css?family=Roboto&display=swap"
+      rel="stylesheet"
+    />
+    <link href="../css/fonts/Nexa/Nexa.css" rel="stylesheet" />
 
-    <script>window.$ = window.jQuery = require('jquery');</script>
+    <script>
+      window.$ = window.jQuery = require("jquery");
+    </script>
 
-    <link rel="stylesheet" href="../css/titlebar.css">
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="stylesheet" href="../css/titlebar.css" />
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+      integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
+      crossorigin="anonymous"
+    />
     <script src="../js/jquery-3.3.1.slim.min.js"></script>
     <script src="../js/popper.min.js"></script>
     <script src="../js/bootstrap.min.js"></script>
     <style>
-      @import url('https://fonts.googleapis.com/css?family=Roboto&display=swap');
+      @import url("https://fonts.googleapis.com/css?family=Roboto&display=swap");
 
       /**
        *   MAKE ELECTRON APP FEEL MORE NATIVE
@@ -26,15 +36,27 @@
        *   * Prevent text selection
        */
 
-      *, *::after, *::before {
-      	-webkit-user-select: none;
-      	-webkit-user-drag: none;
-      	-webkit-app-region: no-drag;
-      	cursor: default;
+      *,
+      *::after,
+      *::before {
+        -webkit-user-select: none;
+        -webkit-user-drag: none;
+        -webkit-app-region: no-drag;
+        cursor: default;
       }
 
-      h1, h2, h3, h4, h5, h6, p{
-        font-family: 'Nexa', 'Roboto', sans-serif;
+      h1,
+      h2,
+      h3,
+      h4,
+      h5,
+      h6,
+      p {
+        font-family: "Nexa", "Roboto", sans-serif;
+      }
+
+      #drag-region {
+        --webkit-app-drag: drag;
       }
 
       #back-arrow {
@@ -46,7 +68,7 @@
         top: 25px;
         height: 40px;
         width: 40px;
-        font-family: 'Nexa', 'Roboto';
+        font-family: "Nexa", "Roboto";
         font-weight: 500;
         font-size: 30px;
         border-radius: 5px;
@@ -54,22 +76,27 @@
       }
 
       #back-arrow:hover {
-        background-color: rgba(0, 0, 0, 0.04)
+        background-color: rgba(0, 0, 0, 0.04);
       }
 
       #content {
         padding-top: 100px;
         padding-left: 100px;
+        margin-top: 80px;
       }
 
       #title {
         margin-top: 50px;
         font-size: 40px;
-        color: #313A43;
+        color: #313a43;
         font-weight: 700;
       }
 
-      #header-icon{
+      #titlebar {
+        top: 0;
+      }
+
+      #header-icon {
         width: 35px;
         height: auto;
       }
@@ -79,19 +106,19 @@
         margin-top: 7px;
         font-size: 22px;
         text-shadow: 0px 3px 0px rgba(0, 0, 0, 0.1);
-        font-family: 'Nexa', 'Roboto';
+        font-family: "Nexa", "Roboto";
         font-weight: 700;
-        color: #313A43;
+        color: #313a43;
       }
 
-      .heading{
+      .heading {
         margin-top: 100px;
         font-size: 19px;
       }
 
-      .heading-title{
+      .heading-title {
         font-weight: 500;
-        color: #313A43;
+        color: #313a43;
         margin-bottom: 20px;
       }
 
@@ -111,7 +138,7 @@
         border-radius: 5px;
         border: none;
         background-color: rgba(0, 0, 0, 0.05);
-        color: #313A43;
+        color: #313a43;
         transition: all 0.1s;
       }
 
@@ -122,7 +149,6 @@
     </style>
   </head>
   <body>
-    <button id="back-arrow">←</button>
     <header id="titlebar">
       <div id="drag-region">
         <div id="window-controls">
@@ -141,9 +167,10 @@
         </div>
       </div>
     </header>
+    <button id="back-arrow">←</button>
     <div id="content">
       <div>
-        <img id="header-icon" src="../images/Peacock2.0.png">
+        <img id="header-icon" src="../images/Peacock2.0.png" />
         <p id="header-text">Peacock</p>
       </div>
       <h1 id="title">Settings</h1>
@@ -152,7 +179,15 @@
         <div class="heading-element" data-key="search_engine">
           <p class="label">Search Engine</p>
           <div class="dropdown">
-            <button class="btn btn-secondary dropdown-toggle" data-toggle="dropdown" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <button
+              class="btn btn-secondary dropdown-toggle"
+              data-toggle="dropdown"
+              type="button"
+              id="dropdownMenuButton"
+              data-toggle="dropdown"
+              aria-haspopup="true"
+              aria-expanded="false"
+            >
               Google
             </button>
             <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
@@ -168,7 +203,15 @@
         <div class="heading-element" data-key="theme">
           <p class="label">Theme</p>
           <div class="dropdown">
-            <button class="btn btn-secondary dropdown-toggle" data-toggle="dropdown" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <button
+              class="btn btn-secondary dropdown-toggle"
+              data-toggle="dropdown"
+              type="button"
+              id="dropdownMenuButton"
+              data-toggle="dropdown"
+              aria-haspopup="true"
+              aria-expanded="false"
+            >
               Default
             </button>
             <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
@@ -182,7 +225,7 @@
     </div>
   </body>
   <script>
-    require('../js/settings.js');
-    require('../titlebar.js');
+    require("../js/settings.js");
+    require("../titlebar.js");
   </script>
 </html>
