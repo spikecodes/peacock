@@ -11,6 +11,8 @@ const protocol = electron.protocol
 
 // const ExtensibleSession = require('electron-extensions/main').ExtensibleSession;
 
+const { Menu, MenuItem } = require('electron');
+
 const path = require('path')
 const url = require('url')
 
@@ -20,6 +22,100 @@ const fetch = require('cross-fetch').fetch; // required 'fetch'
 const blockstack = require('blockstack');
 const queryString = require('query-string').queryString;
 const cp = require('child_process');
+
+const menuTemplate = [
+		{
+			label: 'Window',
+			submenu: [
+				{
+					label: 'Open Settings',
+					accelerator: 'CmdOrCtrl+Shift+S',
+					click: () => {
+						mainWindow.webContents.send('keyboardShortcut', 'settings');
+					}
+				},
+				{
+					label: 'Open DevTools',
+					accelerator: 'CmdOrCtrl+Shift+I',
+					click: () => {
+						if(mainWindow.isDevToolsOpened()){
+							mainWindow.closeDevTools();
+						} else {
+							mainWindow.openDevTools();
+						}
+					}
+				},
+				{
+					label: 'Restart Peacock',
+					accelerator: 'CmdOrCtrl+Alt+R',
+					click: () => {
+						// mainWindow.webContents.send('keyboardShortcut', 'restart');
+						app.relaunch();
+						app.exit(0);
+					}
+				},
+				{
+					label: 'Open History',
+					accelerator: 'CmdOrCtrl+H',
+					click: () => {
+						mainWindow.webContents.send('keyboardShortcut', 'history');
+					}
+				},
+				{
+					label: 'Clear History',
+					accelerator: 'CmdOrCtrl+Shift+H',
+					click: () => {
+						mainWindow.webContents.send('keyboardShortcut', 'clearHistory');
+					}
+				}
+			]
+		},
+		{
+			label: 'Website',
+			submenu: [
+				{
+					label: 'Open DevTools',
+					accelerator: 'CmdOrCtrl+Alt+I',
+					click: () => {
+						mainWindow.webContents.send('keyboardShortcut', 'devTools');
+					}
+				}
+			]
+		},
+		{
+			label: 'Tabs',
+			submenu: [
+				{
+					label: 'Next Tab',
+					accelerator: 'CmdOrCtrl+Tab',
+					click: () => {
+						mainWindow.webContents.send('keyboardShortcut', 'nextTab');
+					}
+				},
+				{
+					label: 'Previous Tab',
+					accelerator: 'CmdOrCtrl+Shift+Tab',
+					click: () => {
+						mainWindow.webContents.send('keyboardShortcut', 'backTab');
+					}
+				},
+				{
+					label: 'New Tab',
+					accelerator: 'CmdOrCtrl+T',
+					click: () => {
+						mainWindow.webContents.send('keyboardShortcut', 'newTab');
+					}
+				},
+				{
+					label: 'Close Tab',
+					accelerator: 'CmdOrCtrl+W',
+					click: () => {
+						mainWindow.webContents.send('keyboardShortcut', 'closeTab');
+					}
+				}
+			]
+		}
+];
 
 // Start process to serve manifest file
 const server = cp.fork(__dirname + '/server.js');
@@ -82,7 +178,7 @@ function createWindow() {
 	// Create the browser window.
 	var screenElectron = electron.screen.getPrimaryDisplay().size;
 
-	mainWindow = new BrowserWindow({
+  mainWindow = new BrowserWindow({
 		frame: false,
 		minWidth: 500,
     minHeight: 450,
@@ -101,6 +197,8 @@ function createWindow() {
 		height: screenElectron.height,
 		icon: path.join(__dirname, 'images/Peacock2.0.ico')
 	});
+
+	Menu.setApplicationMenu(Menu.buildFromTemplate(menuTemplate));
 
 	enableAdBlocking();
 

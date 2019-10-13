@@ -52,8 +52,6 @@ function saveSettings(input) {
   });
 }
 
-saveSettings({ "search_engine": "Yahoo" });
-
 jsonfile.readFile("data/settings.json", function (err, obj) {
   if (err) console.error(err);
   for (var key in obj){
