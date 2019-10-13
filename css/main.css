@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css?family=Roboto&display=swap');
+@import url("https://fonts.googleapis.com/css?family=Roboto&display=swap");
 
 /**
  *   MAKE ELECTRON APP FEEL MORE NATIVE
@@ -10,24 +10,120 @@
  *   * Prevent text selection
  */
 
-*, *::after, *::before {
-	-webkit-user-select: none;
-	-webkit-user-drag: none;
-	-webkit-app-region: no-drag;
-	cursor: default;
+*,
+*::after,
+*::before {
+  -webkit-user-select: none;
+  -webkit-user-drag: none;
+  -webkit-app-region: no-drag;
+  cursor: default;
 }
 
-html, body, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p, blockquote, pre, a, abbr, acronym, address, big, cite, code, del, dfn, em, img, ins, kbd, q, s, samp, small, strike, strong, sub, sup, tt, var, b, u, i, center, dl, dt, dd, ol, ul, li, fieldset, form, label, legend, table, caption, tbody, tfoot, thead, tr, th, td, article, aside, canvas, details, embed, figure, figcaption, footer, header, hgroup, menu, nav, output, ruby, section, summary, time, mark, audio, video {
+html,
+body,
+div,
+span,
+applet,
+object,
+iframe,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+blockquote,
+pre,
+a,
+abbr,
+acronym,
+address,
+big,
+cite,
+code,
+del,
+dfn,
+em,
+img,
+ins,
+kbd,
+q,
+s,
+samp,
+small,
+strike,
+strong,
+sub,
+sup,
+tt,
+var,
+b,
+u,
+i,
+center,
+dl,
+dt,
+dd,
+ol,
+ul,
+li,
+fieldset,
+form,
+label,
+legend,
+table,
+caption,
+tbody,
+tfoot,
+thead,
+tr,
+th,
+td,
+article,
+aside,
+canvas,
+details,
+embed,
+figure,
+figcaption,
+footer,
+header,
+hgroup,
+menu,
+nav,
+output,
+ruby,
+section,
+summary,
+time,
+mark,
+audio,
+video {
   margin: 0;
   padding: 0;
   border: 0;
   font-size: 100%;
   font: inherit;
-  vertical-align: baseline
+  vertical-align: baseline;
 }
 
-article, aside, details, figcaption, figure, footer, header, hgroup, menu, nav, section {
-  display: block
+*:focus {
+  outline: none;
+}
+
+article,
+aside,
+details,
+figcaption,
+figure,
+footer,
+header,
+hgroup,
+menu,
+nav,
+section {
+  display: block;
 }
 
 body {
@@ -37,21 +133,26 @@ body {
   display: block;
   background: #f5f5f5;
   overflow-y: hidden;
-  /* padding-right: 17px; /* Increase/decrease this value for cross-browser compatibility */ */
-  box-sizing: content-box; /* So the width will be 100% + 17px */
+  /* padding-right: 17px; /* Increase/decrease this value for cross-browser compatibility */
+  */box-sizing: content-box; /* So the width will be 100% + 17px */
 }
 
-ol, ul {
-  list-style: none
+ol,
+ul {
+  list-style: none;
 }
 
-blockquote, q {
-  quotes: none
+blockquote,
+q {
+  quotes: none;
 }
 
-blockquote:before, blockquote:after, q:before, q:after {
-  content: '';
-  content: none
+blockquote:before,
+blockquote:after,
+q:before,
+q:after {
+  content: "";
+  content: none;
 }
 
 table {
@@ -83,13 +184,19 @@ html {
   position: fixed;
   background: grey;
   z-index: 11;
-  font-family: 'Roboto', sans-serif;
+  font-family: "Roboto", sans-serif;
   width: 100%;
   width: auto;
   display: block;
 }
 
-#navigation #back, #navigation #forward, #navigation #refresh, #navigation #fave, #navigation #list, #navigation #shield, #navigation #settings {
+#navigation #back,
+#navigation #forward,
+#navigation #refresh,
+#navigation #fave,
+#navigation #list,
+#navigation #shield,
+#navigation #settings {
   float: left;
   display: block;
   min-width: 30px;
@@ -98,7 +205,7 @@ html {
   color: #2e3033;
 }
 
-#navigation div:not(#omnibox):not(#fave-popup) img{
+#navigation div:not(#omnibox):not(#fave-popup) img {
   position: absolute;
   top: 0;
   bottom: 0;
@@ -108,14 +215,14 @@ html {
   width: 22px;
 }
 
-#navigation div:not(#omnibox):not(#fave-popup){
+#navigation div:not(#omnibox):not(#fave-popup) {
   border-radius: 5px;
   transition: all 0.1s;
   position: relative;
   margin-top: -2px;
 }
 
-#navigation div:not(#omnibox):not(#fave-popup):hover{
+#navigation div:not(#omnibox):not(#fave-popup):hover {
   background-color: rgba(0, 0, 0, 0.075);
 }
 
@@ -147,6 +254,7 @@ html {
   float: left;
   display: block;
   width: calc(100% - 210px);
+  cursor: text;
 }
 
 #omnibox:hover > #url {
@@ -162,9 +270,11 @@ html {
   border-radius: 50px;
   padding: 5px 15px;
   color: #2e3033;
-  background-color: #F5F5F5;
-  font-weight: 600;
+  background-color: #f5f5f5;
   margin: -2px 10px 0px 10px;
+  cursor: text;
+  font-family: Roboto;
+  padding-left: 40px;
 }
 
 #navigation #omnibox input::selection {
@@ -179,10 +289,10 @@ html {
   border-radius: 5px;
   display: none;
   position: fixed;
-  right: 1px;
+  right: 89px;
   color: #eee;
-  top: 29px;
-  width: 180px;
+  top: 32px;
+  width: 190px;
   height: auto;
   z-index: 10;
   padding: 15px;
@@ -191,7 +301,7 @@ html {
   text-overflow: ellipsis;
   white-space: nowrap;
   background: white;
-  box-shadow: 0px -5px 30px 1px rgba(0, 0, 0, 0.075);
+  box-shadow: 0px -5px 18px 12px rgba(0, 0, 0, 0.075);
   transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
@@ -200,7 +310,7 @@ html {
   height: 32px;
   color: #050708;
   font-size: 13px;
-  font-family: 'Roboto', sans-serif;
+  font-family: "Roboto", sans-serif;
   text-decoration: none;
   text-align: left;
   display: block;
@@ -236,24 +346,24 @@ html {
   height: 40px;
   padding: 0;
   margin: 0;
-  background: rgba(7, 15, 78, 0.7)
+  background: rgba(7, 15, 78, 0.7);
 }
 
 #tabs::-webkit-scrollbar {
   background: red;
   outline: none;
   border: none;
-  height: 3px
+  height: 3px;
 }
 
 #tabs::-webkit-scrollbar-thumb {
-  background: white
+  background: white;
 }
 
 #tabs .tab {
   margin: 0;
   width: 100px;
-  background: #070F4E;
+  background: #070f4e;
   display: inline-block;
   height: 40px;
   margin-left: -4px;
@@ -266,7 +376,7 @@ html {
   cursor: pointer;
   box-sizing: border-box;
   border-right: #eee 1px solid;
-  line-height: 32px
+  line-height: 32px;
 }
 
 #tabs .tab .close {
@@ -279,19 +389,19 @@ html {
   font-size: 14px;
   line-height: 0;
   font-family: monospace;
-  background: #070F4E
+  background: #070f4e;
 }
 
 #tabs .tab .close:hover {
-  color: darkred
+  color: darkred;
 }
 
 #tabs .tab:first-of-type {
-  margin-left: 0
+  margin-left: 0;
 }
 
 #views {
-  position: relative
+  position: relative;
 }
 
 .page {
@@ -301,7 +411,7 @@ html {
   right: 0;
   bottom: 0;
   width: 100%;
-  height: calc(100vh - 28px)
+  height: calc(100vh - 28px);
 }
 
 #dialog {
@@ -310,24 +420,32 @@ html {
   overflow: hidden;
   max-width: 1000px;
 
-  padding: 0px 25px;
+  padding: 0px 10px;
   padding-top: 1px;
-  border-radius: 25px;
+  border-radius: 3px;
   background-color: #f5f5f5;
   vertical-align: middle;
-  line-height: 30px;
+  line-height: 24px;
   color: #050708;
   position: relative;
   float: left;
-  left: 40px;
+  left: 5px;
   font-size: 15px;
+  bottom: -20px;
+  border: 1px solid #00000038;
 }
 
 #dialog-container {
   bottom: 25px;
   position: fixed;
   z-index: 11;
-  font-family: 'Roboto', sans-serif;
+  font-family: "Roboto", sans-serif;
   width: 100%;
-  display: none;
+  opacity: 0;
+  transition: 0.2s opacity;
+  pointer-events: none;
+}
+
+#search {
+  filter: invert(0);
 }
