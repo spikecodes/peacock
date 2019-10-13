@@ -38,7 +38,7 @@ body {
   background: linear-gradient(to bottom, #2e3033 0%, #2e3033 100%);
 }
 
-#navigation {
+#navigation, #topbar, .etabs-views {
   background: #2e3033;
 }
 

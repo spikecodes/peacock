@@ -124,57 +124,86 @@ ipcRenderer.on('blockstackSignIn', function(event, token) {
 	}
 });
 
+ipcRenderer.on('keyboardShortcut', function(event, shortcut) {
+	let id;
+	let length;
+	switch (shortcut) {
+		case "settings":
+			let url = path.normalize(`${__dirname}/pages/settings.html`);
+			window.location.href = url;
+			break;
+		case "devTools":
+			if(tabGroup.getActiveTab().webview.isDevToolsOpened()){
+				tabGroup.getActiveTab().webview.closeDevTools();
+			} else {
+				tabGroup.getActiveTab().webview.openDevTools();
+			}
+			break;
+		case "nextTab":
+			id = tabGroup.getActiveTab().id;
+			length = tabGroup.getTabs().length;
+			if (length === 1) {
+				// Do nothing
+			} else if (id === length - 1) {
+				tabGroup.getTab(0).activate();
+			} else {
+				tabGroup.getTab(id + 1).activate();
+			}
+			break;
+		case "backTab":
+			id = tabGroup.getActiveTab().id;
+			length = tabGroup.getTabs().length;
+			if (length === 1) {
+				// Do nothing
+			} else if (id === 0) { // If First Tab
+				tabGroup.getTab(length - 1).activate(); // Activate Last Tab
+			} else { // If Not First Tab
+				tabGroup.getTab(id - 1).activate(); // Activate Previous Tab
+			}
+			break;
+		case "newTab":
+			tabGroup.addTab({
+				title: "Google",
+				src: "https://google.com",
+				visible: true,
+				active: true,
+				webviewAttributes: {
+					useragent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) peacock/2.0.43 Chrome/77.0.3865.90 Electron/3.1.13 Safari/537.36",
+					partition: "persist:peacock"
+				}
+			});
+			break;
+		case "closeTab":
+			id = tabGroup.getActiveTab().id;
+			tabGroup.getTab(id).close();
+			break;
+		case "history":
+			if (userSession.isUserSignedIn()) {
+				userSession.getFile("history.txt").then(data => {
+					alert(data);
+				});
+			} else {
+				signIntoBlockstack();
+			}
+			break;
+		case "clearHistory":
+				if (userSession.isUserSignedIn()) {
+					userSession.putFile("history.txt", "");
+				} else {
+					signIntoBlockstack();
+				}
+				break;
+		default:
+			break;
+	}
+});
+
 // ipcRenderer.on('window-closing', function(event, input) {
 // 	uploadHistory();
 // });
 
 Mousetrap.bind(['ctrl+shift+a', 'command+shift+a'], function() {
 	toggleAdblock();
-});
-Mousetrap.bind(['ctrl+tab', 'command+tab'], function() {
-	let id = tabGroup.getActiveTab().id;
-	let length = tabGroup.getTabs().length;
-	if (length === 1) {
-		// Do nothing
-	} else if (id === length - 1) {
-		tabGroup.getTab(0).activate();
-	} else {
-		tabGroup.getTab(id + 1).activate();
-	}
-});
-Mousetrap.bind(['ctrl+shift+tab', 'command+shift+tab'], function() {
-	let id = tabGroup.getActiveTab().id;
-	let length = tabGroup.getTabs().length;
-	if (length === 1) {
-		// Do nothing
-	} else if (id === 0) {
-		tabGroup.getTab(length - 1).activate();
-	} else {
-		tabGroup.getTab(id - 1).activate();
-	}
-});
-Mousetrap.bind(['ctrl+h', 'command+h'], function() {
-	if (userSession.isUserSignedIn()) {
-		userSession.getFile("history.txt").then(data => {
-			alert(data);
-		});
-	} else {
-		signIntoBlockstack();
-	}
-});
-Mousetrap.bind(['ctrl+l', 'command+l'], function() {
-	if (userSession.isUserSignedIn()) {
-		userSession.putFile("history.txt", "");
-	} else {
-		signIntoBlockstack();
-	}
-});
-Mousetrap.bind(['ctrl+j', 'command+j'], function() {
-	tabGroup.getActiveTab().webview.openDevTools();
-});
-Mousetrap.bind(['ctrl+shift+s', 'command+shift+s'], function() {
-	let url = path.normalize(`${__dirname}/pages/settings.html`);
-	window.location.href = url;
 });
 
 omni.focus();
