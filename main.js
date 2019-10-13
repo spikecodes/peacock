@@ -196,6 +196,8 @@ function createWindow() {
 		icon: path.join(__dirname, 'images/Peacock2.0.ico')
 	});
 
+	mainWindow.on('focus', () => { mainWindow.webContents.send('loadTheme', ''); });
+
 	Menu.setApplicationMenu(Menu.buildFromTemplate(menuTemplate));
 
 	enableAdBlocking();

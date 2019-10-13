@@ -59,12 +59,6 @@ jsonfile.readFile("data/settings.json", function (err, obj) {
   }
 });
 
-$(document).on('click', '#back-arrow', function(event) {
-  // window.history.back();
-  let url = path.normalize(`${__dirname}/../index.html`);
-  window.location.href = url;
-});
-
 $(document).on('click', '.dropdown-item', function(event) {
   let text = $(this).text();
   let key = $(this).parent().parent().parent().attr("data-key");

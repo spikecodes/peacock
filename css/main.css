@@ -257,6 +257,14 @@ html {
   cursor: text;
 }
 
+#navigation #omnibox #search {
+  margin-left: 22px;
+  position: absolute;
+  margin-top: 4px;
+  width: 17px;
+  cursor: text;
+}
+
 #omnibox:hover > #url {
   background-color: #f1f1f1;
   transition: all 0.1s;
@@ -267,7 +275,8 @@ html {
   outline: none;
   height: 20px;
   width: 90%;
-  border-radius: 50px;
+  border-radius: 5px;
+  border: 1px #f1f1f1 solid;
   padding: 5px 15px;
   color: #2e3033;
   background-color: #f5f5f5;
@@ -301,7 +310,7 @@ html {
   text-overflow: ellipsis;
   white-space: nowrap;
   background: white;
-  box-shadow: 0px -5px 18px 12px rgba(0, 0, 0, 0.075);
+  box-shadow: 0px 0px 18px 5px rgba(0, 0, 0, 0.05);
   transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
@@ -318,6 +327,8 @@ html {
   text-overflow: ellipsis;
   overflow: hidden;
   border-radius: 4px;
+  margin-top: 2px;
+  transition: all 0.1s;
 }
 
 #navigation #fave-popup .link:hover {
@@ -334,6 +345,7 @@ html {
   float: left;
   background: #fff;
   margin-right: 5px;
+  transition: all 0.1s;
 }
 
 #tabs {
@@ -419,10 +431,10 @@ html {
   text-overflow: ellipsis;
   overflow: hidden;
   max-width: 1000px;
-
   padding: 0px 10px;
   padding-top: 1px;
-  border-radius: 3px;
+  border-radius: 4px;
+
   background-color: #f5f5f5;
   vertical-align: middle;
   line-height: 24px;
@@ -432,7 +444,6 @@ html {
   left: 5px;
   font-size: 15px;
   bottom: -20px;
-  border: 1px solid #00000038;
 }
 
 #dialog-container {

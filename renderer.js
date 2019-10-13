@@ -2,8 +2,8 @@
 // be executed in the renderer process for that window.
 // All of the Node.js APIs are available in this process.
 const jsonfile = require("jsonfile");
-const favicon = require("favicon-getter").default;
 const path = require("path");
+const url = require('url');
 const uuid = require("uuid");
 const TabGroup = require("electron-tabs");
 const dragula = require("dragula");
@@ -12,7 +12,9 @@ const blockstack = require("blockstack");
 
 const session = require("electron").remote.session;
 const remote = require("electron").remote;
+const { BrowserWindow } = require("electron").remote;
 const { ipcRenderer } = require("electron");
+const Mercury = require('@postlight/mercury-parser');
 
 const ElectronBlocker = require("@cliqz/adblocker-electron").ElectronBlocker;
 const fetch = require("cross-fetch").fetch; // required 'fetch'
@@ -67,7 +69,6 @@ var userSession = new blockstack.UserSession();
 var ById = function(id) {
   return document.getElementById(id);
 };
-
 var back = ById("back"),
   forward = ById("forward"),
   omni = ById("url"),
@@ -99,7 +100,6 @@ var tabGroup = new TabGroup({
     }
   }
 });
-
 let tab = tabGroup.addTab({
   title: "Google",
   src: "https://google.com",
@@ -111,6 +111,8 @@ let tab = tabGroup.addTab({
     partition: "persist:peacock"
   }
 });
+
+// Customize button placement: dragula([nav]);
 
 ipcRenderer.on("blockstackSignIn", function(event, token) {
   if (userSession.isUserSignedIn()) {
@@ -199,6 +201,9 @@ ipcRenderer.on("keyboardShortcut", function(event, shortcut) {
   }
 });
 
+ipcRenderer.on("loadTheme", function(event, args) { loadTheme(); });
+
+
 // ipcRenderer.on('window-closing', function(event, input) {
 // 	uploadHistory();
 // });
@@ -209,23 +214,28 @@ Mousetrap.bind(["ctrl+shift+a", "command+shift+a"], function() {
 
 omni.focus();
 
+window.onfocus = function() { console.log('example'); };
+
+var settings;
 function loadTheme() {
   jsonfile.readFile("data/settings.json", function(err, obj) {
     if (err) console.error(err);
     let themeObj = obj.theme.toLowerCase();
     if (themeObj === "light") {
       theme = "light";
+
+			if($('head link[href*="css/themes"]').length > 0){
+				$('head link[href*="css/themes"]').remove();
+			}
     } else if (themeObj === "default") {
       theme = "light";
-      console.log("checking");
-      if (
-        window.matchMedia &&
-        window.matchMedia("(prefers-color-scheme: dark)").matches
-      ) {
+      if (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) {
         // If Dark Mode
         theme = "dark";
         $("head").append('<link rel="stylesheet" href="css/themes/dark.css">');
-      }
+      } else if($('head link[href*="css/themes"]').length > 0){
+				$('head link[href*="css/themes"]').remove();
+			}
     } else {
       $("head").append(
         '<link rel="stylesheet" href="css/themes/' + themeObj + '.css">'
@@ -235,6 +245,44 @@ function loadTheme() {
   });
 }
 loadTheme();
+
+function openSettings() {
+	// let url = path.normalize(`${__dirname}/pages/settings.html`);
+  // window.location.href = url;
+
+	if(settings != undefined && settings != null){ // If Settings Already Exists
+		settings.focus(); // Focus on it
+	} else { // If Settings Doesn't Already Exist
+		settings = new BrowserWindow({
+			frame: false,
+			minWidth: 700,
+	    minHeight: 550,
+			titleBarStyle: 'hiddenInset',
+			backgroundColor: '#FFF',
+			webPreferences: {
+				nodeIntegration: true,
+				plugins: true,
+	      nodeIntegration: true,
+	      contextIsolation: false,
+	      experimentalFeatures: true,
+	      enableBlinkFeatures: 'OverlayScrollbars',
+	      webviewTag: true
+			},
+			width: 900,
+			height: 700,
+			icon: path.join(__dirname, 'images/Peacock2.0.ico')
+		}); // Create Settings
+
+		// and load the html of the app.
+		settings.loadURL(url.format({
+			pathname: path.join(__dirname, 'pages/settings.html'),
+			protocol: 'file:',
+			slashes: true
+		}));
+
+		settings.on('closed', function() { settings = null; });
+	}
+}
 
 function getSearchEnginePrefix(cb) {
   jsonfile.readFile("data/settings.json", function(err, objecteroonie) {
@@ -484,7 +532,7 @@ function finishLoad(event) {
 
 function updateTargetURL(event) {
   if (event.url != "") {
-    dialogContainer.style.opacity = 1;
+    dialogContainer.style.opacity = 0.9;
     dialog.innerHTML = event.url;
   } else {
     dialogContainer.style.opacity = 0;
@@ -533,7 +581,7 @@ tabGroup.on("tab-active", (tab, tabGroup) => {
   tab.setIcon(`https://www.google.com/s2/favicons?domain=${url}`);
 });
 const webview = document.querySelector("webview");
-ById("shield").addEventListener("click", toggleAdblock);
+$("#shield").click(toggleAdblock);
 $("#refresh").click(reloadView);
 $("#back").click(backView);
 $("#forward").click(forwardView);
@@ -543,29 +591,17 @@ $("#omnibox").on("keypress", function(e) {
     updateURL(e);
   }
 });
-
 $("#fave").click(addBookmark);
 $("#list").click(openPopUp);
-$("#settings").click(function() {
-  let url = path.normalize(`${__dirname}/pages/settings.html`);
-  window.location.href = url;
-});
-popup.addEventListener("click", handleUrl);
+$("#settings").click(openSettings);
+$("#fave-popup").click(handleUrl);
 
-tabGroup
-  .getActiveTab()
-  .webview.addEventListener("did-start-loading", loadStart);
+tabGroup.getActiveTab().webview.addEventListener("did-start-loading", loadStart);
 tabGroup.getActiveTab().webview.addEventListener("did-stop-loading", loadStop);
 tabGroup.getActiveTab().webview.addEventListener("did-finish-load", finishLoad);
-tabGroup
-  .getActiveTab()
-  .webview.addEventListener("enter-html-full-screen", enterFullscreen);
-tabGroup
-  .getActiveTab()
-  .webview.addEventListener("leave-html-full-screen", leaveFullscreen);
-tabGroup
-  .getActiveTab()
-  .webview.addEventListener("update-target-url", updateTargetURL);
+tabGroup.getActiveTab().webview.addEventListener("enter-html-full-screen", enterFullscreen);
+tabGroup.getActiveTab().webview.addEventListener("leave-html-full-screen", leaveFullscreen);
+tabGroup.getActiveTab().webview.addEventListener("update-target-url", updateTargetURL);
 tabGroup.getActiveTab().webview.addEventListener("dom-ready", function() {
   if (theme === "dark") {
     tabGroup.getActiveTab().webview.insertCSS(`
@@ -587,6 +623,16 @@ tabGroup.getActiveTab().webview.addEventListener("dom-ready", function() {
 		{
 			background-color: rgba(255,255,255,0.5);
 		}`);
+
+// 		tabGroup.getActiveTab().webview.executeJavaScript(`
+// 			var script = document.createElement('script');
+// 			script.setAttribute('src', 'https://cdn.jsdelivr.net/npm/darkmode-js@1.5.0/lib/darkmode-js.min.js');
+// 			script.setAttribute('type', 'text/javascript');
+// 			document.getElementsByTagName('head')[0].appendChild(script);`);
+//
+// 		tabGroup.getActiveTab().webview.executeJavaScript(`const darkmode =  new Darkmode();
+// 			darkmode.toggle();
+// 			console.log(darkmode.isActivated()) // will return true`);
   }
 });
 tabGroup.getActiveTab().webview.addEventListener("new-window", e => {
@@ -617,3 +663,7 @@ sess.webRequest.onBeforeSendHeaders(filter, (details, callback) => {
     requestHeaders: details.requestHeaders
   });
 });
+
+// Mercury.parse("https://en.wikipedia.org/wiki/Madagascar", { contentType: 'html' }).then(function (result) {
+// 	console.log(result);
+// });
