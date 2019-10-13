@@ -3,7 +3,7 @@ body {
 }
 
 #window-controls .button:hover {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255,255,255,0.1);
 }
 
 .etabs-tab-buttons button:hover {
@@ -11,21 +11,18 @@ body {
 }
 
 .etabs-buttons button:hover {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255,255,255,0.1);
 }
 
 .etabs-tab.active {
   background: #41454c;
-  border: 1px solid #565656 !important;
 }
 
 .etabs-tab {
-  background-color: rgb(56, 58, 62);
-  border: 1px solid #00000000;
+  background: linear-gradient(to bottom, #2e3033 0%, #2e3033 100%);
 }
 
-#navigation,
-#topbar {
+#navigation, #topbar, .etabs-views {
   background: #2e3033;
 }
 
@@ -36,48 +33,43 @@ body {
 }
 
 #shieldIMG {
-  content: url("../../images/Peacock Shield.png");
+  content:url('../../images/Peacock Shield.png');
 }
 
-#navigation div:not(#omnibox):not(#fave-popup):not(#shield) img,
-#back-arrow {
-  filter: invert(100%) sepia(100%) saturate(0%) hue-rotate(288deg)
-    brightness(102%) contrast(102%);
+#navigation div:not(#omnibox):not(#fave-popup):not(#shield) img, #back-arrow, #search {
+  filter: invert(100%) sepia(100%) saturate(0%) hue-rotate(288deg) brightness(102%) contrast(102%);
 }
 
-#navigation div:not(#omnibox):not(#fave-popup):hover {
+#navigation div:not(#omnibox):not(#fave-popup):hover{
   background-color: rgba(255, 255, 255, 0.05);
 }
 
-#navigation #omnibox input {
+#navigation #omnibox input{
   background-color: #3c3e42;
   color: #fefefe;
+  border: 1px #494c50 solid;
 }
 
-.etabs-views {
+.etabs-views{
   border: none;
+}
+
+.etabs-tab:hover {
+  background-color: #565b65 !important;
 }
 
 #dialog {
   color: white;
   background-color: rgb(46, 48, 51);
-  border: 1px solid #ffffff38 !important;
 }
 
-#header-text,
-#title,
-.label,
-.heading-title,
-.etabs-buttons button,
-.etabs-tab-title,
-.etabs-tab-buttons button,
-#window-controls .button,
-.dropdown-toggle {
+#header-text, #title, .label, .heading-title, .etabs-buttons button,
+.etabs-tab-title, .etabs-tab-buttons button, #window-controls .button, .dropdown-toggle {
   color: white;
 }
 
-#header-text {
-  text-shadow: 0px 3px 0px #545b62;
+#header-text{
+  text-shadow: 0px 3px 0px #545B62;
 }
 
 .dropdown {
@@ -85,21 +77,20 @@ body {
   border-radius: 5px;
 }
 
-.dropdown-menu {
+.dropdown-menu{
   background: #3c3e42;
 }
 
-.dropdown-item {
+.dropdown-item{
   color: white;
 }
 
-.dropdown-item:hover {
-  background-color: #545b62;
+.dropdown-item:hover{
+  background-color: #545B62;
   color: white;
 }
 
-#navigation #fave-popup,
-#navigation #fave-popup .link .favicon {
+#navigation #fave-popup, #navigation #fave-popup .link .favicon {
   background-color: #3c3e42;
 }
 
@@ -108,9 +99,14 @@ body {
 }
 
 #navigation #fave-popup .link:hover {
-  background-color: #545b62;
+  background-color: #545B62;
 }
 
-#search {
-  filter: invert(1);
+.gu-mirror:not(#omnibox):not(#fave-popup):not(#shield), .gu-transit:not(#omnibox):not(#fave-popup):not(#shield) {
+  filter: invert(100%) sepia(100%) saturate(0%) hue-rotate(288deg) brightness(102%) contrast(102%) !important;
+}
+
+#shield.gu-mirror, #shield.gu-transit, #shieldIMG.gu-mirror, #shieldIMG.gu-transit {
+  max-width: 30px !important;
+  max-height: 30px !important;
 }

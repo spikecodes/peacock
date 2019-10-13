@@ -55,34 +55,15 @@
         font-family: "Nexa", "Roboto", sans-serif;
       }
 
-      #drag-region {
-        --webkit-app-drag: drag;
-      }
-
-      #back-arrow {
-        outline: none;
-        border: 0px;
-        background-color: transparent;
-        position: fixed;
-        left: 20px;
-        top: 25px;
-        height: 40px;
-        width: 40px;
-        font-family: "Nexa", "Roboto";
-        font-weight: 500;
-        font-size: 30px;
-        border-radius: 5px;
-        transition: all 0.05s;
-      }
-
-      #back-arrow:hover {
-        background-color: rgba(0, 0, 0, 0.04);
+      #drag-region, #titlebar {
+        --webkit-app-drag: drag !important;
+        -webkit-app-drag: drag !important;
       }
 
       #content {
         padding-top: 100px;
         padding-left: 100px;
-        margin-top: 80px;
+        margin-top: 0px;
       }
 
       #title {
@@ -112,7 +93,7 @@
       }
 
       .heading {
-        margin-top: 100px;
+        margin-top: 75px;
         font-size: 19px;
       }
 
@@ -167,7 +148,6 @@
         </div>
       </div>
     </header>
-    <button id="back-arrow">←</button>
     <div id="content">
       <div>
         <img id="header-icon" src="../images/Peacock2.0.png" />
