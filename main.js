@@ -5,9 +5,7 @@ const {
 // Module to control application life.
 const app = electron.app
 // Module to create native browser window.
-const BrowserWindow = electron.BrowserWindow
-const session = electron.session
-const protocol = electron.protocol
+const {BrowserView, BrowserWindow, session, protocol } = electron;
 
 // const ExtensibleSession = require('electron-extensions/main').ExtensibleSession;
 
@@ -223,6 +221,11 @@ function createWindow() {
 
 	// const extensions = new ExtensibleSession(session.defaultSession);
 	// extensions.loadExtension('Grammarly'); // Path to the extension to load
+
+	// let view = new BrowserView();
+	// mainWindow.setBrowserView(view);
+	// mainWindow.setBounds({ x: 0, y: 0, width: 300, height: 300 });
+	// view.webContents.loadURL('https://electronjs.org');
 
 	// and load the index.html of the app.
 	mainWindow.loadURL(url.format({

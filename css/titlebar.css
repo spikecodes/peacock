@@ -5,13 +5,14 @@
   background: transparent;
   width: 100%;
   display: block;
+  -webkit-app-region: drag;
 }
 
 #titlebar #drag-region {
   float: right;
   height: 100%;
   width: 100%;
-  /* -webkit-app-region: drag; */
+  -webkit-app-region: drag;
 }
 
 #window-controls {

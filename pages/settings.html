@@ -16,6 +16,23 @@
     <style>
       @import url('https://fonts.googleapis.com/css?family=Roboto&display=swap');
 
+      /**
+       *   MAKE ELECTRON APP FEEL MORE NATIVE
+       *
+       *   * Prevent dragging all HTML elements, specially:
+       *   	- images
+       *   	- links (anchors)
+       *
+       *   * Prevent text selection
+       */
+
+      *, *::after, *::before {
+      	-webkit-user-select: none;
+      	-webkit-user-drag: none;
+      	-webkit-app-region: no-drag;
+      	cursor: default;
+      }
+
       h1, h2, h3, h4, h5, h6, p{
         font-family: 'Nexa', 'Roboto', sans-serif;
       }
@@ -158,7 +175,6 @@
               <a class="dropdown-item" href="#">Default</a>
               <a class="dropdown-item" href="#">Light</a>
               <a class="dropdown-item" href="#">Dark</a>
-              <a class="dropdown-item" href="#">Hackerman</a>
             </div>
           </div>
         </div>
