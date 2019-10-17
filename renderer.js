@@ -9,12 +9,15 @@ const TabGroup = require("electron-tabs");
 const dragula = require("dragula");
 const bookmarks = path.join(__dirname, "bookmarks.json");
 const blockstack = require("blockstack");
+const web = require('./js/web.js');
 
 const session = require("electron").remote.session;
 const remote = require("electron").remote;
 const { BrowserWindow } = require("electron").remote;
 const { ipcRenderer } = require("electron");
 const Mercury = require('@postlight/mercury-parser');
+
+const contextMenu = require('electron-context-menu');
 
 const ElectronBlocker = require("@cliqz/adblocker-electron").ElectronBlocker;
 const fetch = require("cross-fetch").fetch; // required 'fetch'
@@ -69,11 +72,8 @@ var userSession = new blockstack.UserSession();
 var ById = function(id) {
   return document.getElementById(id);
 };
-var back = ById("back"),
-  forward = ById("forward"),
-  omni = ById("url"),
+var omni = ById("url"),
   fave = ById("fave"),
-  nav = ById("navigation"),
   titlebar = ById("titlebar"),
   dialog = ById("dialog"),
   dialogContainer = ById("dialog-container"),
@@ -213,8 +213,6 @@ Mousetrap.bind(["ctrl+shift+a", "command+shift+a"], function() {
 });
 
 omni.focus();
-
-window.onfocus = function() { console.log('example'); };
 
 var settings;
 function loadTheme() {
@@ -388,18 +386,6 @@ function toggleAdblock() {
   }
 }
 
-function reloadView() {
-  tabGroup.getActiveTab().webview.reload();
-}
-
-function backView() {
-  tabGroup.getActiveTab().webview.goBack();
-}
-
-function forwardView() {
-  tabGroup.getActiveTab().webview.goForward();
-}
-
 function updateURL(event) {
   if (event.keyCode === 13) {
     omni.blur();
@@ -528,6 +514,11 @@ function finishLoad(event) {
       .getActiveTab()
       .setIcon(`https://www.google.com/s2/favicons?domain=${url}`);
   }
+
+  contextMenu({
+  	window: tabGroup.getActiveTab().webview,
+  	showCopyImageAddress: true
+  });
 }
 
 function updateTargetURL(event) {
@@ -539,118 +530,51 @@ function updateTargetURL(event) {
   }
 }
 
-function enterFullscreen() {
-  nav.style.display = "none";
-  titlebar.style.display = "none";
-  etabsGroup.style.display = "none";
-  etabsViews.style.borderTop = "none";
-  etabsViews.style.marginTop = "0px";
-}
-
-function leaveFullscreen() {
-  nav.style.display = "block";
-  titlebar.style.display = "block";
-  etabsGroup.style.display = "block";
-  etabsViews.style.borderTop = "1px solid #eee";
-  etabsViews.style.marginTop = "100px";
-}
-
-function loadStart(event) {
-  if (theme === "light") {
-    tabGroup.getActiveTab().setIcon("images/loading-light.gif");
-  } else if (theme === "dark") {
-    tabGroup.getActiveTab().setIcon("images/loading-dark.gif");
-  } else {
-    console.error("Theme not specified.");
-  }
-}
-
-function loadStop(event) {
-  let url = tabGroup.getActiveTab().webview.src;
-  tabGroup
-    .getActiveTab()
-    .setIcon(`https://www.google.com/s2/favicons?domain=${url}`);
-}
-
 tabGroup.on("tab-active", (tab, tabGroup) => {
+  tab.webview.addEventListener("did-start-loading", web.loadStart(theme, mTab));
+  tab.webview.addEventListener("did-stop-loading", web.loadStop(mTab));
   tab.webview.addEventListener("did-finish-load", finishLoad);
-  tab.webview.addEventListener("enter-html-full-screen", enterFullscreen);
-  tab.webview.addEventListener("leave-html-full-screen", leaveFullscreen);
-  tab.webview.addEventListener("update-target-url", updateTargetURL);
+  tab.webview.addEventListener("enter-html-full-screen", web.enterFllscrn(document));
+  tab.webview.addEventListener("leave-html-full-screen", web.leaveFllscrn(document));
+  tab.webview.addEventListener("update-target-url", e => web.updateTargetURL(e, document));
+  tab.webview.addEventListener("dom-ready", web.domReady(theme, mTab));
+  tab.webview.addEventListener("new-window", web.newWindow(tabGroup));
+  tab.webview.addEventListener("page-favicon-updated", web.faviconUpdated(mTab));
+  tab.webview.addEventListener("page-title-updated", e => web.titleUpdated(e, mTab));
   let url = tab.webview.src;
-  tab.setIcon(`https://www.google.com/s2/favicons?domain=${url}`);
+	$("#url").val(url);
+	try {
+		tab.setTitle(tabGroup.getActiveTab().webview.getTitle());
+	} catch (e) {}
 });
+
 const webview = document.querySelector("webview");
+const mTab = tabGroup.getActiveTab();
 $("#shield").click(toggleAdblock);
-$("#refresh").click(reloadView);
-$("#back").click(backView);
-$("#forward").click(forwardView);
+$("#refresh").click(e => web.reload(mTab));
+$("#back").click(e => web.goBack(mTab));
+$("#forward").click(e => web.goForward(mTab));
 $("#omnibox").on("keypress", function(e) {
   if (e.which == 13) {
     webview.style.display = "none";
     updateURL(e);
   }
 });
+$("#url").focus(e => $("#url").select());
 $("#fave").click(addBookmark);
 $("#list").click(openPopUp);
 $("#settings").click(openSettings);
 $("#fave-popup").click(handleUrl);
-
-tabGroup.getActiveTab().webview.addEventListener("did-start-loading", loadStart);
-tabGroup.getActiveTab().webview.addEventListener("did-stop-loading", loadStop);
+tabGroup.getActiveTab().webview.addEventListener("did-start-loading", web.loadStart(theme, mTab));
+tabGroup.getActiveTab().webview.addEventListener("did-stop-loading", web.loadStop(mTab));
 tabGroup.getActiveTab().webview.addEventListener("did-finish-load", finishLoad);
-tabGroup.getActiveTab().webview.addEventListener("enter-html-full-screen", enterFullscreen);
-tabGroup.getActiveTab().webview.addEventListener("leave-html-full-screen", leaveFullscreen);
-tabGroup.getActiveTab().webview.addEventListener("update-target-url", updateTargetURL);
-tabGroup.getActiveTab().webview.addEventListener("dom-ready", function() {
-  if (theme === "dark") {
-    tabGroup.getActiveTab().webview.insertCSS(`
-		html {
-		  scroll-behavior: smooth;
-		}
-
-		::-webkit-scrollbar
-		{
-		  width: 10px; /* for vertical scrollbars */
-		}
-
-		::-webkit-scrollbar-track
-		{
-		  background: #2e3033;
-		}
-
-		::-webkit-scrollbar-thumb
-		{
-			background-color: rgba(255,255,255,0.5);
-		}`);
-
-// 		tabGroup.getActiveTab().webview.executeJavaScript(`
-// 			var script = document.createElement('script');
-// 			script.setAttribute('src', 'https://cdn.jsdelivr.net/npm/darkmode-js@1.5.0/lib/darkmode-js.min.js');
-// 			script.setAttribute('type', 'text/javascript');
-// 			document.getElementsByTagName('head')[0].appendChild(script);`);
-//
-// 		tabGroup.getActiveTab().webview.executeJavaScript(`const darkmode =  new Darkmode();
-// 			darkmode.toggle();
-// 			console.log(darkmode.isActivated()) // will return true`);
-  }
-});
-tabGroup.getActiveTab().webview.addEventListener("new-window", e => {
-  let thisTab = tabGroup.addTab({
-    title: "",
-    src: e.url,
-    visible: true,
-    active: true,
-    webviewAttributes: {
-      useragent:
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) peacock/2.0.43 Chrome/77.0.3865.90 Electron/3.1.13 Safari/537.36",
-      partition: "persist:peacock"
-    }
-  });
-});
-tabGroup.getActiveTab().webview.addEventListener("page-favicon-updated", e => {
-  tabGroup.getActiveTab().setIcon(e.favicons);
-});
+tabGroup.getActiveTab().webview.addEventListener("enter-html-full-screen", web.enterFllscrn(document));
+tabGroup.getActiveTab().webview.addEventListener("leave-html-full-screen", web.leaveFllscrn(document));
+tabGroup.getActiveTab().webview.addEventListener("update-target-url", e => web.updateTargetURL(e, document));
+tabGroup.getActiveTab().webview.addEventListener("dom-ready", web.domReady(theme, mTab));
+tabGroup.getActiveTab().webview.addEventListener("new-window", web.newWindow(tabGroup));
+tabGroup.getActiveTab().webview.addEventListener("page-favicon-updated", web.faviconUpdated(mTab));
+tabGroup.getActiveTab().webview.addEventListener("page-title-updated", e => web.titleUpdated(e, mTab));
 
 const sess = session.fromPartition("persist:peacock");
 const filter = {
@@ -663,7 +587,11 @@ sess.webRequest.onBeforeSendHeaders(filter, (details, callback) => {
     requestHeaders: details.requestHeaders
   });
 });
-
 // Mercury.parse("https://en.wikipedia.org/wiki/Madagascar", { contentType: 'html' }).then(function (result) {
 // 	console.log(result);
+// });
+
+// let proxy = "75.73.50.82:80";
+// sess.setProxy({proxyRules:proxy}, function (){
+//     console.log('using the proxy ' + proxy);
 // });

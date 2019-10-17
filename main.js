@@ -21,6 +21,8 @@ const blockstack = require('blockstack');
 const queryString = require('query-string').queryString;
 const cp = require('child_process');
 
+const contextMenu = require('electron-context-menu');
+
 const menuTemplate = [
 		{
 			label: 'Window',
@@ -281,6 +283,33 @@ app.on('window-all-closed', function() {
 		app.quit()
 	}
 })
+
+app.on('web-contents-created', (e, contents) => {
+  if (contents.getType() == 'webview') {
+    contextMenu({
+      window: contents,
+			prepend: (defaultActions, params, browserWindow) => [
+				{
+					label: 'Open Link in New Tab',
+					visible: params.linkURL,
+					click: () => {
+						console.log(params.linkURL);
+					}
+				},
+				{
+					label: 'Search Google for “{selection}”',
+					// Only show it when right-clicking text
+					visible: params.selectionText.trim().length > 0,
+					click: () => {
+						shell.openExternal(`https://google.com/search?q=${encodeURIComponent(params.selectionText)}`);
+					}
+				}
+
+			],
+      showCopyImageAddress: true
+    });
+  }
+});
 
 app.on('activate', function() {
 	// On OS X it's common to re-create a window in the app when the

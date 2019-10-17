@@ -260,7 +260,7 @@ html {
 #navigation #omnibox #search {
   margin-left: 22px;
   position: absolute;
-  margin-top: 4px;
+  margin-top: 5px;
   width: 17px;
   cursor: text;
 }
