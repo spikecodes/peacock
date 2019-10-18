@@ -38,7 +38,7 @@ exports.leaveFllscrn = function(doc) {
   doc.querySelector("#titlebar").style.display = "block";
   doc.querySelector("#etabs-tabgroup").style.display = "block";
   doc.querySelector("#etabs-views").style.borderTop = "1px solid #eee";
-  doc.querySelector("#etabs-views").style.marginTop = "100px";
+  doc.querySelector("#etabs-views").style.marginTop = "97px";
 }
 
 exports.domReady = function (theme, tab) {
@@ -51,17 +51,17 @@ exports.domReady = function (theme, tab) {
 
 exports.updateTargetURL = function (event, doc) {
   if (event.url != "") {
-    doc.querySelector("dialog-container").style.opacity = 0.9;
-    doc.querySelector("dialog").innerHTML = event.url;
+    doc.querySelector("#dialog-container").style.opacity = 0.9;
+    doc.querySelector("#dialog").innerHTML = event.url;
   } else {
-    doc.querySelector("dialog-container").style.opacity = 0;
+    doc.querySelector("#dialog-container").style.opacity = 0;
   }
 }
 
-exports.newWindow = function (group) {
-  let thisTab = tabGroup.addTab({
+exports.newWindow = function (event, group) {
+  let thisTab = group.addTab({
     title: "",
-    src: e.url,
+    src: event.url,
     visible: true,
     active: true,
     webviewAttributes: {
@@ -72,8 +72,8 @@ exports.newWindow = function (group) {
   });
 }
 
-exports.faviconUpdated = function (tab) {
-  tab.setIcon(e.favicons);
+exports.faviconUpdated = function (event, tab) {
+  tab.setIcon(event.favicons);
 }
 
 exports.titleUpdated = function (event, tab) {
