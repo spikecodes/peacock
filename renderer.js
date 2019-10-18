@@ -9,7 +9,6 @@ const TabGroup = require("electron-tabs");
 const dragula = require("dragula");
 const bookmarks = path.join(__dirname, "bookmarks.json");
 const blockstack = require("blockstack");
-const web = require('./js/web.js');
 
 const session = require("electron").remote.session;
 const remote = require("electron").remote;
@@ -21,6 +20,9 @@ const contextMenu = require('electron-context-menu');
 
 const ElectronBlocker = require("@cliqz/adblocker-electron").ElectronBlocker;
 const fetch = require("cross-fetch").fetch; // required 'fetch'
+
+const web = require('./js/web.js');
+const vpn = require('./js/vpn.js');
 
 //Discord Rich Presence
 const { Client } = require("discord-rpc");
@@ -38,14 +40,14 @@ async function setActivity() {
   if (!rpclient) {
     return;
   }
-  var details = "Peacock Browser";
-  var state = "Exploring the internet...";
+  var details = "https://peacock.link/";
+  var state = "Browsing the web...";
   rpclient.setActivity({
     details: details,
     state: state,
     startTimestamp,
 
-    largeImageKey: "peacock",
+    largeImageKey: "peacockbg_light",
     largeImageText: `Peacock Browser v2.0.5`,
     instance: false
   });
@@ -195,6 +197,12 @@ ipcRenderer.on("keyboardShortcut", function(event, shortcut) {
       } else {
         signIntoBlockstack();
       }
+      break;
+    case "startVPN":
+      vpn.startVPN();
+      break;
+    case "stopVPN":
+      vpn.stopVPN();
       break;
     default:
       break;
@@ -565,6 +573,7 @@ $("#fave").click(addBookmark);
 $("#list").click(openPopUp);
 $("#settings").click(openSettings);
 $("#fave-popup").click(handleUrl);
+
 tabGroup.getActiveTab().webview.addEventListener("did-start-loading", web.loadStart(theme, mTab));
 tabGroup.getActiveTab().webview.addEventListener("did-stop-loading", web.loadStop(mTab));
 tabGroup.getActiveTab().webview.addEventListener("did-finish-load", finishLoad);
@@ -572,8 +581,8 @@ tabGroup.getActiveTab().webview.addEventListener("enter-html-full-screen", web.e
 tabGroup.getActiveTab().webview.addEventListener("leave-html-full-screen", web.leaveFllscrn(document));
 tabGroup.getActiveTab().webview.addEventListener("update-target-url", e => web.updateTargetURL(e, document));
 tabGroup.getActiveTab().webview.addEventListener("dom-ready", web.domReady(theme, mTab));
-tabGroup.getActiveTab().webview.addEventListener("new-window", web.newWindow(tabGroup));
-tabGroup.getActiveTab().webview.addEventListener("page-favicon-updated", web.faviconUpdated(mTab));
+tabGroup.getActiveTab().webview.addEventListener("new-window", e => web.newWindow(e, tabGroup));
+tabGroup.getActiveTab().webview.addEventListener("page-favicon-updated", e => web.faviconUpdated(e, mTab));
 tabGroup.getActiveTab().webview.addEventListener("page-title-updated", e => web.titleUpdated(e, mTab));
 
 const sess = session.fromPartition("persist:peacock");
@@ -589,9 +598,4 @@ sess.webRequest.onBeforeSendHeaders(filter, (details, callback) => {
 });
 // Mercury.parse("https://en.wikipedia.org/wiki/Madagascar", { contentType: 'html' }).then(function (result) {
 // 	console.log(result);
-// });
-
-// let proxy = "75.73.50.82:80";
-// sess.setProxy({proxyRules:proxy}, function (){
-//     console.log('using the proxy ' + proxy);
 // });

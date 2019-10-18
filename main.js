@@ -67,6 +67,20 @@ const menuTemplate = [
 					click: () => {
 						mainWindow.webContents.send('keyboardShortcut', 'clearHistory');
 					}
+				},
+				{
+					label: 'Start VPN',
+					accelerator: 'CmdOrCtrl+Shift+V',
+					click: () => {
+						mainWindow.webContents.send('keyboardShortcut', 'startVPN');
+					}
+				},
+				{
+					label: 'Stop VPN',
+					accelerator: 'CmdOrCtrl+Alt+V',
+					click: () => {
+						mainWindow.webContents.send('keyboardShortcut', 'stopVPN');
+					}
 				}
 			]
 		},
