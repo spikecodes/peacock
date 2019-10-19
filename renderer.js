@@ -175,10 +175,6 @@ ipcRenderer.on("loadTheme", function(event, args) { loadTheme(); });
 // 	uploadHistory();
 // });
 
-Mousetrap.bind(["ctrl+shift+a", "command+shift+a"], function() {
-  toggleAdblock();
-});
-
 omni.focus();
 
 var settings;
