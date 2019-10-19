@@ -1,6 +1,12 @@
 const jsonfile = require('jsonfile');
 const path = require('path');
 
+const blockchain = require('./blockchain.js');
+
+const { ipcRenderer } = require("electron");
+
+ipcRenderer.on("updateProfile", function(event, args) { updateProfile(); });
+
 //Discord Rich Presence
 const { Client } = require('discord-rpc');
 const clientId = '627363592408137749';
@@ -72,8 +78,8 @@ function loadTheme() {
 	  if (err) console.error(err);
 		let theme = obj.theme.toLowerCase();
 	  if (theme === "default" || theme === "light"){
-			if ($('.dropdown-menu').css("background").includes("rgb(60, 62, 66)")){
-        window.location.reload(false);
+      if($('head link[href*="css/themes"]').length > 0){
+  				$('head link[href*="css/themes"]').remove();
       }
 		} else {
 			$('head').append('<link rel="stylesheet" href="../css/themes/' + theme + '.css">');
@@ -82,3 +88,52 @@ function loadTheme() {
 }
 
 loadTheme();
+
+function signOutOfBlockstack() {
+  blockchain.getUserSession().signUserOut();
+  resetProfile();
+  $(".list-group").empty();
+  $(".list-group").append('<a href="#" class="list-group-item list-group-item-action">error</a>');
+  $(".list-group-item").first().text("Sign in with Blockstack via the Profile tab to access history.");
+}
+
+function resetProfile() {
+  $("#profile").attr("src", "../images/blank.png");
+  $("#name").text("Blockstack");
+  $("#signedIn").text("Signed Out");
+  $("#signOut").text("SIGN IN");
+  $("#signOut").unbind("click");
+  $("#signOut").click(function () { ipcRenderer.send('signIntoBlockstack',''); });
+}
+
+function updateProfile() {
+  if(blockchain.getUserSession().isUserSignedIn()){
+    blockchain.getUserSession().getFile("history.txt").then(data => {
+      $(".list-group-item").first().remove();
+      var split = data.split(',');
+      for (var i = 0; i < split.length; i++) {
+        if(split[i] != null && split[i] != undefined && split[i] != ""){
+          $(".list-group").append('<a href="#" class="list-group-item list-group-item-action">' + split[i]
+            + '</a>');
+        }
+      }
+    });
+
+    let profile = blockchain.getUserSession().loadUserData().profile;
+    let username = profile.name;
+    let profilePic = profile.image[0].contentUrl;
+    $("#profile").attr("src",profilePic);
+    $("#name").text(username);
+    $("#signedIn").text("Signed In");
+    $("#signOut").text("SIGN OUT");
+    $("#signOut").unbind("click");
+    $("#signOut").click(signOutOfBlockstack);
+  } else {
+    resetProfile();
+    $(".list-group-item").first().text("Sign in with Blockstack via the Profile tab to access history.");
+  }
+}
+
+$(document).ready(function () {
+  updateProfile();
+})

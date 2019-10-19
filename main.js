@@ -58,7 +58,8 @@ const menuTemplate = [
 					label: 'Open History',
 					accelerator: 'CmdOrCtrl+H',
 					click: () => {
-						mainWindow.webContents.send('keyboardShortcut', 'history');
+						// mainWindow.webContents.send('keyboardShortcut', 'history');
+						console.log('history');
 					}
 				},
 				{
@@ -160,6 +161,10 @@ ipcMain.on('adblock-change', (event, arg) => {
 
 ipcMain.on('test-message', (event, arg) => {
 	console.log(arg);
+});
+
+ipcMain.on('signIntoBlockstack', (e, a) => {
+	mainWindow.webContents.send('keyboardShortcut','signIntoBlockstack');
 });
 
 // ipcMain.on('close-window', (event, arg) => {

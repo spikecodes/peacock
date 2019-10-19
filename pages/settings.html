@@ -63,6 +63,7 @@
       #content {
         padding-top: 100px;
         padding-left: 100px;
+        padding-right: 75px;
         margin-top: 0px;
       }
 
@@ -93,7 +94,7 @@
       }
 
       .heading {
-        margin-top: 75px;
+        margin-top: 50px;
         font-size: 19px;
       }
 
@@ -115,7 +116,7 @@
         float: right;
       }
 
-      .dropdown-toggle {
+      .btn {
         border-radius: 5px;
         border: none;
         background-color: rgba(0, 0, 0, 0.05);
@@ -126,6 +127,53 @@
       .label {
         display: inline-block;
         font-size: 22px;
+      }
+
+      #pills-profile {
+        top: 100px;
+        right: 100px;
+        line-height: 5px;
+      }
+
+      #pills-profile #profile {
+        margin-top: 30px;
+        width: 100px;
+        height: 100px;
+        border-radius: 15px;
+        background: #eee;
+      }
+
+      #pills-profile #name {
+        margin-top: 35px;
+        font-size: 20px;
+        white-space: nowrap;
+        font-weight: bold;
+      }
+
+      #pills-profile #signedIn {
+        font-size: 17px;
+        white-space: nowrap;
+      }
+
+      #pills-profile #signOut {
+        margin-top: 20px;
+        font-family: "Roboto";
+        font-size: 14px;
+        white-space: nowrap;
+      }
+
+      .nav-link {
+        background-color: #f9f9f9;
+        color: #313a43;
+        border-radius: 0px !important;
+      }
+
+      .active {
+        border-radius: 5px !important;
+      }
+
+      .nav-pills {
+        margin-top: 20px;
       }
     </style>
   </head>
@@ -154,55 +202,90 @@
         <p id="header-text">Peacock</p>
       </div>
       <h1 id="title">Settings</h1>
-      <section class="heading">
-        <h2 class="heading-title">Customization</h2>
-        <div class="heading-element" data-key="search_engine">
-          <p class="label">Search Engine</p>
-          <div class="dropdown">
-            <button
-              class="btn btn-secondary dropdown-toggle"
-              data-toggle="dropdown"
-              type="button"
-              id="dropdownMenuButton"
-              data-toggle="dropdown"
-              aria-haspopup="true"
-              aria-expanded="false"
-            >
-              Google
-            </button>
-            <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-              <a class="dropdown-item" href="#">Google</a>
-              <a class="dropdown-item" href="#">DuckDuckGo</a>
-              <a class="dropdown-item" href="#">Ecosia</a>
-              <a class="dropdown-item" href="#">Bing</a>
-              <a class="dropdown-item" href="#">Yahoo</a>
-              <a class="dropdown-item" href="#">Qwant</a>
+
+      <ul class="nav nav-pills mb-3 nav-fill" id="pills-tab" role="tablist">
+        <li class="nav-item">
+          <a class="nav-link active" id="pills-customization-tab" data-toggle="pill" href="#pills-customization" role="tab" aria-controls="pills-customization" aria-selected="true">Customization</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" id="pills-history-tab" data-toggle="pill" href="#pills-history" role="tab" aria-controls="pills-history" aria-selected="false">History</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link disabled" id="pills-bookmarks-tab" data-toggle="pill" href="#pills-bookmarks" role="tab" aria-controls="pills-bookmarks" aria-selected="false">Bookmarks</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" id="pills-profile-tab" data-toggle="pill" href="#pills-profile" role="tab" aria-controls="pills-profile" aria-selected="false">Profile</a>
+        </li>
+      </ul>
+
+      <div class="tab-content" id="pills-tabContent">
+        <div class="tab-pane fade show active" id="pills-customization" role="tabpanel" aria-labelledby="pills-customization-tab">
+          <section class="heading">
+            <h2 class="heading-title">Customization</h2>
+            <div class="heading-element" data-key="search_engine">
+              <p class="label">Search Engine</p>
+              <div class="dropdown">
+                <button
+                  class="btn btn-secondary dropdown-toggle"
+                  data-toggle="dropdown"
+                  type="button"
+                  id="dropdownMenuButton"
+                  data-toggle="dropdown"
+                  aria-haspopup="true"
+                  aria-expanded="false"
+                >
+                  Google
+                </button>
+                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                  <a class="dropdown-item" href="#">Google</a>
+                  <a class="dropdown-item" href="#">DuckDuckGo</a>
+                  <a class="dropdown-item" href="#">Ecosia</a>
+                  <a class="dropdown-item" href="#">Bing</a>
+                  <a class="dropdown-item" href="#">Yahoo</a>
+                  <a class="dropdown-item" href="#">Qwant</a>
+                </div>
+              </div>
             </div>
+            <div class="heading-element" data-key="theme">
+              <p class="label">Theme</p>
+              <div class="dropdown">
+                <button
+                  class="btn btn-secondary dropdown-toggle"
+                  data-toggle="dropdown"
+                  type="button"
+                  id="dropdownMenuButton"
+                  data-toggle="dropdown"
+                  aria-haspopup="true"
+                  aria-expanded="false"
+                >
+                  Default
+                </button>
+                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                  <a class="dropdown-item" href="#">Default</a>
+                  <a class="dropdown-item" href="#">Light</a>
+                  <a class="dropdown-item" href="#">Dark</a>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+        <div class="tab-pane fade" id="pills-history" role="tabpanel" aria-labelledby="pills-history-tab">
+          <div class="list-group">
+            <a href="#" class="list-group-item list-group-item-action">Loading history...</a>
           </div>
         </div>
-        <div class="heading-element" data-key="theme">
-          <p class="label">Theme</p>
-          <div class="dropdown">
-            <button
-              class="btn btn-secondary dropdown-toggle"
-              data-toggle="dropdown"
-              type="button"
-              id="dropdownMenuButton"
-              data-toggle="dropdown"
-              aria-haspopup="true"
-              aria-expanded="false"
-            >
-              Default
-            </button>
-            <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-              <a class="dropdown-item" href="#">Default</a>
-              <a class="dropdown-item" href="#">Light</a>
-              <a class="dropdown-item" href="#">Dark</a>
-            </div>
-          </div>
+        <div class="tab-pane fade" id="pills-bookmarks" role="tabpanel" aria-labelledby="pills-bookmarks-tab"></div>
+        <div class="tab-pane fade" id="pills-profile" role="tabpanel" aria-labelledby="pills-profile-tab">
+          <center><img id="profile" src="../images/blank.png" />
+          <p id="name">Error </p>
+          <p id="signedIn">Signed Out</p>
+          <button id="signOut" type="button" class="btn btn-secondary">SIGN IN</button></center>
         </div>
-      </section>
+      </div>
     </div>
+    <aside id="user">
+
+    </aside>
   </body>
   <script>
     require("../js/settings.js");

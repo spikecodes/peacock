@@ -3,26 +3,22 @@
 // All of the Node.js APIs are available in this process.
 const jsonfile = require("jsonfile");
 const path = require("path");
-const url = require('url');
 const uuid = require("uuid");
-const TabGroup = require("electron-tabs");
-const dragula = require("dragula");
 const bookmarks = path.join(__dirname, "bookmarks.json");
-const blockstack = require("blockstack");
 
 const session = require("electron").remote.session;
 const remote = require("electron").remote;
 const { BrowserWindow } = require("electron").remote;
 const { ipcRenderer } = require("electron");
-const Mercury = require('@postlight/mercury-parser');
+
+// const Mercury = require('@postlight/mercury-parser');
 
 const contextMenu = require('electron-context-menu');
 
-const ElectronBlocker = require("@cliqz/adblocker-electron").ElectronBlocker;
-const fetch = require("cross-fetch").fetch; // required 'fetch'
-
+const tabs = require('./js/tabs.js');
 const web = require('./js/web.js');
 const vpn = require('./js/vpn.js');
+const blockchain = require('./js/blockchain.js');
 
 //Discord Rich Presence
 const { Client } = require("discord-rpc");
@@ -34,7 +30,7 @@ const rpclient = new Client({
 const startDate = new Date();
 const startTimestamp = startDate.getTime();
 
-var theme = "light";
+window.theme = "light";
 
 async function setActivity() {
   if (!rpclient) {
@@ -69,8 +65,6 @@ rpclient
   .catch(console.error);
 //Discord Rich Presence
 
-var userSession = new blockstack.UserSession();
-
 var ById = function(id) {
   return document.getElementById(id);
 };
@@ -84,44 +78,17 @@ var omni = ById("url"),
   popup = ById("fave-popup"),
   shield = ById("shieldIMG");
 
-var tabGroup = new TabGroup({
-  ready: function(tabGroup) {
-    dragula([tabGroup.tabContainer], {
-      direction: "horizontal"
-    });
-  },
-  newTab: {
-    title: "Google",
-    src: "https://google.com",
-    visible: true,
-    active: true,
-    webviewAttributes: {
-      useragent:
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) peacock/2.0.43 Chrome/77.0.3865.90 Electron/3.1.13 Safari/537.36",
-      partition: "persist:peacock"
-    }
-  }
-});
-let tab = tabGroup.addTab({
-  title: "Google",
-  src: "https://google.com",
-  visible: true,
-  active: true,
-  webviewAttributes: {
-    useragent:
-      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) peacock/2.0.43 Chrome/77.0.3865.90 Electron/3.1.13 Safari/537.36",
-    partition: "persist:peacock"
-  }
-});
+var tabGroup = tabs.makeTabGroup();
+tabs.newTab("Google", "https://google.com/");
 
 // Customize button placement: dragula([nav]);
 
 ipcRenderer.on("blockstackSignIn", function(event, token) {
-  if (userSession.isUserSignedIn()) {
+  if (blockchain.getUserSession().isUserSignedIn()) {
     alert("We did it boys!");
     tabGroup.getActiveTab().close();
   } else {
-    userSession.handlePendingSignIn(token);
+    blockchain.getUserSession().handlePendingSignIn(token);
     tabGroup.getActiveTab().close();
   }
 });
@@ -131,8 +98,7 @@ ipcRenderer.on("keyboardShortcut", function(event, shortcut) {
   let length;
   switch (shortcut) {
     case "settings":
-      let url = path.normalize(`${__dirname}/pages/settings.html`);
-      window.location.href = url;
+      openSettings();
       break;
     case "devTools":
       if (tabGroup.getActiveTab().webview.isDevToolsOpened()) {
@@ -151,6 +117,7 @@ ipcRenderer.on("keyboardShortcut", function(event, shortcut) {
       } else {
         tabGroup.getTab(id + 1).activate();
       }
+
       break;
     case "backTab":
       id = tabGroup.getActiveTab().id;
@@ -166,37 +133,30 @@ ipcRenderer.on("keyboardShortcut", function(event, shortcut) {
       }
       break;
     case "newTab":
-      tabGroup.addTab({
-        title: "Google",
-        src: "https://google.com",
-        visible: true,
-        active: true,
-        webviewAttributes: {
-          useragent:
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) peacock/2.0.43 Chrome/77.0.3865.90 Electron/3.1.13 Safari/537.36",
-          partition: "persist:peacock"
-        }
-      });
+      tabs.newTab("Google", "https://google.com/");
       break;
     case "closeTab":
       id = tabGroup.getActiveTab().id;
       tabGroup.getTab(id).close();
       break;
     case "history":
-      if (userSession.isUserSignedIn()) {
-        userSession.getFile("history.txt").then(data => {
+      if (blockchain.getUserSession().isUserSignedIn()) {
+        blockchain.getUserSession().getFile("history.txt").then(data => {
           alert(data);
         });
       } else {
-        signIntoBlockstack();
+        tabs.newTab("Blockstack", blockchain.signIntoBlockstack());
       }
       break;
     case "clearHistory":
-      if (userSession.isUserSignedIn()) {
-        userSession.putFile("history.txt", "");
+      if (blockchain.getUserSession().isUserSignedIn()) {
+        blockchain.getUserSession().putFile("history.txt", "");
       } else {
-        signIntoBlockstack();
+        tabs.newTab("Blockstack", blockchain.signIntoBlockstack());
       }
+      break;
+    case "signIntoBlockstack":
+      tabs.newTab("Blockstack", blockchain.signIntoBlockstack());
       break;
     case "startVPN":
       vpn.startVPN();
@@ -210,7 +170,6 @@ ipcRenderer.on("keyboardShortcut", function(event, shortcut) {
 });
 
 ipcRenderer.on("loadTheme", function(event, args) { loadTheme(); });
-
 
 // ipcRenderer.on('window-closing', function(event, input) {
 // 	uploadHistory();
@@ -227,26 +186,28 @@ function loadTheme() {
   jsonfile.readFile("data/settings.json", function(err, obj) {
     if (err) console.error(err);
     let themeObj = obj.theme.toLowerCase();
-    if (themeObj === "light") {
-      theme = "light";
+    if (window.theme != themeObj) {
+      if (themeObj === "light") {
+        window.theme = "light";
 
-			if($('head link[href*="css/themes"]').length > 0){
-				$('head link[href*="css/themes"]').remove();
-			}
-    } else if (themeObj === "default") {
-      theme = "light";
-      if (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) {
-        // If Dark Mode
-        theme = "dark";
-        $("head").append('<link rel="stylesheet" href="css/themes/dark.css">');
-      } else if($('head link[href*="css/themes"]').length > 0){
-				$('head link[href*="css/themes"]').remove();
-			}
-    } else {
-      $("head").append(
-        '<link rel="stylesheet" href="css/themes/' + themeObj + '.css">'
-      );
-      theme = "dark";
+  			if($('head link[href*="css/themes"]').length > 0){
+  				$('head link[href*="css/themes"]').remove();
+  			}
+      } else if (themeObj === "default") {
+        window.theme = "light";
+        if (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) {
+          // If Dark Mode
+          window.theme = "dark";
+          $("head").append('<link rel="stylesheet" href="css/themes/dark.css">');
+        } else if($('head link[href*="css/themes"]').length > 0){
+  				$('head link[href*="css/themes"]').remove();
+  			}
+      } else {
+        $("head").append(
+          '<link rel="stylesheet" href="css/themes/' + themeObj + '.css">'
+        );
+        window.theme = "dark";
+      }
     }
   });
 }
@@ -279,13 +240,17 @@ function openSettings() {
 			icon: path.join(__dirname, 'images/Peacock2.0.ico')
 		}); // Create Settings
 
+    // Open Developer Tools:
+    // settings.openDevTools();
+
 		// and load the html of the app.
-		settings.loadURL(url.format({
+		settings.loadURL(require('url').format({
 			pathname: path.join(__dirname, 'pages/settings.html'),
 			protocol: 'file:',
 			slashes: true
 		}));
 
+    settings.on('focus', () => { settings.webContents.send('updateProfile', ''); });
 		settings.on('closed', function() { settings = null; });
 	}
 }
@@ -307,8 +272,8 @@ function getSearchEnginePrefix(cb) {
 }
 
 function uploadHistory() {
-  if (userSession.isUserSignedIn()) {
-    userSession.getFile("history.txt").then(data => {
+  if (blockchain.getUserSession().isUserSignedIn()) {
+    blockchain.getUserSession().getFile("history.txt").then(data => {
       console.log("|" + data + "|");
       let content;
       if (data != "") {
@@ -316,43 +281,21 @@ function uploadHistory() {
       } else {
         content = "" + history;
       }
-      userSession.putFile("history.txt", content).then(() => {
+      blockchain.getUserSession().putFile("history.txt", content).then(() => {
         ipcRenderer.send("close-window", "now");
       });
     });
   } else {
-    signIntoBlockstack();
+    tabs.newTab("Blockstack", blockchain.signIntoBlockstack());
   }
-}
-
-function signIntoBlockstack() {
-  const transitPrivateKey = userSession.generateAndStoreTransitKey();
-  const redirectURI = "http://127.0.0.1:9876/callback";
-  const manifestURI = "http://127.0.0.1:9876/manifest.json";
-  const scopes = blockstack.DEFAULT_SCOPE;
-  const appDomain = "http://127.0.0.1:9876";
-  var authRequest = blockstack.makeAuthRequest(
-    transitPrivateKey,
-    redirectURI,
-    manifestURI,
-    scopes,
-    appDomain
-  );
-  let url = "http://browser.blockstack.org/auth?authRequest=" + authRequest;
-  tabGroup.addTab({
-    title: "Blockstack",
-    src: url,
-    visible: true,
-    active: true
-  });
 }
 
 function changeAdBlock(toWhat) {
   ipcRenderer.send("adblock-change", "adblock:" + toWhat);
 
-  if (theme === "light") {
+  if (window.theme === "light") {
     shield.src = "images/loading-light.gif";
-  } else if (theme === "dark") {
+  } else if (window.theme === "dark") {
     shield.src = "images/loading-dark.gif";
   } else {
     console.error("Theme not specified.");
@@ -394,7 +337,7 @@ function toggleAdblock() {
   }
 }
 
-function updateURL(event) {
+function loadPage(event) {
   if (event.keyCode === 13) {
     omni.blur();
     let val = omni.value.toLowerCase();
@@ -483,20 +426,14 @@ function openPopUp(event) {
   }
 }
 
-function handleUrl(event) {
-  if (event.target.className === "link") {
-    event.preventDefault();
-    tabGroup.getActiveTab().webview.loadURL(event.target.href);
-  } else if (event.target.className === "favicon") {
-    event.preventDefault();
-    tabGroup.getActiveTab().webview.loadURL(event.target.parentElement.href);
-  }
-}
-
 function finishLoad(event) {
   const webview = document.querySelector("webview");
   webview.style.display = null;
-  tabGroup.getActiveTab().setTitle(tabGroup.getActiveTab().webview.getTitle());
+  try {
+    tabGroup.getActiveTab().setTitle(tabGroup.getActiveTab().webview.getTitle());
+  } catch (e) {
+
+  }
   let currentURL = tabGroup
     .getActiveTab()
     .webview.src.substr(8)
@@ -508,10 +445,15 @@ function finishLoad(event) {
       .split(".")[0];
     omni.value = "peacock://" + protocolVal;
   } else {
-    if (userSession.isUserSignedIn()) {
-      userSession.getFile("history.txt").then(data => {
-        let content = data + tabGroup.getActiveTab().webview.src + ",";
-        userSession.putFile("history.txt", content);
+    if (blockchain.getUserSession().isUserSignedIn()) {
+      blockchain.getUserSession().getFile("history.txt").then(data => {
+        var split = data.split(',');
+        if(split[split.length - 2] === tabGroup.getActiveTab().webview.src){
+          console.warn("History item already exists!");
+        } else {
+          let content = data + tabGroup.getActiveTab().webview.src + ",";
+          blockchain.getUserSession().putFile("history.txt", content);
+        }
       });
     }
 
@@ -529,26 +471,17 @@ function finishLoad(event) {
   });
 }
 
-function updateTargetURL(event) {
-  if (event.url != "") {
-    dialogContainer.style.opacity = 0.9;
-    dialog.innerHTML = event.url;
-  } else {
-    dialogContainer.style.opacity = 0;
-  }
-}
-
 tabGroup.on("tab-active", (tab, tabGroup) => {
-  tab.webview.addEventListener("did-start-loading", web.loadStart(theme, mTab));
+  tab.webview.addEventListener("did-start-loading", web.loadStart(mTab));
   tab.webview.addEventListener("did-stop-loading", web.loadStop(mTab));
-  tab.webview.addEventListener("did-finish-load", finishLoad);
+  tab.webview.addEventListener("did-finish-load", finishLoad());
   tab.webview.addEventListener("enter-html-full-screen", web.enterFllscrn(document));
   tab.webview.addEventListener("leave-html-full-screen", web.leaveFllscrn(document));
   tab.webview.addEventListener("update-target-url", e => web.updateTargetURL(e, document));
-  tab.webview.addEventListener("dom-ready", web.domReady(theme, mTab));
-  tab.webview.addEventListener("new-window", web.newWindow(tabGroup));
-  tab.webview.addEventListener("page-favicon-updated", web.faviconUpdated(mTab));
-  tab.webview.addEventListener("page-title-updated", e => web.titleUpdated(e, mTab));
+  tab.webview.addEventListener("dom-ready", web.domReady());
+  tab.webview.addEventListener("new-window", e => web.newWindow(e, true));
+  tab.webview.addEventListener("page-favicon-updated", e => web.faviconUpdated(e));
+  tab.webview.addEventListener("page-title-updated", e => web.titleUpdated(e));
   let url = tab.webview.src;
 	$("#url").val(url);
 	try {
@@ -565,25 +498,25 @@ $("#forward").click(e => web.goForward(mTab));
 $("#omnibox").on("keypress", function(e) {
   if (e.which == 13) {
     webview.style.display = "none";
-    updateURL(e);
+    loadPage(e);
   }
 });
 $("#url").focus(e => $("#url").select());
 $("#fave").click(addBookmark);
 $("#list").click(openPopUp);
 $("#settings").click(openSettings);
-$("#fave-popup").click(handleUrl);
+$("#fave-popup").click(web.handleUrl);
 
-tabGroup.getActiveTab().webview.addEventListener("did-start-loading", web.loadStart(theme, mTab));
+tabGroup.getActiveTab().webview.addEventListener("did-start-loading", web.loadStart(mTab));
 tabGroup.getActiveTab().webview.addEventListener("did-stop-loading", web.loadStop(mTab));
 tabGroup.getActiveTab().webview.addEventListener("did-finish-load", finishLoad);
 tabGroup.getActiveTab().webview.addEventListener("enter-html-full-screen", web.enterFllscrn(document));
 tabGroup.getActiveTab().webview.addEventListener("leave-html-full-screen", web.leaveFllscrn(document));
 tabGroup.getActiveTab().webview.addEventListener("update-target-url", e => web.updateTargetURL(e, document));
-tabGroup.getActiveTab().webview.addEventListener("dom-ready", web.domReady(theme, mTab));
-tabGroup.getActiveTab().webview.addEventListener("new-window", e => web.newWindow(e, tabGroup));
-tabGroup.getActiveTab().webview.addEventListener("page-favicon-updated", e => web.faviconUpdated(e, mTab));
-tabGroup.getActiveTab().webview.addEventListener("page-title-updated", e => web.titleUpdated(e, mTab));
+tabGroup.getActiveTab().webview.addEventListener("dom-ready", web.domReady());
+tabGroup.getActiveTab().webview.addEventListener("new-window", e => web.newWindow(e, true));
+tabGroup.getActiveTab().webview.addEventListener("page-favicon-updated", web.faviconUpdated);
+tabGroup.getActiveTab().webview.addEventListener("page-title-updated", web.titleUpdated);
 
 const sess = session.fromPartition("persist:peacock");
 const filter = {

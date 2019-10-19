@@ -4,6 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <title>Peacock</title>
+  <script>window.$ = window.jQuery = require('jquery');</script>
   <link href="css/fonts/Nexa/Nexa.css" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css?family=Roboto&display=swap" rel="stylesheet">
 
@@ -11,8 +12,9 @@
   <link rel="stylesheet" href="css/tabs.css">
   <link rel="stylesheet" href="css/titlebar.css">
   <link rel="stylesheet" href="node_modules/dragula/dist/dragula.css">
-  <script>window.$ = window.jQuery = require('jquery');</script>
+
   <script src="mousetrap.min.js"></script>
+
   <style>
     webview {
       width: 100%;
@@ -27,6 +29,7 @@
 </head>
 
 <body id="browser">
+  <div id="notifications"></div>
   <!-- <div id="permission-container">
     <div id="permissions">ERROR</div>
   </div> -->

@@ -64,15 +64,21 @@ body {
 }
 
 #header-text, #title, .label, .heading-title, .etabs-buttons button,
-.etabs-tab-title, .etabs-tab-buttons button, #window-controls .button, .dropdown-toggle {
+.etabs-tab-title,.etabs-tab-buttons button, #window-controls .button, .dropdown-toggle,
+#pills-profile #name, #pills-profile button
+{
   color: white;
+}
+
+#pills-profile #signedIn{
+  color: rgba(255,255,255,0.75);
 }
 
 #header-text{
   text-shadow: 0px 3px 0px #545B62;
 }
 
-.dropdown {
+.dropdown, .btn {
   background-color: #3c3e42;
   border-radius: 5px;
 }
@@ -109,4 +115,13 @@ body {
 #shield.gu-mirror, #shield.gu-transit, #shieldIMG.gu-mirror, #shieldIMG.gu-transit {
   max-width: 30px !important;
   max-height: 30px !important;
+}
+
+.nav-link {
+  background-color: #3c3e42;
+  color: white;
+}
+
+.nav-link:hover {
+  color: #ddd;
 }
