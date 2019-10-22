@@ -23,6 +23,10 @@ const cp = require('child_process');
 
 const contextMenu = require('electron-context-menu');
 
+const filter = {
+	urls: ["http://*/*", "https://*/*"]
+}
+
 const menuTemplate = [
 		{
 			label: 'Window',
@@ -159,8 +163,8 @@ ipcMain.on('adblock-change', (event, arg) => {
 	}
 });
 
-ipcMain.on('test-message', (event, arg) => {
-	console.log(arg);
+ipcMain.on('openPage', (event, arg) => {
+	mainWindow.webContents.send('openPage', arg);
 });
 
 ipcMain.on('signIntoBlockstack', (e, a) => {
@@ -183,13 +187,13 @@ function authCallback(authResponse) {
 
 function enableAdBlocking() {
 	ElectronBlocker.fromPrebuiltAdsAndTracking(fetch).then((blocker) => {
-		blocker.enableBlockingInSession(session.defaultSession);
+		blocker.enableBlockingInSession(session.fromPartition("persist:peacock"));
 	});
 }
 
 function disableAdBlocking() {
 	ElectronBlocker.fromPrebuiltAdsAndTracking(fetch).then((blocker) => {
-		blocker.disableBlockingInSession(session.defaultSession);
+		blocker.disableBlockingInSession(session.fromPartition("persist:peacock"));
 	});
 }
 
@@ -222,25 +226,6 @@ function createWindow() {
 	Menu.setApplicationMenu(Menu.buildFromTemplate(menuTemplate));
 
 	enableAdBlocking();
-
-	const filter = {
-		urls: ["http://*/*", "https://*/*"]
-	}
-
-	session.defaultSession.webRequest.onBeforeSendHeaders(filter, (details, callback) => {
-		details.requestHeaders['DNT'] = "1";
-		callback({
-			cancel: false,
-			requestHeaders: details.requestHeaders
-		})
-	});
-
-	session.defaultSession.setPermissionRequestHandler((webContents, permission, callback) => {
-		const url = webContents.getURL()
-
-    console.log(permission);
-		callback(true);
-	});
 
 	// const extensions = new ExtensibleSession(session.defaultSession);
 	// extensions.loadExtension('Grammarly'); // Path to the extension to load
@@ -284,6 +269,23 @@ function createWindow() {
 	//   "Love, Spike",
 	//   silent: true // We'll play our own sound
 	// });
+
+	mainWindow.once('did-finish-load', () => {
+		session.fromPartition("persist:peacock").webRequest.onBeforeSendHeaders(filter, (details, callback) => {
+			details.requestHeaders['DNT'] = "1";
+			callback({
+				cancel: false,
+				requestHeaders: details.requestHeaders
+			})
+		});
+
+		session.fromPartition("persist:peacock").setPermissionRequestHandler((webContents, permission, callback) => {
+			const url = webContents.getURL();
+
+			console.log(permission);
+			callback({ cancel: true	});
+		});
+	});
 }
 
 // This method will be called when Electron has finished

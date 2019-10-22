@@ -171,6 +171,8 @@ ipcRenderer.on("keyboardShortcut", function(event, shortcut) {
 
 ipcRenderer.on("loadTheme", function(event, args) { loadTheme(); });
 
+ipcRenderer.on("openPage", function(event, args) { tabs.newTab("Loading...", args); });
+
 // ipcRenderer.on('window-closing', function(event, input) {
 // 	uploadHistory();
 // });
@@ -179,7 +181,7 @@ omni.focus();
 
 var settings;
 function loadTheme() {
-  jsonfile.readFile("data/settings.json", function(err, obj) {
+  jsonfile.readFile("settings.json", function(err, obj) {
     if (err) console.error(err);
     let themeObj = obj.theme.toLowerCase();
     if (window.theme != themeObj) {
@@ -237,7 +239,7 @@ function openSettings() {
 		}); // Create Settings
 
     // Open Developer Tools:
-    // settings.openDevTools();
+    settings.openDevTools();
 
 		// and load the html of the app.
 		settings.loadURL(require('url').format({
@@ -252,12 +254,12 @@ function openSettings() {
 }
 
 function getSearchEnginePrefix(cb) {
-  jsonfile.readFile("data/settings.json", function(err, objecteroonie) {
+  jsonfile.readFile("settings.json", function(err, objecteroonie) {
     if (err) console.error(err);
 
     let searchEngine = objecteroonie.search_engine;
 
-    jsonfile.readFile("data/search_engines.json", function(err, obj) {
+    jsonfile.readFile("search_engines.json", function(err, obj) {
       for (var i = 0; i < obj.length; i++) {
         if (obj[i].name === searchEngine) {
           cb(obj[i].url);
@@ -465,6 +467,18 @@ function finishLoad(event) {
   	window: tabGroup.getActiveTab().webview,
   	showCopyImageAddress: true
   });
+
+  const filter = {
+  	urls: ["http://*/*", "https://*/*"]
+  }
+
+  session.fromPartition("persist:peacock").webRequest.onBeforeSendHeaders(filter, (details, callback) => {
+    details.requestHeaders['DNT'] = "1";
+    callback({
+      cancel: false,
+      requestHeaders: details.requestHeaders
+    })
+  });
 }
 
 tabGroup.on("tab-active", (tab, tabGroup) => {
@@ -513,18 +527,28 @@ tabGroup.getActiveTab().webview.addEventListener("dom-ready", web.domReady());
 tabGroup.getActiveTab().webview.addEventListener("new-window", e => web.newWindow(e, true));
 tabGroup.getActiveTab().webview.addEventListener("page-favicon-updated", web.faviconUpdated);
 tabGroup.getActiveTab().webview.addEventListener("page-title-updated", web.titleUpdated);
-
-const sess = session.fromPartition("persist:peacock");
-const filter = {
-  urls: ["http://*/*", "https://*/*"]
-};
-sess.webRequest.onBeforeSendHeaders(filter, (details, callback) => {
-  details.requestHeaders["DNT"] = "1";
-  callback({
-    cancel: false,
-    requestHeaders: details.requestHeaders
-  });
-});
 // Mercury.parse("https://en.wikipedia.org/wiki/Madagascar", { contentType: 'html' }).then(function (result) {
 // 	console.log(result);
 // });
+
+const filter = {
+	urls: ["http://*/*", "https://*/*"]
+}
+
+session.fromPartition("persist:peacock").setCertificateVerifyProc((request, callback) => {
+  if(request.verificationResult != "net::OK"){
+    console.log(request.verificationResult + " at " + request.hostname);
+    $("#search").attr("src","images/unlock.svg");
+  } else {
+    $("#search").attr("src","images/lock.svg");
+  }
+  callback(0);
+});
+
+session.fromPartition("persist:peacock").webRequest.onBeforeSendHeaders(filter, (details, callback) => {
+  details.requestHeaders['DNT'] = "1";
+  callback({
+    cancel: false,
+    requestHeaders: details.requestHeaders
+  })
+});
