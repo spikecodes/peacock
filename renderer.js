@@ -4,7 +4,12 @@
 const jsonfile = require("jsonfile");
 const path = require("path");
 const uuid = require("uuid");
+
 const bookmarks = path.join(__dirname, "bookmarks.json");
+const settingsFile = path.join(__dirname, "settings.json");
+const search_engines = path.join(__dirname, "search_engines.json");
+
+console.log(bookmarks);
 
 const session = require("electron").remote.session;
 const remote = require("electron").remote;
@@ -181,7 +186,7 @@ omni.focus();
 
 var settings;
 function loadTheme() {
-  jsonfile.readFile("settings.json", function(err, obj) {
+  jsonfile.readFile(settingsFile, function(err, obj) {
     if (err) console.error(err);
     let themeObj = obj.theme.toLowerCase();
     if (window.theme != themeObj) {
@@ -239,7 +244,7 @@ function openSettings() {
 		}); // Create Settings
 
     // Open Developer Tools:
-    settings.openDevTools();
+    // settings.openDevTools();
 
 		// and load the html of the app.
 		settings.loadURL(require('url').format({
@@ -254,12 +259,12 @@ function openSettings() {
 }
 
 function getSearchEnginePrefix(cb) {
-  jsonfile.readFile("settings.json", function(err, objecteroonie) {
+  jsonfile.readFile(settingsFile, function(err, objecteroonie) {
     if (err) console.error(err);
 
     let searchEngine = objecteroonie.search_engine;
 
-    jsonfile.readFile("search_engines.json", function(err, obj) {
+    jsonfile.readFile(search_engines, function(err, obj) {
       for (var i = 0; i < obj.length; i++) {
         if (obj[i].name === searchEngine) {
           cb(obj[i].url);

@@ -1,5 +1,10 @@
 const jsonfile = require('jsonfile');
-const path = require('path');
+
+const path = require("path");
+const uuid = require("uuid");
+
+const bookmarks = path.join(__dirname, "../bookmarks.json");
+const settingsFile = path.join(__dirname, "../settings.json");
 
 const blockchain = require('./blockchain.js');
 
@@ -45,20 +50,20 @@ rpclient.login({ clientId }).catch(console.error);
 //Discord Rich Presence
 
 function saveSettings(input) {
-  jsonfile.readFile("settings.json", function (err, data_raw) {
+  jsonfile.readFile(settingsFile, function (err, data_raw) {
     if (err) console.error(err);
     let data = data_raw;
     for (var key in input){
       data[key] = input[key];
     }
-    jsonfile.writeFile("settings.json", data, function(err) {
+    jsonfile.writeFile(settingsFile, data, function(err) {
   		if (err) { console.error(err) }
       else { console.log("Updated Settings!") }
   	});
   });
 }
 
-jsonfile.readFile("settings.json", function (err, obj) {
+jsonfile.readFile(settingsFile, function (err, obj) {
   if (err) console.error(err);
   for (var key in obj){
     $('div[data-key=' + key + ']').find('.dropdown').find(".dropdown-toggle").text(obj[key]);
@@ -74,7 +79,7 @@ $(document).on('click', '.dropdown-item', function(event) {
 });
 
 function loadTheme() {
-	jsonfile.readFile("settings.json", function (err, obj) {
+	jsonfile.readFile(settingsFile, function (err, obj) {
 	  if (err) console.error(err);
 		let theme = obj.theme.toLowerCase();
 	  if (theme === "default" || theme === "light"){
@@ -107,16 +112,16 @@ function resetProfile() {
 }
 
 function loadHistory() {
-  $(".list-group").empty();
+  $(".group-history").empty();
   blockchain.getUserSession().getFile("history.txt").then(data => {
     var split = data.split(',');
     for (var i = 0; i < split.length; i++) {
       if(split[i] != null && split[i] != undefined && split[i] != ""){
-        let item = $(".list-group").append('<a href="#" class="list-group-item list-group-item-action">' + split[i]
+        let item = $(".group-history").append('<a href="#" class="list-group-item list-group-item-action item-history">' + split[i]
           + '</a>');
       }
     }
-    $(".list-group-item").click(function (e) {
+    $(".item-history").click(function (e) {
       e.preventDefault();
       ipcRenderer.send('openPage',$(this).text());
     });
@@ -124,6 +129,7 @@ function loadHistory() {
 }
 
 function loadBookmarks() {
+  $(".group-bookmarks").empty();
   jsonfile.readFile(bookmarks, function(err, obj) {
     if (obj.length !== 0) {
       for (var i = 0; i < obj.length; i++) {
@@ -137,14 +143,14 @@ function loadBookmarks() {
         let id = obj[i].id;
         let title = obj[i].title;
 
-        let bookmark = new Bookmark(id, url, icon, title);
-        let el = bookmark.ELEMENT();
-        popup.appendChild(el);
+        let item = $(".group-bookmarks").append('<a href="#" class="list-group-item list-group-item-action item-bookmarks">' + url + '</a>');
       }
+
+      $(".item-bookmarks").click(function (e) {
+        e.preventDefault();
+        ipcRenderer.send('openPage',$(this).text());
+      });
     }
-    popup.style.display = "block";
-    popup.style.opacity = "1";
-    popup.setAttribute("data-state", "open");
   });
 }
 
