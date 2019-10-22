@@ -45,20 +45,20 @@ rpclient.login({ clientId }).catch(console.error);
 //Discord Rich Presence
 
 function saveSettings(input) {
-  jsonfile.readFile("data/settings.json", function (err, data_raw) {
+  jsonfile.readFile("settings.json", function (err, data_raw) {
     if (err) console.error(err);
     let data = data_raw;
     for (var key in input){
       data[key] = input[key];
     }
-    jsonfile.writeFile("data/settings.json", data, function(err) {
+    jsonfile.writeFile("settings.json", data, function(err) {
   		if (err) { console.error(err) }
       else { console.log("Updated Settings!") }
   	});
   });
 }
 
-jsonfile.readFile("data/settings.json", function (err, obj) {
+jsonfile.readFile("settings.json", function (err, obj) {
   if (err) console.error(err);
   for (var key in obj){
     $('div[data-key=' + key + ']').find('.dropdown').find(".dropdown-toggle").text(obj[key]);
@@ -74,7 +74,7 @@ $(document).on('click', '.dropdown-item', function(event) {
 });
 
 function loadTheme() {
-	jsonfile.readFile("data/settings.json", function (err, obj) {
+	jsonfile.readFile("settings.json", function (err, obj) {
 	  if (err) console.error(err);
 		let theme = obj.theme.toLowerCase();
 	  if (theme === "default" || theme === "light"){
@@ -106,18 +106,52 @@ function resetProfile() {
   $("#signOut").click(function () { ipcRenderer.send('signIntoBlockstack',''); });
 }
 
+function loadHistory() {
+  $(".list-group").empty();
+  blockchain.getUserSession().getFile("history.txt").then(data => {
+    var split = data.split(',');
+    for (var i = 0; i < split.length; i++) {
+      if(split[i] != null && split[i] != undefined && split[i] != ""){
+        let item = $(".list-group").append('<a href="#" class="list-group-item list-group-item-action">' + split[i]
+          + '</a>');
+      }
+    }
+    $(".list-group-item").click(function (e) {
+      e.preventDefault();
+      ipcRenderer.send('openPage',$(this).text());
+    });
+  });
+}
+
+function loadBookmarks() {
+  jsonfile.readFile(bookmarks, function(err, obj) {
+    if (obj.length !== 0) {
+      for (var i = 0; i < obj.length; i++) {
+        let url = obj[i].url;
+        let icon;
+        if (obj[i].icon != "blank favicon") {
+          icon = obj[i].icon;
+        } else {
+          icon = "images/blank.png";
+        }
+        let id = obj[i].id;
+        let title = obj[i].title;
+
+        let bookmark = new Bookmark(id, url, icon, title);
+        let el = bookmark.ELEMENT();
+        popup.appendChild(el);
+      }
+    }
+    popup.style.display = "block";
+    popup.style.opacity = "1";
+    popup.setAttribute("data-state", "open");
+  });
+}
+
 function updateProfile() {
   if(blockchain.getUserSession().isUserSignedIn()){
-    blockchain.getUserSession().getFile("history.txt").then(data => {
-      $(".list-group-item").first().remove();
-      var split = data.split(',');
-      for (var i = 0; i < split.length; i++) {
-        if(split[i] != null && split[i] != undefined && split[i] != ""){
-          $(".list-group").append('<a href="#" class="list-group-item list-group-item-action">' + split[i]
-            + '</a>');
-        }
-      }
-    });
+    loadHistory();
+    loadBookmarks();
 
     let profile = blockchain.getUserSession().loadUserData().profile;
     let username = profile.name;
@@ -130,6 +164,7 @@ function updateProfile() {
     $("#signOut").click(signOutOfBlockstack);
   } else {
     resetProfile();
+    $(".list-group a").unbind("click");
     $(".list-group-item").first().text("Sign in with Blockstack via the Profile tab to access history.");
   }
 }

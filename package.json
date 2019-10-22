@@ -1,6 +1,6 @@
 {
-	"name": "peacock",
-	"version": "2.0.56",
+	"name": "Peacock",
+	"version": "2.0.57",
 	"description": "Open source privacy-first browser that hosts your data on the blockchain.",
 	"main": "main.js",
 	"repository": "https://github.com/Codiscite/peacock/",
@@ -9,7 +9,8 @@
 		"web",
 		"web3",
 		"blockchain",
-		"privacy"
+		"privacy",
+		"internet"
 	],
 	"build": {
 		"appId": "com.codiscite.peacock",
