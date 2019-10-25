@@ -11,14 +11,27 @@
   <a href="https://invite.gg/peacock"><img src="https://discordapp.com/api/guilds/630199884229771314/widget.png?style=shield" alt="Discord"></a>
 </p><br>
 
-### Features
-<img src="https://cdn.discordapp.com/emojis/587762933665366016.gif?v=1" width="20" height="20"> WebP Support<br>
-<img src="https://cdn.discordapp.com/emojis/587762933665366016.gif?v=1" width="20" height="20"> Basic Bookmark System<br>
-<img src="https://cdn.discordapp.com/emojis/587762933665366016.gif?v=1" width="20" height="20"> Tab Navigation (shortcuts: <b>Ctrl+Tab/⌘+Tab</b> and <b>Ctrl+Shift+Tab/⌘+Shift+Tab</b>)<br>
-<img src="https://cdn.discordapp.com/emojis/587762933665366016.gif?v=1" width="20" height="20"> Do Not Track Header Added to <b>ALL</b> Web Requests<br>
-<img src="https://cdn.discordapp.com/emojis/587762933665366016.gif?v=1" width="20" height="20"> Discord Rich Presence Support <br>
-<img src="https://cdn.discordapp.com/emojis/587762933665366016.gif?v=1" width="20" height="20"> Settings Menu<br>
-<img src="https://cdn.discordapp.com/emojis/587762933665366016.gif?v=1" width="20" height="20"> Dark Mode<br>
-<img src="https://cdn.discordapp.com/emojis/587762933665366016.gif?v=1" width="20" height="20"> Customizable Themes<br>
 
-### More to come! This is just a placeholder README file currently.
+
+### Features
+- 🖼 WebP Image Support<br>
+- 🔖 Basic Bookmark System<br>
+- 💻 Tab Navigation (shortcuts: <b>Ctrl+Tab/⌘+Tab</b> and <b>Ctrl+Shift+Tab/⌘+Shift+Tab</b>)<br>
+- 🔏 Do Not Track Header Added to <b>ALL</b> Web Requests<br>
+- 💬 Discord Rich Presence Support <br>
+- 🔨 Settings Menu<br>
+- 🌓 Dark Mode<br>
+- 🎨 Customizable Themes<br>
+
+### Downloads
+Windows|Mac|Linux
+--|--|--
+[Download](https://github.com/Codiscite/peacock/releases/download/v2.0.59/Peacock-Setup-2.0.59.exe)|[Download](https://github.com/Codiscite/peacock/releases/download/v2.0.59/Peacock-2.0.59.dmg)|[Download](https://github.com/Codiscite/peacock/releases/download/v2.0.59/Peacock-2.0.59-x86_64.AppImage)
+
+### How to bypass security warnings?
+Peacock is 100% safe to use but like most applications with low install counts, Peacock may show up to antiviruses or Windows Defender as a 'suspicious application', which can be easily dismissed by following the quick steps explained by the GIF below.
+
+<img src="https://i.imgur.com/az4ZKPx.gif"/>
+
+More to come! This is just a placeholder README file currently.<br>
+**Note:** Don't store any highly sensitive data on Peacock as it is in Beta and your information could risk being lost.
