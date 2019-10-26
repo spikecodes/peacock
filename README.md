@@ -11,8 +11,6 @@
   <a href="https://invite.gg/peacock"><img src="https://discordapp.com/api/guilds/630199884229771314/widget.png?style=shield" alt="Discord"></a>
 </p><br>
 
-
-
 ### Features
 - 🖼 WebP Image Support<br>
 - 🔖 Basic Bookmark System<br>
@@ -21,7 +19,11 @@
 - 💬 Discord Rich Presence Support <br>
 - 🔨 Settings Menu<br>
 - 🌓 Dark Mode<br>
-- 🎨 Customizable Themes<br>
+- 🎨 Customizable Themes<br><br>
+
+### Screenshots
+<img src="https://i.imgur.com/tt9Nl6I.png"/>
+<img src="https://i.imgur.com/kOxwq6u.png"/>
 
 ### Downloads
 Windows|Mac|Linux
