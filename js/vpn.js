@@ -1,8 +1,5 @@
-const request = require('request');
-const session = require("electron").remote.session;
-
 exports.startVPN = function () {
-  request.get('http://spys.me/proxy.txt', function (error, response, body) {
+  require('request').get('http://spys.me/proxy.txt', function (error, response, body) {
     var lines = body.split("\n");
     var ips = lines.slice(9, lines.length - 2);
 
@@ -15,7 +12,7 @@ exports.startVPN = function () {
           }
         }
         let proxy = validIPs[Math.floor(Math.random()*validIPs.length)];
-        let sess = session.fromPartition("persist:peacock");
+        let sess = require("electron").remote.session.fromPartition("persist:peacock");
         sess.setProxy({proxyRules:proxy}, function (){
             console.log('Using the proxy ' + proxy + '.');
         });

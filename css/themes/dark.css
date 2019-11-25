@@ -1,5 +1,5 @@
 body {
-  background: #2e3033;
+  background: #131313;
 }
 
 #window-controls .button:hover {
@@ -15,19 +15,32 @@ body {
 }
 
 .etabs-tab.active {
-  background: #41454c;
+  background: #262729;
+  box-shadow: inset 0px 0px 0px 1px #36373a;
 }
 
 .etabs-tab {
-  background: linear-gradient(to bottom, #2e3033 0%, #2e3033 100%);
+  background: transparent;
+}
+
+.etabs-tab.visible::after {
+  background: linear-gradient(90deg, #13131300 0%, #131313 75%, #13131380 100%);
+}
+
+.etabs-tab.visible.active::after {
+  background: linear-gradient(90deg, #26272900 0%, #262729 75%, #26272980 100%);
+}
+
+.etabs-tab.visible:hover::after, .etabs-tab.visible.active:hover::after {
+  background: linear-gradient(90deg, #31323500 0%, #313235 75%, #31323580 100%);
 }
 
 #navigation, #topbar, .etabs-views {
-  background: #2e3033;
+  background: transparent;
 }
 
 #omnibox:hover > #url {
-  background-color: #494c50;
+  background-color: #2f3033;
   color: #fefefe;
   transition: all 0.1s;
 }
@@ -36,26 +49,27 @@ body {
   content:url('../../images/Peacock Shield.png');
 }
 
-#navigation div:not(#omnibox):not(#fave-popup):not(#shield) img, #back-arrow, #search {
+#navigation div:not(#omnibox):not(#shield) img, #back-arrow, #search {
   filter: invert(100%) sepia(100%) saturate(0%) hue-rotate(288deg) brightness(102%) contrast(102%);
 }
 
-#navigation div:not(#omnibox):not(#fave-popup):hover{
-  background-color: rgba(255, 255, 255, 0.05);
+#navigation div:not(#omnibox):hover {
+  background-color: rgba(255, 255, 255, 0.05) !important;
 }
 
-#navigation #omnibox input{
-  background-color: #3c3e42;
+#navigation div:not(#omnibox):active {
+  background-color: rgba(255, 255, 255, 0.15) !important;
+}
+
+#url{
+  background-color: #222325;
   color: #fefefe;
-  border: 1px #494c50 solid;
-}
-
-.etabs-views{
-  border: none;
+  border: 1px #36373a solid;
+  box-shadow: none;
 }
 
 .etabs-tab:hover {
-  background-color: #565b65 !important;
+  background-color: #313235 !important;
 }
 
 #dialog {
@@ -67,7 +81,7 @@ body {
 .etabs-tab-title,.etabs-tab-buttons button, #window-controls .button, .dropdown-toggle,
 #pills-profile #name, #pills-profile button
 {
-  color: white;
+  color: #efefef;
 }
 
 #pills-profile #signedIn{
@@ -75,7 +89,7 @@ body {
 }
 
 #header-text{
-  text-shadow: 0px 3px 0px #545B62;
+  text-shadow: 0px 2.5px 0px #4e5254;
 }
 
 .dropdown, .btn {
@@ -96,19 +110,11 @@ body {
   color: white;
 }
 
-#navigation #fave-popup, #navigation #fave-popup .link .favicon {
-  background-color: #3c3e42;
+.btn, .note {
+  color: #dedede;
 }
 
-#navigation #fave-popup .link {
-  color: white;
-}
-
-#navigation #fave-popup .link:hover {
-  background-color: #545B62;
-}
-
-.gu-mirror:not(#omnibox):not(#fave-popup):not(#shield), .gu-transit:not(#omnibox):not(#fave-popup):not(#shield) {
+.gu-mirror:not(#omnibox):not(#shield), .gu-transit:not(#omnibox):not(#shield) {
   filter: invert(100%) sepia(100%) saturate(0%) hue-rotate(288deg) brightness(102%) contrast(102%) !important;
 }
 
@@ -118,10 +124,112 @@ body {
 }
 
 .nav-link {
-  background-color: #3c3e42;
+  background-color: #232323;
   color: white;
 }
 
 .nav-link:hover {
   color: #ddd;
+}
+
+.item-history, .item-bookmarks {
+  color: white;
+  transition: all 0.05s;
+  border: 2px solid #444444 !important;
+  background: #131313 !important;
+}
+
+.item-history:hover, .item-bookmarks:hover {
+  color: white;
+  box-shadow: -4px 0px 0px 0px white;
+  border: 2px solid white !important;
+}
+
+.item-history > .history-title, .item-bookmarks > .bookmark-title {
+  color: white;
+}
+
+.autocomplete {
+  box-shadow: 0px 10px 27px -12px rgba(70, 70, 70, 0.75);
+}
+
+.autocomplete > div{
+  background: #222325;
+  color: white;
+}
+
+.autocomplete > div.selected {
+  box-shadow: inset 4px 0px 0px 0px #717375;
+}
+
+.autocomplete > div:hover, .autocomplete > div.selected {
+  background: #2c2d2f;
+  padding-left: 25px;
+}
+
+.delete-bookmark {
+  color: white;
+}
+
+.delete-bookmark:hover {
+  background: rgba(255,255,255,0.1);
+}
+
+#profile {
+  background: #545B62;
+}
+
+#profile-jumbo {
+  background: transparent;
+  border: 2px solid #232323;
+}
+
+#profile-jumbo:hover {
+  background: #1c1c1d;
+}
+
+.btn {
+  border: 2px solid #444444;
+  background: #131313;
+  /* box-shadow: -4px 4px 0px 0px white; */
+}
+
+.btn:hover {
+  box-shadow: 0px 3.5px 0px 0px #d2d1d6;
+}
+
+.btn:hover, .btn:focus {
+  background-color: white !important;
+  border: 2px solid white !important;
+  color: #313a43 !important;
+}
+
+.nav-link.active {
+  background-color: #FDD332 !important;
+  color: #131313 !important;
+}
+
+#window-controls > div > span {
+  color: white;
+}
+
+#omnibox:hover > #url {
+  box-shadow: inset 0px 0px 0px 1px #3c3c3c;
+}
+
+b {
+  color: white;
+}
+
+#navigation div:not(#omnibox):hover, .etabs-buttons button:hover {
+  box-shadow: inset 0px 0px 0px 1px #5f5f5f, 0px 1px 3px rgba(0,0,0,0.65) !important;
+}
+
+.etabs-tab-buttons button:hover {
+  box-shadow: inset 0px 0px 0px 1px #5f5f5f !important;
+}
+
+#url::selection {
+  background: #FFD563;
+  color: white;
 }

@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css?family=Roboto&display=swap");
+@import url('https://fonts.googleapis.com/css?family=Roboto:300,400,500,700,900&display=swap');
 
 /**
  *   MAKE ELECTRON APP FEEL MORE NATIVE
@@ -18,6 +18,8 @@
   -webkit-app-region: no-drag;
   cursor: default;
 }
+
+cssbody { font: caption; }
 
 html,
 body,
@@ -106,10 +108,16 @@ video {
   font-size: 100%;
   font: inherit;
   vertical-align: baseline;
+  color: #313a43;
 }
 
 *:focus {
   outline: none;
+}
+
+* {
+  font-family: Roboto;
+  font-weight: unset
 }
 
 article,
@@ -131,7 +139,7 @@ body {
   height: 100%;
   width: 100%;
   display: block;
-  background: #f5f5f5;
+  background: #f3f3f3;
   overflow-y: hidden;
   /* padding-right: 17px; /* Increase/decrease this value for cross-browser compatibility */
   */box-sizing: content-box; /* So the width will be 100% + 17px */
@@ -164,6 +172,11 @@ html {
   width: 100%;
   height: 100%;
   overflow: hidden;
+}
+
+webview {
+  width: 100%;
+  height: 100%;
 }
 
 #permission-container {
@@ -205,7 +218,7 @@ html {
   color: #2e3033;
 }
 
-#navigation div:not(#omnibox):not(#fave-popup) img {
+#navigation div:not(#omnibox) img {
   position: absolute;
   top: 0;
   bottom: 0;
@@ -215,15 +228,23 @@ html {
   width: 22px;
 }
 
-#navigation div:not(#omnibox):not(#fave-popup) {
-  border-radius: 5px;
-  transition: all 0.1s;
+#navigation div:not(#omnibox) {
+  border-radius: 4px;
+  transition: all 0.05s;
   position: relative;
-  margin-top: -2px;
+  padding: 3px;
+  margin-top: -6px;
 }
 
-#navigation div:not(#omnibox):not(#fave-popup):hover {
-  background-color: rgba(0, 0, 0, 0.075);
+#navigation div:not(#omnibox):hover, .etabs-tab-buttons button:hover,
+.etabs-buttons button:hover {
+  box-shadow: inset 0px 0px 0px 1px #e6e6e6;
+  background-color: rgba(0, 0, 0, 0.025);
+}
+
+#navigation div:not(#omnibox):active, .etabs-tab-buttons button:active,
+.etabs-buttons button:active {
+  background-color: rgba(0, 0, 0, 0.065);
 }
 
 #topbar {
@@ -231,7 +252,7 @@ html {
   margin-top: 47px;
   position: fixed;
   width: 100%;
-  background: white;
+  background: transparent;
   display: block;
   top: 0;
   left: 0;
@@ -241,7 +262,7 @@ html {
 #navigation {
   width: 100%;
   height: 40px;
-  background: white;
+  background: transparent;
   display: block;
   top: 0;
   left: 0;
@@ -253,99 +274,43 @@ html {
 #navigation #omnibox {
   float: left;
   display: block;
-  width: calc(100% - 210px);
+  width: calc(100% - 230px);
   cursor: text;
 }
 
 #navigation #omnibox #search {
   margin-left: 22px;
   position: absolute;
-  margin-top: 5px;
+  margin-top: 4px;
   width: 17px;
   cursor: text;
 }
 
 #omnibox:hover > #url {
-  background-color: #f1f1f1;
-  transition: all 0.1s;
+  box-shadow: inset 0px 0px 0px 1px #e6e6e6;
+  transition: all 0.05s;
 }
 
-#navigation #omnibox input {
+#url {
   border: none;
   outline: none;
   height: 20px;
   width: 90%;
-  border-radius: 5px;
-  border: 1px #f1f1f1 solid;
-  padding: 5px 15px;
+  border-radius: 4px;
+  padding: 7px 15px;
   color: #2e3033;
-  background-color: #f5f5f5;
-  margin: -2px 10px 0px 10px;
+  background-color: white;
+  margin: -5.5px 10px 0px 10px;
   cursor: text;
   font-family: Roboto;
   padding-left: 40px;
+  transition: all 0.01s;
+  box-shadow: inset 0px 0px 0px 1px #e6e6e6;
 }
 
-#navigation #omnibox input::selection {
-  background: #2e3033;
-  color: #ffffff;
-}
-
-#navigation #fave-popup {
-  opacity: 0;
-  margin-right: 10px;
-  margin-top: 65px;
-  border-radius: 5px;
-  display: none;
-  position: fixed;
-  right: 89px;
-  color: #eee;
-  top: 32px;
-  width: 190px;
-  height: auto;
-  z-index: 10;
-  padding: 15px;
-  overflow-y: auto;
-  overflow-x: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  background: white;
-  box-shadow: 0px 0px 18px 5px rgba(0, 0, 0, 0.05);
-  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-}
-
-#navigation #fave-popup .link {
-  width: 100%;
-  height: 32px;
-  color: #050708;
-  font-size: 13px;
-  font-family: "Roboto", sans-serif;
-  text-decoration: none;
-  text-align: left;
-  display: block;
-  line-height: 32px;
-  text-overflow: ellipsis;
-  overflow: hidden;
-  border-radius: 4px;
-  margin-top: 2px;
-  transition: all 0.1s;
-}
-
-#navigation #fave-popup .link:hover {
-  background-color: #f5f5f5;
-}
-
-#navigation #fave-popup .link:hover > img {
-  background-color: #f5f5f5;
-}
-
-#navigation #fave-popup .link .favicon {
-  width: 32px;
-  height: 32px;
-  float: left;
-  background: #fff;
-  margin-right: 5px;
-  transition: all 0.1s;
+#url::selection {
+  background: #313a43;
+  color: white;
 }
 
 #tabs {
@@ -435,7 +400,7 @@ html {
   padding-top: 1px;
   border-radius: 4px;
 
-  background-color: #f5f5f5;
+  background-color: #f7f7f9;
   vertical-align: middle;
   line-height: 24px;
   color: #050708;
@@ -453,7 +418,7 @@ html {
   font-family: "Roboto", sans-serif;
   width: 100%;
   opacity: 0;
-  transition: 0.2s opacity;
+  transition: all 0.05s;
   pointer-events: none;
 }
 
@@ -470,4 +435,89 @@ html {
   margin-bottom: 22px;
   margin-right: 15px;
   max-width: 300px;
+}
+
+.autocomplete {
+  border-radius: 0px 0px 4px 4px;
+  box-shadow: 0px 10px 27px -10px rgba(140,140,140,0.5);
+  z-index: 5;
+}
+
+.autocomplete > div {
+  font-family: "Roboto";
+  font-size: 13px;
+  padding: 15px 15px;
+  background: white;
+  transition: all 0.035s;
+  color: #2e3033;
+  border-radius: none;
+}
+
+.autocomplete > div.selected {
+  background: #f7f7f9;
+  padding-left: 19px;
+  box-shadow: inset 4px 0px 0px 0px #313a43;
+  cursor: pointer;
+}
+
+.autocomplete > div:last-child {
+  border-radius: 0px 0px 5px 5px;
+}
+
+b {
+  font-weight: 700;
+}
+
+#navigation {
+  background: transparent;
+}
+
+#find {
+  background: transparent;
+  color: #2e3033;
+  width: 100%;
+  position: fixed;
+  bottom: 0;
+  height: 35px;
+  display: none;
+  font-family: 'Roboto', sans-serif;
+  line-height: 35px;
+  padding-left: 10px;
+}
+
+#find input {
+  cursor: text;
+  padding: 3px 7px;
+  font-weight: 700;
+}
+
+#find #matches, #match-case {
+  font-weight: 500;
+  margin-left: 10px;
+  font-size: 14px;
+}
+
+#match-case {
+  cursor: pointer;
+  border: 2px #eee;
+  padding: 5px 10px;
+}
+
+#match-case.down {
+  background: #ddd;
+  border: 2px solid #2e3033;
+}
+
+#close-find {
+  bottom: 5px;
+  position: absolute;
+  right: 17px;
+  background: transparent;
+  border: none;
+  font-size: 18px;
+}
+
+#close-find:hover {
+  box-shadow: inset 0px 0px 0px 1px #c1c1c1;
+  background: rgba(0, 0, 0, 0.075) !important;
 }
