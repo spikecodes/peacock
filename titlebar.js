@@ -46,6 +46,8 @@ const remote = require('electron').remote;
         window.on('unmaximize', toggleMaxRestoreButtons);
 
         closeButton.addEventListener("click", event => {
+            // var { app } = remote;
+            // app.quit();
             window = remote.getCurrentWindow();
             window.close();
         });

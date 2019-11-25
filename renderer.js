@@ -2,95 +2,120 @@
 // be executed in the renderer process for that window.
 // All of the Node.js APIs are available in this process.
 const jsonfile = require("jsonfile");
-const path = require("path");
-const uuid = require("uuid");
 
-const bookmarks = path.join(__dirname, "bookmarks.json");
-const settingsFile = path.join(__dirname, "settings.json");
-const search_engines = path.join(__dirname, "search_engines.json");
+require('v8-compile-cache');
 
-console.log(bookmarks);
+const { ipcRenderer, remote, webFrame } = require("electron");
+const { BrowserWindow } = remote;
 
-const session = require("electron").remote.session;
-const remote = require("electron").remote;
-const { BrowserWindow } = require("electron").remote;
-const { ipcRenderer } = require("electron");
+const { join, normalize } = require("path");
 
-// const Mercury = require('@postlight/mercury-parser');
-
-const contextMenu = require('electron-context-menu');
+const bookmarks = join(__dirname, "data/bookmarks.json");
+const settingsFile = join(__dirname, "data/settings.json");
+const search_engines = join(__dirname, "data/search_engines.json");
+const blocked = join(__dirname, 'data/blocked.json');
 
 const tabs = require('./js/tabs.js');
 const web = require('./js/web.js');
-const vpn = require('./js/vpn.js');
+
 const blockchain = require('./js/blockchain.js');
+const store = require('./js/store.js');
+
+const { version } = require('./package.json');
 
 //Discord Rich Presence
-const { Client } = require("discord-rpc");
-const clientId = "627363592408137749";
+try {
+  const { Client } = require("discord-rpc");
+  const clientId = "627363592408137749";
 
-const rpclient = new Client({
-  transport: "ipc"
-});
-const startDate = new Date();
-const startTimestamp = startDate.getTime();
+  const rpclient = new Client({
+    transport: "ipc"
+  });
+  const startDate = new Date();
+  const startTimestamp = startDate.getTime();
+
+  async function setActivity() {
+    if (!rpclient) {
+      return;
+    }
+    var details = "https://peacock.link/";
+    var state = "Browsing the web...";
+    rpclient.setActivity({
+      details: details,
+      state: state,
+      startTimestamp,
+
+      largeImageKey: "peacockbg_light",
+      largeImageText: `Peacock Browser v` + version,
+      instance: false
+    });
+  }
+
+  rpclient.on("ready", () => {
+    setActivity();
+
+    setInterval(() => {
+      setActivity();
+    }, 15e3);
+  });
+
+  rpclient
+    .login({clientId})
+    .catch(console.log("Discord not open."));
+} catch (e) {
+  console.log("Discord not open.");
+}
+//Discord Rich Presence
 
 window.theme = "light";
+window.darkMode = false;
 
-async function setActivity() {
-  if (!rpclient) {
-    return;
-  }
-  var details = "https://peacock.link/";
-  var state = "Browsing the web...";
-  rpclient.setActivity({
-    details: details,
-    state: state,
-    startTimestamp,
+var omni = $("#url"),
+  fave = $("#fave"),
+  titlebar = $("#titlebar"),
+  dialogo = $("#dialog"),
+  dialogContainer = $("#dialog-container"),
+  etabsGroup = $("#etabs-tabgroup"),
+  etabsViews = $("#etabs-views"),
+  shield = $("#shieldIMG");
 
-    largeImageKey: "peacockbg_light",
-    largeImageText: `Peacock Browser v2.0.5`,
-    instance: false
-  });
-}
+var tabGroup = tabs.makeTabGroup("DuckDuckGo", "https://duckduckgo.com/");
+tabs.newTab("DuckDuckGo", "https://duckduckgo.com/");
 
-rpclient.on("ready", () => {
-  console.log("Loaded Discord RPC");
-  setActivity();
+require("dragula")([$('nav')]);
 
-  setInterval(() => {
-    setActivity();
-  }, 15e3);
+ipcRenderer.on("nativeTheme", async function(event, arg) {
+  window.darkMode = arg;
 });
 
-rpclient
-  .login({
-    clientId
-  })
-  .catch(console.error);
-//Discord Rich Presence
+/*const {openNewGitHubIssue, debugInfo} = require('electron-util');
+require('electron-unhandled')({
+  showDialog: true,
+	reportButton: error => {
+		openNewGitHubIssue({
+			user: 'Codiscite',
+			repo: 'peacock',
+			body: `\`\`\`\n${error.stack}\n\`\`\`\n\n---\n\n${debugInfo()}`
+		});
+	}
+});*/
 
-var ById = function(id) {
-  return document.getElementById(id);
-};
-var omni = ById("url"),
-  fave = ById("fave"),
-  titlebar = ById("titlebar"),
-  dialog = ById("dialog"),
-  dialogContainer = ById("dialog-container"),
-  etabsGroup = ById("etabs-tabgroup"),
-  etabsViews = ById("etabs-views"),
-  popup = ById("fave-popup"),
-  shield = ById("shieldIMG");
+ipcRenderer.on("ad-blocked", async function (event, ad) {
+  /*jsonfile.readFile(blocked, async function(err, obj) {
+    if(err) {console.error(err); return;}
 
-var tabGroup = tabs.makeTabGroup();
-tabs.newTab("Google", "https://google.com/");
+    var adRequest = { type: ad.type, url: ad.url, sourceHostname: ad.sourceHostname };
 
-// Customize button placement: dragula([nav]);
+    console.log(adRequest);
 
-ipcRenderer.on("blockstackSignIn", function(event, token) {
+    let result = obj;
+    result.push(adRequest);
+    jsonfile.writeFile(blocked, result, async function (err) {});
+  });*/
+});
+
+ipcRenderer.on("blockstackSignIn", async function(event, token) {
   if (blockchain.getUserSession().isUserSignedIn()) {
-    alert("We did it boys!");
     tabGroup.getActiveTab().close();
   } else {
     blockchain.getUserSession().handlePendingSignIn(token);
@@ -98,9 +123,10 @@ ipcRenderer.on("blockstackSignIn", function(event, token) {
   }
 });
 
-ipcRenderer.on("keyboardShortcut", function(event, shortcut) {
-  let id;
-  let length;
+let nav;
+let viewHeight = $('.etabs-views').height();
+ipcRenderer.on("keyboardShortcut", async function(event, shortcut) {
+  let { startVPN, stopVPN } = require('./js/vpn.js');
   switch (shortcut) {
     case "settings":
       openSettings();
@@ -113,80 +139,91 @@ ipcRenderer.on("keyboardShortcut", function(event, shortcut) {
       }
       break;
     case "nextTab":
-      id = tabGroup.getActiveTab().id;
-      length = tabGroup.getTabs().length;
-      if (length === 1) {
+      if (tabGroup.getTabs().length === 1) {
         // Do nothing
-      } else if (id === length - 1) {
+      } else if (tabGroup.getActiveTab().id === tabGroup.getTabs().length - 1) {
         tabGroup.getTab(0).activate();
       } else {
-        tabGroup.getTab(id + 1).activate();
+        tabGroup.getTab(tabGroup.getActiveTab().id + 1).activate();
       }
 
       break;
     case "backTab":
-      id = tabGroup.getActiveTab().id;
-      length = tabGroup.getTabs().length;
-      if (length === 1) {
+      if (tabGroup.getTabs().length === 1) {
         // Do nothing
-      } else if (id === 0) {
+      } else if (tabGroup.getActiveTab().id === 0) {
         // If First Tab
-        tabGroup.getTab(length - 1).activate(); // Activate Last Tab
+        tabGroup.getTab(tabGroup.getTabs().length - 1).activate(); // Activate Last Tab
       } else {
         // If Not First Tab
-        tabGroup.getTab(id - 1).activate(); // Activate Previous Tab
+        tabGroup.getTab(tabGroup.getActiveTab().id - 1).activate(); // Activate Previous Tab
       }
       break;
     case "newTab":
-      tabs.newTab("Google", "https://google.com/");
+      tabs.newTab("DuckDuckGo", "https://duckduckgo.com/");
       break;
     case "closeTab":
-      id = tabGroup.getActiveTab().id;
-      tabGroup.getTab(id).close();
-      break;
-    case "history":
-      if (blockchain.getUserSession().isUserSignedIn()) {
-        blockchain.getUserSession().getFile("history.txt").then(data => {
-          alert(data);
-        });
-      } else {
-        tabs.newTab("Blockstack", blockchain.signIntoBlockstack());
-      }
-      break;
-    case "clearHistory":
-      if (blockchain.getUserSession().isUserSignedIn()) {
-        blockchain.getUserSession().putFile("history.txt", "");
-      } else {
-        tabs.newTab("Blockstack", blockchain.signIntoBlockstack());
-      }
+      // id = tabGroup.getActiveTab().id;
+      // tabGroup.getTab(id).close();
+      tabs.closeTab(tabGroup.getActiveTab());
       break;
     case "signIntoBlockstack":
       tabs.newTab("Blockstack", blockchain.signIntoBlockstack());
       break;
+    case "history":
+      store.getHistory().then(console.log);
+      break;
+    case "clearHistory":
+      store.clearHistory();
+      break;
     case "startVPN":
-      vpn.startVPN();
+      startVPN();
       break;
     case "stopVPN":
-      vpn.stopVPN();
+      stopVPN();
+      break;
+    case "zoomIn":
+      tabGroup.getActiveTab().webview.setZoomFactor(tabGroup.getActiveTab().webview.getZoomFactor() + 0.1);
+      break;
+    case "zoomOut":
+      tabGroup.getActiveTab().webview.setZoomFactor(tabGroup.getActiveTab().webview.getZoomFactor() - 0.1);
+      break;
+    case "resetZoom":
+      webFrame.setZoomFactor(1.0);
+      tabGroup.getActiveTab().webview.setZoomFactor(1.0);
+      break;
+    case "focusSearchbar":
+      omni.focus();
+      omni.select();
+      break;
+    case "refreshPage":
+      tabGroup.getActiveTab().webview.reload();
+      break;
+    case "getMetrics":
+      console.log(remote.app.getAppMetrics());
+      break;
+    case "toggleCustomization":
+      if(!nav){ nav = require("dragula")([document.getElementById('navigation')], {}); }
+      else { nav.destroy(); nav = undefined; }
+      break;
+    case "findInPage":
+      findInPage();
       break;
     default:
       break;
   }
 });
 
-ipcRenderer.on("loadTheme", function(event, args) { loadTheme(); });
+ipcRenderer.on("loadTheme", async function(event, args) { loadTheme(); });
 
-ipcRenderer.on("openPage", function(event, args) { tabs.newTab("Loading...", args); });
+ipcRenderer.on("loadPage", async function(event, args) { tabGroup.getActiveTab().webview.loadURL(args); });
 
-// ipcRenderer.on('window-closing', function(event, input) {
-// 	uploadHistory();
-// });
-
-omni.focus();
+ipcRenderer.on("openPage", async function(event, args) { tabs.newTab("Loading...", args); });
 
 var settings;
-function loadTheme() {
-  jsonfile.readFile(settingsFile, function(err, obj) {
+async function loadTheme() {
+  console.time("Theme load time");
+  jsonfile.readFile(settingsFile, async function(err, obj) {
     if (err) console.error(err);
     let themeObj = obj.theme.toLowerCase();
     if (window.theme != themeObj) {
@@ -197,27 +234,80 @@ function loadTheme() {
   				$('head link[href*="css/themes"]').remove();
   			}
       } else if (themeObj === "default") {
-        window.theme = "light";
-        if (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) {
+        if (window.darkMode) {
           // If Dark Mode
           window.theme = "dark";
+          $('link[href="css/themes/dark.css"]').remove();
           $("head").append('<link rel="stylesheet" href="css/themes/dark.css">');
-        } else if($('head link[href*="css/themes"]').length > 0){
-  				$('head link[href*="css/themes"]').remove();
-  			}
+        } else {
+          // If Light Mode
+          window.theme = "light";
+          if($('head link[href*="css/themes"]').length > 0){
+    				$('head link[href*="css/themes"]').remove();
+    			}
+        }
       } else {
-        $("head").append(
-          '<link rel="stylesheet" href="css/themes/' + themeObj + '.css">'
-        );
         window.theme = "dark";
+        $('link[href="css/themes/' + themeObj + '.css"]').remove();
+        $("head").append('<link rel="stylesheet" href="css/themes/' + themeObj + '.css">');
       }
+      console.timeEnd("Theme load time");
     }
   });
 }
 loadTheme();
 
-function openSettings() {
-	// let url = path.normalize(`${__dirname}/pages/settings.html`);
+async function findInPage() {
+  if(parseInt( $('.etabs-views').css('height') ) === viewHeight - 35){
+
+    // If find dialog open:
+    $('#find blur').focus();
+    $('#find').css('display', 'none');
+    $('.etabs-views').animate({
+      'height' : viewHeight
+    }, 25, function() { });
+
+  } else {
+
+    // If find dialog not open:
+    $('.etabs-views').animate({
+      'height' : viewHeight - 35
+    }, 25, function() {
+      $('#find').css('display', 'inline-block');
+      $('#find input').focus();
+
+      let val;
+
+      $("#find input").on("keypress", async (e) => {
+        val = $("#find input").val();
+        if (e.which == 13) {
+          if(val.length > 0){
+            tabGroup.getActiveTab().webview.findInPage(val, {
+              findNext: true,
+              matchCase: $('#match-case').hasClass('down')
+            });
+          }
+        }
+      });
+
+      $("#find input").on('input', function () {
+        val = $("#find input").val();
+        console.log($('#match-case').hasClass('down'));
+        if(val.length > 0) {
+          tabGroup.getActiveTab().webview.findInPage(val, {
+            findNext: false,
+            matchCase: $('#match-case').hasClass('down')
+          });
+        } else {
+          try { tabGroup.getActiveTab().webview.stopFindInPage(); } catch (e) { }
+        }
+      });
+    });
+  }
+}
+
+async function openSettings() {
+	// let url = normalize(`${__dirname}/pages/settings.html`);
   // window.location.href = url;
 
 	if(settings != undefined && settings != null){ // If Settings Already Exists
@@ -232,39 +322,42 @@ function openSettings() {
 			webPreferences: {
 				nodeIntegration: true,
 				plugins: true,
-	      nodeIntegration: true,
 	      contextIsolation: false,
-	      experimentalFeatures: true,
 	      enableBlinkFeatures: 'OverlayScrollbars',
-	      webviewTag: true
+	      webviewTag: false
 			},
 			width: 900,
 			height: 700,
-			icon: path.join(__dirname, 'images/Peacock2.0.ico')
+			icon: join(__dirname, 'images/peacock.ico')
 		}); // Create Settings
 
     // Open Developer Tools:
-    // settings.openDevTools();
+    settings.openDevTools();
 
 		// and load the html of the app.
-		settings.loadURL(require('url').format({
-			pathname: path.join(__dirname, 'pages/settings.html'),
+    let { format } = require('url');
+		settings.loadURL(format({
+			pathname: join(__dirname, 'pages/settings.html'),
 			protocol: 'file:',
 			slashes: true
 		}));
 
     settings.on('focus', () => { settings.webContents.send('updateProfile', ''); });
-		settings.on('closed', function() { settings = null; });
+		settings.on('closed', async function() { settings = null; });
+
+    setTimeout(async function () {
+      settings.webContents.send('nativeTheme', window.darkMode);
+    }, 500);
 	}
 }
 
-function getSearchEnginePrefix(cb) {
-  jsonfile.readFile(settingsFile, function(err, objecteroonie) {
+async function getSearchEnginePrefix(cb) {
+  jsonfile.readFile(settingsFile, async function(err, objecteroonie) {
     if (err) console.error(err);
 
     let searchEngine = objecteroonie.search_engine;
 
-    jsonfile.readFile(search_engines, function(err, obj) {
+    jsonfile.readFile(search_engines, async function(err, obj) {
       for (var i = 0; i < obj.length; i++) {
         if (obj[i].name === searchEngine) {
           cb(obj[i].url);
@@ -274,55 +367,30 @@ function getSearchEnginePrefix(cb) {
   });
 }
 
-function uploadHistory() {
-  if (blockchain.getUserSession().isUserSignedIn()) {
-    blockchain.getUserSession().getFile("history.txt").then(data => {
-      console.log("|" + data + "|");
-      let content;
-      if (data != "") {
-        content = data + "," + history;
-      } else {
-        content = "" + history;
-      }
-      blockchain.getUserSession().putFile("history.txt", content).then(() => {
-        ipcRenderer.send("close-window", "now");
-      });
-    });
-  } else {
-    tabs.newTab("Blockstack", blockchain.signIntoBlockstack());
-  }
-}
-
-function changeAdBlock(toWhat) {
+async function changeAdBlock(toWhat) {
   ipcRenderer.send("adblock-change", "adblock:" + toWhat);
 
-  if (window.theme === "light") {
-    shield.src = "images/loading-light.gif";
-  } else if (window.theme === "dark") {
-    shield.src = "images/loading-dark.gif";
+  if (window.theme === "dark") {
+    shield.attr('src', "images/loading-dark.gif");
   } else {
-    console.error("Theme not specified.");
+    shield.attr('src', "images/loading-light.gif");
   }
 
-  setTimeout(function() {
+  setTimeout(async function() {
     tabGroup.getActiveTab().webview.reload();
     if (toWhat === "on") {
-      shield.src = "images/Peacock Shield.svg";
+      shield.attr('src', "images/Peacock Shield.svg");
     } else if (toWhat === "off") {
-      shield.src = "images/Peacock Shield Empty.svg";
+      shield.attr('src', "images/Peacock Shield Empty.svg");
     } else {
-      alert("Error: Adblocker not working.");
+      console.error("Adblocker not working.");
+      console.error("Adblocker not working.");
     }
   }, 3000);
 }
 
-function toggleAdblock() {
-  let src = shield.src
-    .replace(/\%20/g, " ")
-    .replace("file:///", "")
-    .replace(/\//g, "\\")
-    .replace(__dirname, "")
-    .substr(1);
+async function toggleAdblock() {
+  let src = shield.attr('src').replace(/\%20/g, " ").replace("file:///", "").replace(/\//g, "\\").replace(__dirname, "");
   if (
     src === "images/Peacock Shield.svg" ||
     src === "images\\Peacock Shield.svg"
@@ -340,220 +408,229 @@ function toggleAdblock() {
   }
 }
 
-function loadPage(event) {
-  if (event.keyCode === 13) {
-    omni.blur();
-    let val = omni.value.toLowerCase();
-    if (val.startsWith("peacock://")) {
-      let url = path.normalize(`${__dirname}/pages/${val.substr(10)}.html`);
-      window.location.href = url;
-    } else if (val.startsWith("https://")) {
-      tabGroup.getActiveTab().webview.loadURL(val);
-    } else if (val.startsWith("http://")) {
+async function loadPage(val) {
+  omni.blur();
+  omni.val(val);
+
+  if (val.startsWith("peacock://")) {
+    let url = normalize(`${__dirname}/pages/${val.substr(10)}.html`);
+    window.location.href = url;
+  } else if (val.startsWith("https://")) {
+    $('#search').attr('src', 'images/lock.svg');
+    tabGroup.getActiveTab().webview.loadURL(val);
+  } else if (val.startsWith("http://")) {
+    $('#search').attr('src', 'images/unlock.svg');
+    tabGroup.getActiveTab().webview.loadURL(val);
+  } else {
+    if (val.includes(".") && !val.includes(" ")) {
+      tabGroup.getActiveTab().webview.loadURL("https://" + val);
+    } else if (val.includes("://") || val.startsWith("data:") || val.startsWith("localhost:") && !val.includes(" ")) {
       tabGroup.getActiveTab().webview.loadURL(val);
     } else {
-      if (val.includes(".") && !val.includes(" ")) {
-        tabGroup.getActiveTab().webview.loadURL("https://" + val);
-      } else if (val.includes("://") && !val.includes(" ")) {
-        tabGroup.getActiveTab().webview.loadURL(val);
-      } else {
-        getSearchEnginePrefix(function(prefix) {
-          console.log(prefix + val);
-          //tabGroup.getActiveTab().webview.loadURL('https://' + val);
-          tabGroup.getActiveTab().webview.loadURL(prefix + val);
-        });
-      }
+      getSearchEnginePrefix(async function(prefix) {
+        tabGroup.getActiveTab().webview.loadURL(prefix + val);
+      });
     }
   }
 }
 
-var Bookmark = function(id, url, faviconUrl, title) {
-  this.id = id;
-  this.url = url;
-  this.icon = faviconUrl;
-  this.title = title;
-};
-
-Bookmark.prototype.ELEMENT = function() {
-  var a_tag = document.createElement("a");
-  a_tag.href = this.url;
-  a_tag.className = "link";
-  a_tag.textContent = this.title;
-  var favimage = document.createElement("img");
-  favimage.src = this.icon;
-  favimage.className = "favicon";
-  a_tag.insertBefore(favimage, a_tag.childNodes[0]);
-  return a_tag;
-};
-
-function addBookmark() {
-  let url = tabGroup.getActiveTab().webview.src;
-  let title = tabGroup.getActiveTab().webview.getTitle();
-  let fav = `https://www.google.com/s2/favicons?domain=${url}`;
-  let book = new Bookmark(uuid.v1(), url, fav, title);
-  jsonfile.readFile(bookmarks, function(err, curr) {
-    curr.push(book);
-    jsonfile.writeFile(bookmarks, curr, function(err) {});
-  });
-}
-
-function openPopUp(event) {
-  let state = popup.getAttribute("data-state");
-  if (state === "closed") {
-    popup.innerHTML = "";
-    jsonfile.readFile(bookmarks, function(err, obj) {
-      if (obj.length !== 0) {
-        for (var i = 0; i < obj.length; i++) {
-          let url = obj[i].url;
-          let icon;
-          if (obj[i].icon != "blank favicon") {
-            icon = obj[i].icon;
-          } else {
-            icon = "images/blank.png";
-          }
-          let id = obj[i].id;
-          let title = obj[i].title;
-          let bookmark = new Bookmark(id, url, icon, title);
-          let el = bookmark.ELEMENT();
-          popup.appendChild(el);
-        }
-      }
-      popup.style.display = "block";
-      popup.style.opacity = "1";
-      popup.setAttribute("data-state", "open");
-    });
-  } else {
-    popup.style.opacity = "0";
-    popup.style.display = "none";
-    popup.setAttribute("data-state", "closed");
-  }
-}
-
-function finishLoad(event) {
+async function finishLoad(event, tab) {
   const webview = document.querySelector("webview");
   webview.style.display = null;
   try {
-    tabGroup.getActiveTab().setTitle(tabGroup.getActiveTab().webview.getTitle());
-  } catch (e) {
+    tab.setTitle(tab.webview.getTitle());
+  } catch (e) {}
+  let currentURL = tab.webview.src.substr(8).replace(/\//g, "\\");
 
-  }
-  let currentURL = tabGroup
-    .getActiveTab()
-    .webview.src.substr(8)
-    .replace(/\//g, "\\");
-
-  if (currentURL.startsWith(path.normalize(`${__dirname}\\pages\\`))) {
+  if (currentURL.startsWith(normalize(`${__dirname}\\pages\\`))) {
     let protocolVal = currentURL
-      .replace(path.normalize(`${__dirname}\\pages\\`), "")
+      .replace(normalize(`${__dirname}\\pages\\`), "")
       .split(".")[0];
-    omni.value = "peacock://" + protocolVal;
+    omni.val("peacock://" + protocolVal);
   } else {
-    if (blockchain.getUserSession().isUserSignedIn()) {
-      blockchain.getUserSession().getFile("history.txt").then(data => {
-        var split = data.split(',');
-        if(split[split.length - 2] === tabGroup.getActiveTab().webview.src){
-          console.warn("History item already exists!");
-        } else {
-          let content = data + tabGroup.getActiveTab().webview.src + ",";
-          blockchain.getUserSession().putFile("history.txt", content);
-        }
-      });
-    }
+    store.logHistory(tab.webview.src, tabGroup.getActiveTab().webview.getTitle());
 
-    omni.value = tabGroup.getActiveTab().webview.src;
+    omni.val(tab.webview.src);
 
-    let url = tabGroup.getActiveTab().webview.src;
-    tabGroup
-      .getActiveTab()
-      .setIcon(`https://www.google.com/s2/favicons?domain=${url}`);
+    let src = new URL(tab.webview.src);
+    let fav = `https://www.google.com/s2/favicons?domain=${src.origin}`;
+    tab.setIcon(fav);
   }
 
-  contextMenu({
-  	window: tabGroup.getActiveTab().webview,
-  	showCopyImageAddress: true
-  });
-
-  const filter = {
-  	urls: ["http://*/*", "https://*/*"]
+  if(tab.initialized === undefined || tab.initialized === false) {
+    omni.focus();
+    omni.select();
+    tab.initialized = true;
   }
+}
 
-  session.fromPartition("persist:peacock").webRequest.onBeforeSendHeaders(filter, (details, callback) => {
-    details.requestHeaders['DNT'] = "1";
-    callback({
-      cancel: false,
-      requestHeaders: details.requestHeaders
-    })
+async function initWebView(tab) {
+  if(!tab) tab = tabGroup.getActiveTab();
+
+  tab.webview.addEventListener("did-start-loading", async (e) => { web.loadStart(tab) });
+  tab.webview.addEventListener("did-stop-loading", async (e) => { web.loadStop(tab) });
+  tab.webview.addEventListener("did-finish-load", async (e) => { finishLoad(e, tab) });
+  tab.webview.addEventListener("enter-html-full-screen", async (e) => { web.enterFllscrn(document) });
+  tab.webview.addEventListener("leave-html-full-screen", async (e) => { web.leaveFllscrn(document) });
+  tab.webview.addEventListener("update-target-url", async (e) => { web.updateTargetURL(e, document) });
+  tab.webview.addEventListener("dom-ready", async (e) => { web.domReady(tab.webview) });
+  tab.webview.addEventListener("new-window", async (e) => { web.newWindow(e, true, tabs) });
+  tab.webview.addEventListener("page-favicon-updated", async (e) => { web.faviconUpdated(tab) });
+  tab.webview.addEventListener("page-title-updated", async (e) => { web.titleUpdated(e, tab) });
+  tab.webview.addEventListener("did-change-theme-color", async (e) => { web.changeThemeColor(e, document) });
+  tab.webview.addEventListener('found-in-page', async (e) => {
+    $('#matches').text(e.result.activeMatchOrdinal.toString() + ' of ' + e.result.matches.toString() + ' matches');
   });
 }
 
-tabGroup.on("tab-active", (tab, tabGroup) => {
-  tab.webview.addEventListener("did-start-loading", web.loadStart(mTab));
-  tab.webview.addEventListener("did-stop-loading", web.loadStop(mTab));
-  tab.webview.addEventListener("did-finish-load", finishLoad());
-  tab.webview.addEventListener("enter-html-full-screen", web.enterFllscrn(document));
-  tab.webview.addEventListener("leave-html-full-screen", web.leaveFllscrn(document));
-  tab.webview.addEventListener("update-target-url", e => web.updateTargetURL(e, document));
-  tab.webview.addEventListener("dom-ready", web.domReady());
-  tab.webview.addEventListener("new-window", e => web.newWindow(e, true));
-  tab.webview.addEventListener("page-favicon-updated", e => web.faviconUpdated(e));
-  tab.webview.addEventListener("page-title-updated", e => web.titleUpdated(e));
-  let url = tab.webview.src;
-	$("#url").val(url);
-	try {
-		tab.setTitle(tabGroup.getActiveTab().webview.getTitle());
-	} catch (e) {}
+tabGroup.on("tab-added", async (tab, tabGroup) => {
+  tab.activate();
+  initWebView(tab);
+  /*$('.etabs-tab-button-close').click((e) => { console.log('clicked!') });*/
 });
 
-const webview = document.querySelector("webview");
-const mTab = tabGroup.getActiveTab();
+tabGroup.on("tab-removed", async (tab, tabContainer) => {
+  if(tabGroup.getTabs().length === 0) { remote.app.quit(); }
+});
+
+tabGroup.on("tab-active", async (tab, tabGroup) => {
+  try {
+    $("#url").val(tab.webview.src);
+    tab.setTitle(tab.webview.getTitle());
+  } catch (e) {
+    setTimeout(async function () {
+      $("#url").val(tab.webview.src);
+      tab.setTitle(tab.webview.getTitle());
+    }, 500);
+  }
+
+  tab.on("webview-ready", (tab) => {
+  	$("#url").val(tab.webview.src);
+    tab.setTitle(tab.webview.getTitle());
+  });
+});
+
 $("#shield").click(toggleAdblock);
-$("#refresh").click(e => web.reload(mTab));
-$("#back").click(e => web.goBack(mTab));
-$("#forward").click(e => web.goForward(mTab));
-$("#omnibox").on("keypress", function(e) {
+$("#refresh").click(async (e) => { tabGroup.getActiveTab().webview.reload() });
+$("#back").click(async (e) => { tabGroup.getActiveTab().webview.goBack() });
+$("#forward").click(async (e) => { tabGroup.getActiveTab().webview.goForward() });
+
+require('autocompleter')({
+  input: document.getElementById('url'),
+  render: function(item, currentValue) {
+    var div = document.createElement("div");
+    div.textContent = item.phrase;
+
+    let text = new RegExp('(' + currentValue + ')', 'ig');
+    $(div).html($(div).text().replace(text, '<b>$1</b>'));
+
+    document.getElementById("url").style.borderRadius = "4px 4px 0px 0px";
+    $(div).hover(async function() {
+        $(".selected").removeClass("selected");
+        $(this).addClass("selected");
+      }, async function() {
+        $(this).removeClass("selected");
+        $(".autocomplete > div").first().addClass("selected");
+      });
+    return div;
+  },
+  fetch: function(text, update) {
+    var options = {
+      url: `https://ac.duckduckgo.com/ac/?t=peacock&q=${text.toLowerCase()}`,
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Peacock/2.0.591 Chrome/78.0.3905.1 Electron/8.0.0 Safari/537.36'
+      }
+    };
+
+    require('request').get(options, function (error, response, body) {
+      if(error) { console.error(error); update( [{"phrase": [text]}] ); return; }
+      if(body.startsWith("<")) { update( [{"phrase": [text]}] ); return; }
+
+      let results = JSON.parse(body);
+      results.unshift({"phrase": [text]});
+      update(results);
+      if(results.length > 0){ // If there are results for the query:
+        $("#url").css('border-radius','4px 4px 0px 0px');
+        $("#url").css('margin', '-10.5px 10px 0px 10px');
+        $("#url").css('height', '30px');
+      } else {
+        $("#url").css('border-radius','4px');
+        $("#url").css('margin', '-5.5px 10px 0px 10px');
+        $("#url").css('height', '20px');
+      }
+    });
+  },
+  onSelect: function(item, input) {
+    if($(".autocomplete > div").first().hasClass("selected")){
+      loadPage(omni.val());
+    } else {
+      loadPage(item.phrase);
+    }
+  }
+});
+
+$("#omnibox").on("keypress", async (e) => {
   if (e.which == 13) {
-    webview.style.display = "none";
-    loadPage(e);
+    loadPage(omni.val());
+    $("#url").css('border-radius','4px');
+    $("#url").css('margin', '-5.5px 10px 0px 10px');
+    $("#url").css('height', '20px');
+    $(".autocomplete").remove();
   }
 });
-$("#url").focus(e => $("#url").select());
-$("#fave").click(addBookmark);
-$("#list").click(openPopUp);
+
+$("#url").blur(async (e) => {
+  $("#url").css('border-radius','4px');
+  $("#url").css('margin', '-5.5px 10px 0px 10px');
+  $("#url").css('height', '20px');
+  $(".autocomplete").remove();
+});
+$("#fave").click(async (e) => {
+  let url = tabGroup.getActiveTab().webview.src;
+  let title = tabGroup.getActiveTab().webview.getTitle();
+  $("#fave > img").attr('src', 'images/star_filled.svg');
+  store.addBookmark(url, title);
+});
 $("#settings").click(openSettings);
-$("#fave-popup").click(web.handleUrl);
 
-tabGroup.getActiveTab().webview.addEventListener("did-start-loading", web.loadStart(mTab));
-tabGroup.getActiveTab().webview.addEventListener("did-stop-loading", web.loadStop(mTab));
-tabGroup.getActiveTab().webview.addEventListener("did-finish-load", finishLoad);
-tabGroup.getActiveTab().webview.addEventListener("enter-html-full-screen", web.enterFllscrn(document));
-tabGroup.getActiveTab().webview.addEventListener("leave-html-full-screen", web.leaveFllscrn(document));
-tabGroup.getActiveTab().webview.addEventListener("update-target-url", e => web.updateTargetURL(e, document));
-tabGroup.getActiveTab().webview.addEventListener("dom-ready", web.domReady());
-tabGroup.getActiveTab().webview.addEventListener("new-window", e => web.newWindow(e, true));
-tabGroup.getActiveTab().webview.addEventListener("page-favicon-updated", web.faviconUpdated);
-tabGroup.getActiveTab().webview.addEventListener("page-title-updated", web.titleUpdated);
-// Mercury.parse("https://en.wikipedia.org/wiki/Madagascar", { contentType: 'html' }).then(function (result) {
-// 	console.log(result);
-// });
+$('#find a').click(function() {  $(this).toggleClass("down");  });
+$('#close-find').click(function() {  findInPage();  });
 
-const filter = {
-	urls: ["http://*/*", "https://*/*"]
-}
+initWebView();
 
-session.fromPartition("persist:peacock").setCertificateVerifyProc((request, callback) => {
-  if(request.verificationResult != "net::OK"){
-    console.log(request.verificationResult + " at " + request.hostname);
-    $("#search").attr("src","images/unlock.svg");
-  } else {
-    $("#search").attr("src","images/lock.svg");
+var options = {
+  url: 'https://api.github.com/repos/Codiscite/peacock/releases',
+  headers: {
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Peacock/2.0.591 Chrome/78.0.3905.1 Electron/8.0.0 Safari/537.36'
   }
-  callback(0);
-});
+};
+require('request').get(options, async function (error, response, body) {
+  if (error) console.error(error);
 
-session.fromPartition("persist:peacock").webRequest.onBeforeSendHeaders(filter, (details, callback) => {
-  details.requestHeaders['DNT'] = "1";
-  callback({
-    cancel: false,
-    requestHeaders: details.requestHeaders
-  })
-});
+  let newestVersion = JSON.parse(body)[0].tag_name.split('.').join("").replace("v", "").substr(0, 3);
+  let currentVersion = version.split('.').join("").replace("v", "").substr(0, 3);
+  console.log(Number(newestVersion) + " new left, current right " + Number(currentVersion));
+  if (Number(newestVersion) > Number(currentVersion)) {
+    const { dialog } = remote;
+
+    const optionso = {
+      type: 'question',
+      buttons: ['Cancel', 'Update', 'No, thanks'],
+      defaultId: 2,
+      title: 'Peacock',
+      message: "Update available!",
+      detail: JSON.parse(body)[0].tag_name + " > " + version,
+      checkboxLabel: 'Do Not Show Again',
+      checkboxChecked: false,
+    };
+
+    dialog.showMessageBox(null, optionso).then(data => {
+      if(data.response === 1){
+        tabs.newTab("Peacock Download", "https://github.com/Codiscite/peacock/releases/latest");
+      }
+      console.log(data.checkboxChecked);
+    });
+  } else {
+    console.log(`Using newest version! v${version}`);
+  }
+}, "jsonp");

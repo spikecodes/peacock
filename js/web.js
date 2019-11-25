@@ -1,56 +1,46 @@
-const tabs = require('./tabs.js');
-
-exports.goBack = function(tab) {
-  tab.webview.goBack();
-}
-
-exports.goForward = function(tab) {
-  tab.webview.goForward();
-}
-
-exports.reload = function(tab) {
-  tab.webview.reload();
-}
+var id;
 
 exports.loadStart = function(tab) {
-  if (window.theme  === "light") {
+  if (window.theme === "light") {
     tab.setIcon("images/loading-light.gif");
-  } else if (window.theme  === "dark") {
+  } else if (window.theme === "dark") {
     tab.setIcon("images/loading-dark.gif");
-  } else {
-    console.error("Theme not specified.");
+  } else if (window.theme === "default") {
+    if(window.darkMode) {
+      tab.setIcon("images/loading-dark.gif");
+    } else {
+      tab.setIcon("images/loading-light.gif");
+    }
   }
 }
 
 exports.loadStop = function(tab) {
-  let url = tab.webview.src;
-  tab.setIcon(`https://www.google.com/s2/favicons?domain=${url}`);
+  let src = new URL(tab.webview.src);
+  let fav = `https://www.google.com/s2/favicons?domain=${src.origin}`;
+  tab.setIcon(fav);
 }
 
 exports.enterFllscrn = function(doc) {
-  doc.querySelector("#navigation").style.display = "none";
-  doc.querySelector("#titlebar").style.display = "none";
-  doc.querySelector("#etabs-tabgroup").style.display = "none";
-  doc.querySelector("#etabs-views").style.borderTop = "none";
-  doc.querySelector("#etabs-views").style.marginTop = "0px";
+  doc.getElementById("navigation").style.display = "none";
+  doc.getElementById("titlebar").style.display = "none";
+  doc.getElementById("etabs-tabgroup").style.display = "none";
+  doc.getElementById("etabs-views").style.borderTop = "none";
+  doc.getElementById("etabs-views").style.marginTop = "0px";
 }
 
 exports.leaveFllscrn = function(doc) {
-  doc.querySelector("#navigation").style.display = "block";
-  doc.querySelector("#titlebar").style.display = "block";
-  doc.querySelector("#etabs-tabgroup").style.display = "block";
-  if(window.theme === "light"){
-    doc.querySelector("#etabs-views").style.borderTop = "1px solid #eee";
-    doc.querySelector("#etabs-views").style.marginTop = "97px";
-  } else {
-    doc.querySelector("#etabs-views").style.borderTop = "none";
-    doc.querySelector("#etabs-views").style.marginTop = "97px";
-  }
+  doc.getElementById("navigation").style.display = "block";
+  doc.getElementById("titlebar").style.display = "block";
+  doc.getElementById("etabs-tabgroup").style.display = "block";
+  doc.getElementById("etabs-views").style.marginTop = "97px";
 }
 
-exports.domReady = function () {
-  if (window.theme === "dark") {
-    tabs.getTabGroup().getActiveTab().webview.insertCSS(`
+exports.domReady = function (webview) {
+  webview.blur();
+  webview.focus();
+
+  if (window.theme === "dark" || (window.theme === "default" && window.darkMode)) {
+    webview.insertCSS(`
   		::-webkit-scrollbar{width:10px}::-webkit-scrollbar-track{background:#2e3033}
       ::-webkit-scrollbar-thumb{background-color:rgba(255,255,255,.5)}`);
   }
@@ -58,36 +48,31 @@ exports.domReady = function () {
 
 exports.updateTargetURL = function (event, doc) {
   if (event.url != "") {
-    doc.querySelector("#dialog-container").style.opacity = 0.9;
-    doc.querySelector("#dialog").innerHTML = event.url;
+    doc.getElementById("dialog-container").style.opacity = 0.95;
+    doc.getElementById("dialog").innerHTML = event.url;
   } else {
-    doc.querySelector("#dialog-container").style.opacity = 0;
+    doc.getElementById("dialog-container").style.opacity = 0;
   }
 }
 
-exports.newWindow = function (event, legit=false) {
+exports.newWindow = function (event, legit=false, tabs) {
   if(legit){
-    console.log("newtab");
     tabs.newTab("", event.url);
   }
 }
 
-exports.faviconUpdated = function (event) {
-  tabs.getTabGroup().getActiveTab().setIcon(event.favicons);
+exports.faviconUpdated = function (tab) {
+  let src = new URL(tab.webview.src);
+  let fav = `https://www.google.com/s2/favicons?domain=${src.origin}`;
+  tab.setIcon(fav);
 }
 
-exports.titleUpdated = function (event) {
+exports.titleUpdated = function (event, tab) {
   if(event.explicitSet){
-    tabs.getTabGroup().getActiveTab().setTitle(event.title)
+    tab.setTitle(event.title)
   }
 }
 
-exports.updateURL = function (event) {
-  if (event.target.className === "link") {
-    event.preventDefault();
-    tabs.getTabGroup().getActiveTab().getActiveTab().webview.loadURL(event.target.href);
-  } else if (event.target.className === "favicon") {
-    event.preventDefault();
-    tabs.getTabGroup().getActiveTab().getActiveTab().webview.loadURL(event.target.parentElement.href);
-  }
+exports.changeThemeColor = function (event, doc) {
+  doc.querySelector(".etabs-tab.active").style.boxShadow = `inset 0px 0px 0px 1px ${event.themeColor}`;
 }
