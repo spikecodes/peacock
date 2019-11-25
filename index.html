@@ -12,18 +12,6 @@
   <link rel="stylesheet" href="css/tabs.css">
   <link rel="stylesheet" href="css/titlebar.css">
   <link rel="stylesheet" href="node_modules/dragula/dist/dragula.css">
-
-  <style>
-    webview {
-      width: 100%;
-      height: 100%;
-    }
-
-    * {
-      font-family: Roboto;
-      font-weight: unset
-    }
-  </style>
 </head>
 
 <body id="browser">
@@ -71,15 +59,10 @@
         </div>
         <div id="omnibox">
           <img src="images/search.svg" id="search">
-          <input type="text" id="url">
+          <input type="text" id="url" onfocus="this.select();" onmouseup="return false;">
         </div>
         <div id="fave">
           <img src="images/star.svg">
-        </div>
-        <div id="fave-popup" data-state="closed">
-        </div>
-        <div id="list">
-          <img src="images/list.svg">
         </div>
         <div id="shield">
           <img id="shieldIMG" src="images/Peacock Shield.svg">
@@ -89,25 +72,15 @@
         </div>
       </nav>
     </center>
-    <!--<div id="tabs">
-      <a class="tab">Titlegekn ekjng eknjg kegn engk
-        <div class="close">
-          <i class="fa fa-times"></i>
-        </div>
-      </a>
-        <a class="tab">Titlegekn ekjng eknjg kegn engk
-        <div class="close">
-          <i class="fa fa-times"></i>
-        </div>
-      </a>
-            <a class="tab">Titlegekn ekjng eknjg kegn engk
-        <div class="close">
-          <i class="fa fa-times"></i>
-        </div>
-      </a>
-    </div>-->
   </div>
   <div class="etabs-views" id="etabs-views"></div>
+  <footer id="find">
+    <input type="text" placeholder="Find...">
+    <a id="match-case">Match Case</a>
+    <label id="matches"></label>
+    <button id="close-find">×</button>
+  </footer>
+  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js" integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU=" crossorigin="anonymous"></script>
   <script>
     // You can also require other files to run in this process
     require('./renderer.js');
