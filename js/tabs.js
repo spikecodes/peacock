@@ -18,7 +18,7 @@ $.fn.fadeSlideRight = function(speed,fn) {
   });
 }
 
-function newTab(docTitle, url, callback=function () {}) {
+exports.new = function (docTitle, url, callback=function () {}) {
   let tab = tabGroup.addTab({
     title: docTitle,
     src: url,
@@ -26,11 +26,13 @@ function newTab(docTitle, url, callback=function () {}) {
     active: true,
     webviewAttributes: {
       partition: "persist:peacock",
-      sandbox: true
+      sandbox: true,
+      plugins: false,
+      preload: 'js/preload.js'
     },
     ready: function (tab) {
       $(tab.tabElements.buttons.firstElementChild).replaceWith($(tab.tabElements.buttons.firstElementChild).clone());
-      $(tab.tabElements.buttons.firstElementChild).click(async () => { closeTab(); });
+      $(tab.tabElements.buttons.firstElementChild).click(function() { closeTab(tab); });
       callback();
     }
   });
@@ -46,7 +48,7 @@ function newTab(docTitle, url, callback=function () {}) {
 }
 
 function closeTab(tab) {
-  tab = tab || tabGroup.getActiveTab();
+  tab = tab || this.current();
 
   let it = tab.tab;
 
@@ -59,11 +61,15 @@ function closeTab(tab) {
   });
 }
 
-exports.newTab = newTab;
-exports.closeTab = closeTab;
+exports.close = closeTab;
+
+exports.current = function () {
+  return tabGroup.getActiveTab();
+}
 
 exports.makeTabGroup = function (newTab_title, newTab_url) {
   const TabGroup = require("electron-tabs");
+  let newTab = this.new;
   tabGroup = new TabGroup({
     ready: function(tabGroup) {
      require("dragula")([tabGroup.tabContainer], {
@@ -83,10 +89,15 @@ exports.makeTabGroup = function (newTab_title, newTab_url) {
      active: true,
      webviewAttributes: {
        partition: "persist:peacock",
-       sandbox: true
+       sandbox: true,
+       plugins: false,
+       preload: 'js/preload.js'
      }
     }
   });
+
+  tabGroup.tabContainer.nextElementSibling.firstElementChild.innerHTML = `<img src="images/plus.svg">`;
+
   return tabGroup;
 }
 exports.getTabGroup = function () { return tabGroup; }
