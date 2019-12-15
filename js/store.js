@@ -162,6 +162,9 @@ exports.getBookmarks = async function () {
 }
 
 exports.isBookmarked = async function (url) {
+  await checkFiles();
+  let loc = await storeLocation();
+
   if(loc === "Blockstack"){
     if (blockchain.getUserSession().isUserSignedIn()) {
       let promisio = new Promise((resolve, reject) => {

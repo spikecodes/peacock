@@ -68,7 +68,6 @@
 
 .etabs-tab.active {
   background: white;
-  box-shadow: inset 0px 0px 0px 1px #e6e6e6;
 }
 
 .etabs-tab.visible::after {
@@ -96,16 +95,25 @@
 }
 
 .etabs-buttons button {
-  float: left;
+  margin-top: 1px;
   color: #333;
   background: none;
   border: none;
-  font-size: 17px;
-  border-radius: 2px;
-  width: 20px;
-  text-align: center;
-  padding: 5px 22px 4px 5px;
+  border-radius: 4px;
+  width: 30px;
+  height: 30px;
+  position: relative;
   transition: all 0.05s;
+}
+
+.etabs-buttons button img {
+  width: 20px;
+  position:absolute;
+  top: 50%;
+  left:50%;
+  -webkit-transform: translate(-50%, -50%);
+  -ms-transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%);
 }
 
 .etabs-tab-badge {
@@ -161,7 +169,7 @@
   border: none;
   width: 20px;
   text-align: center;
-  border-radius: 2px;
+  border-radius: 4px;
   padding-right: 16px;
   transition: all 0.05s;
   font-size: 18px;
