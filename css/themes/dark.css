@@ -7,16 +7,19 @@ body {
 }
 
 .etabs-tab-buttons button:hover {
-  background-color: rgba(255, 255, 255, 0.05);
+  background-color: rgba(255, 255, 255, 0.1);
 }
 
 .etabs-buttons button:hover {
   background: rgba(255,255,255,0.1);
 }
 
+.etabs-buttons button img {
+  filter: invert(1);
+}
+
 .etabs-tab.active {
   background: #262729;
-  box-shadow: inset 0px 0px 0px 1px #36373a;
 }
 
 .etabs-tab {
@@ -39,32 +42,25 @@ body {
   background: transparent;
 }
 
-#omnibox:hover > #url {
-  background-color: #2f3033;
-  color: #fefefe;
-  transition: all 0.1s;
-}
-
 #shieldIMG {
   content:url('../../images/Peacock Shield.png');
 }
 
-#navigation div:not(#omnibox):not(#shield) img, #back-arrow, #search {
-  filter: invert(100%) sepia(100%) saturate(0%) hue-rotate(288deg) brightness(102%) contrast(102%);
+#navigation div:not(#omnibox):not(.badge) img, #back-arrow, #search, #star {
+  filter: invert(1);
 }
 
-#navigation div:not(#omnibox):hover {
-  background-color: rgba(255, 255, 255, 0.05) !important;
+#navigation div:not(.disabled):not(#omnibox):hover {
+  background-color: rgba(255, 255, 255, 0.075) !important;
 }
 
-#navigation div:not(#omnibox):active {
+#navigation div:not(.disabled):not(#omnibox):active {
   background-color: rgba(255, 255, 255, 0.15) !important;
 }
 
 #url{
   background-color: #222325;
   color: #fefefe;
-  border: 1px #36373a solid;
   box-shadow: none;
 }
 
@@ -115,7 +111,7 @@ body {
 }
 
 .gu-mirror:not(#omnibox):not(#shield), .gu-transit:not(#omnibox):not(#shield) {
-  filter: invert(100%) sepia(100%) saturate(0%) hue-rotate(288deg) brightness(102%) contrast(102%) !important;
+  filter: invert(1) !important;
 }
 
 #shield.gu-mirror, #shield.gu-transit, #shieldIMG.gu-mirror, #shieldIMG.gu-transit {
@@ -150,7 +146,7 @@ body {
 }
 
 .autocomplete {
-  box-shadow: 0px 10px 27px -12px rgba(70, 70, 70, 0.75);
+  box-shadow: 0px 10px 27px -12px rgba(0, 0, 0, 0.75);
 }
 
 .autocomplete > div{
@@ -213,23 +209,22 @@ body {
   color: white;
 }
 
-#omnibox:hover > #url {
-  box-shadow: inset 0px 0px 0px 1px #3c3c3c;
+.url-hover {
+  box-shadow: inset 0px 0px 0px 2px #3c3c3c !important;
+  background-color: #2f3033 !important;
+  color: #fefefe !important;
+  transition: all 0.1s !important;
 }
 
 b {
   color: white;
 }
 
-#navigation div:not(#omnibox):hover, .etabs-buttons button:hover {
-  box-shadow: inset 0px 0px 0px 1px #5f5f5f, 0px 1px 3px rgba(0,0,0,0.65) !important;
-}
-
-.etabs-tab-buttons button:hover {
-  box-shadow: inset 0px 0px 0px 1px #5f5f5f !important;
-}
-
 #url::selection {
   background: #FFD563;
   color: white;
+}
+
+#find > *:not(input) {
+  color: white !important;
 }

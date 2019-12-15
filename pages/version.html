@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>About Version</title>
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+      integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
+      crossorigin="anonymous"/>
+    <script src="../js/jquery-3.3.1.slim.min.js"></script>
+    <script src="../js/popper.min.js"></script>
+    <script src="../js/bootstrap.min.js"></script>
+    <style>
+      .table {
+        position: absolute;
+        width: 50%;
+        top: 5rem;
+        left: 0;
+        right: 0;
+        margin: auto;
+      }
+    </style>
+  </head>
+  <body style="display: none;">
+    <table class="table table-bordered table-hover table-condensed">
+    <thead><tr><th title="Field #1">Name</th>
+    <th title="Field #2">Value</th>
+    </tr></thead>
+    <tbody>
+      <tr>
+      <td>User Agent</td>
+      <td id="user-agent">USER_AGENT_HERE</td>
+      </tr>
+
+      <tr>
+      <td>Chrome</td>
+      <td id="chrome">CHROME_VERSION_HERE</td>
+      </tr>
+
+      <tr>
+      <td>Node</td>
+      <td id="node">NODE_VERSION_HERE</td>
+      </tr>
+
+      <tr>
+      <td>Electron</td>
+      <td id="electron">ELECTRON_VERSION_HERE</td>
+      </tr>
+    </tbody>
+  </table>
+  </body>
+  <script type="text/javascript">
+    function getChromeVersion () {
+        var pieces = navigator.userAgent.match(/Chrom(?:e|ium)\/([0-9]+)\.([0-9]+)\.([0-9]+)\.([0-9]+)/);
+        if (pieces == null || pieces.length != 5) {
+            return undefined;
+        }
+        pieces = pieces.map(piece => parseInt(piece, 10));
+        pieces = {major: pieces[1], minor: pieces[2], build: pieces[3], patch: pieces[4]};
+        return Object.values(pieces).join('.');
+    }
+
+    function getUserAgent() {
+      return navigator.userAgent;
+    }
+
+    function setVersions(versions) {
+      document.getElementById('user-agent').innerHTML = getUserAgent();
+      document.getElementById('chrome').innerHTML = getChromeVersion();
+      document.getElementById('node').innerHTML = versions.node;
+      document.getElementById('electron').innerHTML = versions.electron;
+
+      document.body.style.display = 'block';
+    }
+  </script>
+</html>

@@ -4,12 +4,11 @@ directories:
 appId: com.codiscite.peacock
 win:
   target: nsis
-  icon: images/Peacock2.0.ico
+  icon: images/peacock.ico
 mac:
   category: books
   target:
-    - zip
     - dmg
 nsis:
   perMachine: true
-electronVersion: 1.8.8
+electronVersion: 8.0.0-beta.3
