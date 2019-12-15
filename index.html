@@ -55,20 +55,21 @@
           <img src="images/arrow-right.svg">
         </div>
         <div id="refresh">
-          <img src="images/refresh-cw.svg">
+          <img src="images/refresh.svg">
         </div>
         <div id="omnibox">
           <img src="images/search.svg" id="search">
           <input type="text" id="url" onfocus="this.select();" onmouseup="return false;">
+          <img src="images/bookmark.svg" id="star">
         </div>
-        <div id="fave">
-          <img src="images/star.svg">
+        <div id="pip">
+          <img src="images/picture-in-picture.svg">
         </div>
-        <div id="shield">
+        <div id="shield" class="badge">
           <img id="shieldIMG" src="images/Peacock Shield.svg">
         </div>
         <div id="settings">
-          <img id="gear" src="images/settings.svg">
+          <img id="gear" src="images/menu.svg">
         </div>
       </nav>
     </center>
@@ -80,11 +81,17 @@
     <label id="matches"></label>
     <button id="close-find">×</button>
   </footer>
-  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js" integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU=" crossorigin="anonymous"></script>
+  <div id="snackbar">
+    <p>Allow <b>duckduckgo.com</b> to use your <b>location</b>?</p>
+    <div>YES</div>
+    <div>NO</div>
+  </div>
   <script>
     // You can also require other files to run in this process
-    require('./renderer.js');
-    require('./titlebar.js');
+    let renderer = require('./renderer.js');
+    let titlebar = require('./titlebar.js');
+
+    titlebar.setTabCount(renderer.getTabCount);
   </script>
 
 </html>

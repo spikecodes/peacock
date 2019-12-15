@@ -1,4 +1,5 @@
-const { ipcMain, app, session, screen, BrowserWindow, nativeTheme, Menu } = require('electron');
+const { ipcMain, app, session, screen,
+	BrowserWindow, nativeTheme, Menu, dialog } = require('electron');
 
 const menuTemplate = [
 		{
@@ -128,6 +129,13 @@ const menuTemplate = [
 					}
 				},
 				{
+					label: 'Force Reload Page',
+					accelerator: 'CmdOrCtrl+F5',
+					click: async () => {
+						mainWindow.webContents.send('keyboardShortcut', 'forceReload');
+					}
+				},
+				{
 					label: 'Find in Page',
 					accelerator: 'CmdOrCtrl+F',
 					click: async () => {
@@ -171,9 +179,11 @@ const menuTemplate = [
 		}
 ];
 
-const { join } = require("path");
+const { format } = require('url');
+const { join, normalize } = require("path");
 
 const settingsFile = join(__dirname, "data/settings.json");
+const flags = join(__dirname, "data/flags.json");
 
 const server = require('child_process').fork(__dirname + '/server.js');
 
@@ -182,13 +192,20 @@ const { existsSync, readFile, writeFile } = require('fs');
 const { ElectronBlocker } = require('@cliqz/adblocker-electron');
 const { fetch } = require('cross-fetch');
 
+require('jsonfile').readFile(flags, async (err, obj) => {
+	Object.keys(obj).forEach(function (key) {
+		console.log('Added flag: ' + key);
+		app.commandLine.appendSwitch(key);
+	});
+});
+
 // Quit server process if main app will quit
 app.on('will-quit', async () => {
 	server.send('quit');
 });
 
 server.on('message', async (m) => {
-	authCallback(m.authResponse)
+	authCallback(m.authResponse);
 });
 
 require('jsonfile').readFile(settingsFile, async (err, obj) => {
@@ -293,7 +310,6 @@ async function createWindow() {
 
   mainWindow = new BrowserWindow({
 		title: 'Peacock',
-		backgroundColor: '#002b36',
 		frame: false,
 		minWidth: 500,
     minHeight: 450,
@@ -312,19 +328,18 @@ async function createWindow() {
 		icon: join(__dirname, 'images/peacock.ico')
 	});
 
-	mainWindow.on('focus', async () => { mainWindow.webContents.send('loadTheme', ''); });
+	mainWindow.on('focus', async () => { mainWindow.webContents.send('focus', ''); });
 
 	Menu.setApplicationMenu(Menu.buildFromTemplate(menuTemplate));
 
 	enableAdBlocking();
 
-	if(!app.isDefaultProtocolClient('peacock')) { app.setAsDefaultProtocolClient('peacock') };
+	//if(!app.isDefaultProtocolClient('peacock')) { app.setAsDefaultProtocolClient('peacock') };
 
 	// const extensions = new ExtensibleSession(session.defaultSession);
 	// extensions.loadExtension('Grammarly'); // Path to the extension to load
 
 	// and load the index.html of the app.
-	let { format } = require('url');
 	mainWindow.loadURL(format({
 		pathname: join(__dirname, 'index.html'),
 		protocol: 'file:',
@@ -347,28 +362,6 @@ async function createWindow() {
 		// when you should delete the corresponding element.
 		mainWindow = null;
 	});
-
-	// mainWindow.once('did-finish-load', () => {
-	// 	session.fromPartition("persist:peacock").webRequest.onBeforeSendHeaders({ urls: ["http://*/*", "https://*/*"] }, (details, callback) => {
-	// 		details.requestHeaders['DNT'] = "1";
-	// 		callback({
-	// 			cancel: false,
-	// 			requestHeaders: details.requestHeaders
-	// 		})
-	// 	});
-	//
-	// 	session.fromPartition("persist:peacock").setPermissionRequestHandler((webContents, permission, callback) => {
-	// 		const url = webContents.getURL();
-	//
-	// 		console.log(permission);
-	// 		callback({ cancel: true	});
-	// 	});
-	//
-	// 	session.fromPartition("persist:peacock").on('will-download', (event, item, webContents) => {
-	// 		event.preventDefault();
-	// 		console.log("DOWNLOADING " + item.getURL());
-	// 	});
-	// });
 }
 
 // This method will be called when Electron has finished
@@ -386,6 +379,40 @@ app.on('window-all-closed', async () => {
 		}
 		app.quit()
 	}
+});
+
+app.on('session-created', async (newSession) => {
+  newSession.webRequest.onBeforeSendHeaders(async (details, callback) => {
+		const requestHeaders = {
+			['DNT']: '1',
+			['User-Agent']: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3983.2 Safari/537.36',
+			['ACCEPT']: 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
+			['ACCEPT-LANGUAGE']: 'en-US,en;q=0.9',
+			['ACCEPT-ENCODING']: 'gzip, deflate, br',
+			['SEC-FETCH-MODE']: 'navigate',
+			['SEC-FETCH-SITE']: 'none',
+			['UPGRADE-INSECURE-REQUESTS']: '1'
+		};
+    callback({ cancel: false, requestHeaders: requestHeaders });
+  });
+
+	newSession.protocol.registerFileProtocol('peacock', (req, cb) => {
+		var url = new URL(req.url);
+		if(url.hostname == 'network-error') {
+			cb({ path: join(__dirname, '/pages/', `network-error.html`) });
+		} else {
+			url = req.url.replace(url.protocol, '');
+			cb({ path: join(__dirname, '/pages/', `${ url }.html`) });
+		}
+  }, function (error) {
+    if (error) console.error('Failed to register protocol');
+  });
+
+	newSession.protocol.registerStringProtocol('chrome', (req, cb) => {
+    cb({ url: req.url.replace('chrome', 'peacock') });
+  }, function (error) {
+    if (error) console.error('Failed to register protocol');
+  });
 });
 
 app.on('web-contents-created', async (e, contents) => {
@@ -429,25 +456,15 @@ app.on('activate', async () => {
 	}
 });
 
-app.on('session-created', async (newSession) => {
-  newSession.webRequest.onBeforeSendHeaders(async (details, callback) => {
-		const requestHeaders = {
-			['DNT']: '1',
-			['User-Agent']: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.97 Safari/537.36'
-		};
-    callback({ cancel: false, requestHeaders: requestHeaders });
-  });
+// app.on('certificate-error', async (event, webContents, url, error, certificate, callback) => {
+//   console.log("! url: " + url + "| issuerName: " + certificate.issuerName);
+//   event.preventDefault();
+//   callback(true);
+// });
 
-	newSession.setPermissionRequestHandler(async (webContents, permission, callback) => {
-    console.log(permission);
-    callback(false);
-  });
-});
-
-app.on('certificate-error', async (event, webContents, url, error, certificate, callback) => {
-  console.log("! url: " + url + "| issuerName: " + certificate.issuerName);
-  event.preventDefault();
-  callback(true);
+app.on('certificate-error', (event, webContents, url, error, certificate, callback) => {
+	console.log('err');
+  dialog.showCertificateTrustDialog(mainWindow, {certificate: certificate});
 });
 
 // In this file you can include the rest of your app's specific main process
