@@ -68,6 +68,13 @@ const menuTemplate = [
 					}
 				},
 				{
+					label: 'Focus Searchbar',
+					accelerator: 'CmdOrCtrl+L',
+					click: async () => {
+						mainWindow.webContents.send('keyboardShortcut', 'focusSearchbar');
+					}
+				},
+				{
 					label: 'Get Metrics',
 					accelerator: 'CmdOrCtrl+G',
 					click: async () => {
@@ -174,6 +181,13 @@ const menuTemplate = [
 					click: async () => {
 						mainWindow.webContents.send('keyboardShortcut', 'closeTab');
 					}
+				},
+				{
+					label: 'Open Closed Tab',
+					accelerator: 'CmdOrCtrl+Shift+T',
+					click: async () => {
+						mainWindow.webContents.send('keyboardShortcut', 'openClosedTab');
+					}
 				}
 			]
 		}
@@ -237,6 +251,10 @@ ipcMain.on('openPage', (event, arg) => {
 
 ipcMain.on('signIntoBlockstack', (e, a) => {
 	mainWindow.webContents.send('keyboardShortcut','signIntoBlockstack');
+});
+
+ipcMain.on('setGlobal', (e, globalVal) => {
+	global[globalVal[0]] = globalVal[1];
 });
 
 async function authCallback(authResponse) {
@@ -385,12 +403,13 @@ app.on('session-created', async (newSession) => {
   newSession.webRequest.onBeforeSendHeaders(async (details, callback) => {
 		const requestHeaders = {
 			['DNT']: '1',
-			['User-Agent']: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3983.2 Safari/537.36',
+			['User-Agent']: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.79 Safari/537.36',
 			['ACCEPT']: 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
 			['ACCEPT-LANGUAGE']: 'en-US,en;q=0.9',
 			['ACCEPT-ENCODING']: 'gzip, deflate, br',
 			['SEC-FETCH-MODE']: 'navigate',
-			['SEC-FETCH-SITE']: 'none',
+			['SEC-FETCH-SITE']: 'cross-site',
+			['SEC-FETCH-USER']: '?1',
 			['UPGRADE-INSECURE-REQUESTS']: '1'
 		};
     callback({ cancel: false, requestHeaders: requestHeaders });

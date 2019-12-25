@@ -6,7 +6,7 @@ const jsonfile = require('jsonfile');
 require('v8-compile-cache');
 
 const { ipcRenderer, remote, webFrame } = require('electron');
-const { BrowserWindow } = remote;
+const { BrowserWindow, screen } = remote;
 
 const { join, normalize } = require('path');
 
@@ -28,7 +28,7 @@ const { version } = require('./package.json');
 
 //Discord Rich Presence
 try {
-  const { Client } = require('discord-rpc');
+/*  const { Client } = require('discord-rpc');
   const clientId = '627363592408137749';
 
   const rpclient = new Client({
@@ -64,40 +64,42 @@ try {
 
   rpclient
     .login({clientId})
-    .catch(console.log('Discord not open.'));
+    .catch(console.log('Discord not open.'));*/
 } catch (e) {
   console.log('Discord not open.');
 }
 //Discord Rich Presence
 
 exports.getTabCount = function() {
-  return tabGroup.getTabs().length;
+  return tabs.length();
 }
 
 remote.app.on('session-created', async (newSession) => {
 	newSession.setPermissionRequestHandler(async (webContents, permission, callback) => {
-    let url = new URL(webContents.getURL());
-    toggleSnackbar('Allow <b>' + url.hostname + '</b> to access <b>' + permission + '</b>?', 100, ['YES', 'NO'], function (response) {
-			if(response === 'YES') {
-				callback(true);
-			} else {
-				callback(false);
-			}
-    }, false);
+    let allowedPerms = ['fullscreen', 'pointerLock'];
+    if(!allowedPerms.includes(permission)) {
+      let url = new URL(webContents.getURL());
+      showSnackbar(`${url.hostname} wants to`, [permission], 100, ['Allow', 'Block'], function (response) {
+  			if(response === 'Allow') {
+  				callback(true);
+  			} else {
+  				callback(false);
+  			}
+      });
+    } else {
+      callback(true);
+    }
   });
 });
 
 window.theme = 'light';
 window.darkMode = false;
 
-var dialogo = $('#dialog'),
-  etabsGroup = $('#etabs-tabgroup'),
-  etabsViews = $('#etabs-views');
+tabs.makeTabGroup('DuckDuckGo', 'https://duckduckgo.com/');
 
-var tabGroup = tabs.makeTabGroup('DuckDuckGo', 'https://duckduckgo.com/');
-tabs.new('DuckDuckGo', 'https://duckduckgo.com/');
-
-require('dragula')([$('nav')]);
+var alertWin;
+var settings;
+var certDialog;
 
 ipcRenderer.on('nativeTheme', async function(event, arg) {
   window.darkMode = arg;
@@ -150,33 +152,34 @@ ipcRenderer.on('keyboardShortcut', async function(event, shortcut) {
       remote.webContents.fromId(tabs.current().webview.getWebContentsId()).toggleDevTools();
       break;
     case 'nextTab':
-      if (tabGroup.getTabs().length === 1) {
+      if (tabs.length() === 1) {
         // Do nothing
-      } else if (tabs.current().id === tabGroup.getTabs().length - 1) {
-        tabGroup.getTab(0).activate();
+      } else if (tabs.current().id === tabs.length() - 1) {
+        tabs.get(0).activate();
       } else {
-        tabGroup.getTab(tabs.current().id + 1).activate();
+        tabs.get(tabs.current().id + 1).activate();
       }
 
       break;
     case 'backTab':
-      if (tabGroup.getTabs().length === 1) {
+      if (tabs.length() === 1) {
         // Do nothing
       } else if (tabs.current().id === 0) {
         // If First Tab
-        tabGroup.getTab(tabGroup.getTabs().length - 1).activate(); // Activate Last Tab
+        tabs.get(tabs.length() - 1).activate(); // Activate Last Tab
       } else {
         // If Not First Tab
-        tabGroup.getTab(tabs.current().id - 1).activate(); // Activate Previous Tab
+        tabs.get(tabs.current().id - 1).activate(); // Activate Previous Tab
       }
       break;
     case 'newTab':
       tabs.new('DuckDuckGo', 'https://duckduckgo.com/');
       break;
     case 'closeTab':
-      // id = tabs.current().id;
-      // tabGroup.getTab(id).close();
-      tabs.close(tabs.current());
+      tabs.close();
+      break;
+    case 'openClosedTab':
+      tabs.openClosedTab();
       break;
     case 'signIntoBlockstack':
       tabs.new('Blockstack', blockchain.signIntoBlockstack());
@@ -215,7 +218,7 @@ ipcRenderer.on('keyboardShortcut', async function(event, shortcut) {
       break;
     case 'getMetrics':
       //console.log(remote.app.getAppMetrics());
-      toggleSnackbar('Allow <b>duckduckgo.com</b> to access <b>location</b>?', 100, ['YES', 'NO']);
+      showSnackbar('Allow <b>duckduckgo.com</b> to access <b>location</b>?', 100, ['YES', 'NO']);
       break;
     case 'toggleCustomization':
       if(!nav){ nav = require('dragula')([$('#navigation')], {}); }
@@ -236,7 +239,6 @@ ipcRenderer.on('loadPage', async function(event, args) { tabs.current().webview.
 
 ipcRenderer.on('openPage', async function(event, args) { tabs.new('Loading...', args); });
 
-var settings;
 async function loadTheme() {
   jsonfile.readFile(settingsFile, async function(err, obj) {
     if (err) console.error(err);
@@ -245,10 +247,18 @@ async function loadTheme() {
 
     if(window.darkMode && themeObj == 'default') newTheme = 'dark';
 
+    let src = $('#shieldIMG').attr('src');
+
     if (window.theme != newTheme) {
       console.time('Theme load time');
       if (themeObj === 'light') {
         window.theme = 'light';
+
+        if(src == 'images/Peacock Shield White.svg') {
+          $('#shieldIMG').attr('src', 'images/Peacock Shield.svg');
+        } else if (src == 'images/Peacock Shield White Empty.svg') {
+          $('#shieldIMG').attr('src', 'images/Peacock Shield Empty.svg');
+        }
 
   			if($('head link[href*="css/themes"]').length > 0){
   				$('head link[href*="css/themes"]').remove();
@@ -259,9 +269,22 @@ async function loadTheme() {
           window.theme = 'dark';
           $('link[href="css/themes/dark.css"]').remove();
           $('head').append('<link rel="stylesheet" href="css/themes/dark.css">');
+
+          if(src == 'images/Peacock Shield.svg') {
+            $('#shieldIMG').attr('src', 'images/Peacock Shield White.svg');
+          } else if (src == 'images/Peacock Shield Empty.svg') {
+            $('#shieldIMG').attr('src', 'images/Peacock Shield White Empty.svg');
+          }
         } else {
           // If Light Mode
           window.theme = 'light';
+
+          if(src == 'images/Peacock Shield White.svg') {
+            $('#shieldIMG').attr('src', 'images/Peacock Shield.svg');
+          } else if (src == 'images/Peacock Shield White Empty.svg') {
+            $('#shieldIMG').attr('src', 'images/Peacock Shield Empty.svg');
+          }
+
           if($('head link[href*="css/themes"]').length > 0){
     				$('head link[href*="css/themes"]').remove();
     			}
@@ -270,6 +293,12 @@ async function loadTheme() {
         window.theme = 'dark';
         $('link[href="css/themes/' + themeObj + '.css"]').remove();
         $('head').append('<link rel="stylesheet" href="css/themes/' + themeObj + '.css">');
+
+        if($('#shieldIMG').attr('src') == 'images/Peacock Shield.svg') {
+          $('#shieldIMG').attr('src', 'images/Peacock Shield White.svg');
+        } else {
+          $('#shieldIMG').attr('src', 'images/Peacock Shield White Empty.svg');
+        }
       }
       console.timeEnd('Theme load time');
     }
@@ -346,12 +375,15 @@ async function openSettings() {
 	if(settings != undefined && settings != null){ // If Settings Already Exists
 		settings.focus(); // Focus on it
 	} else { // If Settings Doesn't Already Exist
+    let bg = (window.theme == 'dark') ? '#292A2D' : '#ffffff';
+    let params = encodeURIComponent(JSON.stringify({ darkMode: (window.theme == 'dark') }));
+
 		settings = new BrowserWindow({
 			frame: false,
 			minWidth: 700,
 	    minHeight: 550,
 			titleBarStyle: 'hiddenInset',
-			backgroundColor: '#FFF',
+			backgroundColor: bg,
 			webPreferences: {
 				nodeIntegration: true,
 				plugins: true,
@@ -373,18 +405,71 @@ async function openSettings() {
 			pathname: join(__dirname, 'pages/settings.html'),
 			protocol: 'file:',
 			slashes: true
-		}));
+		}) + '?' + params);
 
-    settings.on('focus', () => { settings.webContents.send('updateProfile', ''); });
-		settings.on('closed', async function() { settings = null; });
-
-    setTimeout(async function () {
-      settings.webContents.send('nativeTheme', window.darkMode);
-    }, 500);
+		settings.on('closed', async () => { settings = null; });
 	}
 }
 
-async function getSearchEnginePrefix(cb) {
+async function initAlert() {
+  let bg = (window.theme == 'dark') ? '#292A2D' : '#ffffff';
+
+  var screenSize = {width: window.outerWidth, height: window.outerHeight};
+
+  let args = {
+    frame: false,
+    resizable: false,
+    skipTaskbar: true,
+    x: (screenSize.width / 2) - (450 / 2),
+    y: 50,
+    width: 450,
+    height: 130,
+    show: false,
+    webPreferences: {
+      nodeIntegration: true
+    },
+    alwaysOnTop: true,
+    icon: join(__dirname, 'images/peacock.ico')
+  };
+
+  alertWin = new BrowserWindow(args);
+
+  alertWin.on('blur', async () => { alertWin.hide(); });
+  alertWin.on('page-title-updated', async () => { alertWin.show(); });
+}
+
+let alerted = false;
+async function showAlert(input) {
+  if(!alerted) {
+    alerted = true;
+  } else {
+    switch (input.type) {
+      case 'alert':
+        let defaultParams = { bg: window.theme };
+        let params = encodeURIComponent(JSON.stringify({...input, ...defaultParams}));
+
+        let address = require('url').format({
+          pathname: join(__dirname, 'pages/alert.html'),
+          protocol: 'file:',
+          slashes: true
+        }) + '?' + params;
+
+        alertWin.loadURL(address);
+        alerted = false;
+        break;
+      case 'message':
+        $(document.body).prepend(`<center class="messageBox"><div class="message"><p>${input.message}</p></div></center>`);
+        setTimeout(function () {
+          $(document.body).children(":first").remove();
+        }, input.duration);
+        break;
+      default:
+        break;
+    }
+  }
+}
+
+async function getSearchEngine(cb) {
   jsonfile.readFile(settingsFile, async function(err, objecteroonie) {
     if (err) console.error(err);
 
@@ -393,7 +478,7 @@ async function getSearchEnginePrefix(cb) {
     jsonfile.readFile(search_engines, async function(err, obj) {
       for (var i = 0; i < obj.length; i++) {
         if (obj[i].name === searchEngine) {
-          cb(obj[i].url);
+          cb(obj[i]);
         }
       }
     });
@@ -412,32 +497,33 @@ async function changeAdBlock(toWhat) {
   setTimeout(async function() {
     tabs.current().webview.reload();
     if (toWhat === 'on') {
-      $('#shieldIMG').attr('src', 'images/Peacock Shield.svg');
+      if(window.theme === 'dark') {
+        $('#shieldIMG').attr('src', 'images/Peacock Shield White.svg');
+      } else {
+        $('#shieldIMG').attr('src', 'images/Peacock Shield.svg');
+      }
     } else if (toWhat === 'off') {
-      $('#shieldIMG').attr('src', 'images/Peacock Shield Empty.svg');
+      if(window.theme === 'dark') {
+        $('#shieldIMG').attr('src', 'images/Peacock Shield White Empty.svg');
+      } else {
+        $('#shieldIMG').attr('src', 'images/Peacock Shield Empty.svg');
+      }
     } else {
-      console.error('Adblocker not working.');
       console.error('Adblocker not working.');
     }
   }, 3000);
 }
 
 async function toggleAdblock() {
-  let src = $('#shieldIMG').attr('src').replace(/\%20/g, ' ').replace('file:///', '').replace(/\//g, '\\').replace(__dirname, '');
-  if (
-    src === 'images/Peacock Shield.svg' ||
-    src === 'images\\Peacock Shield.svg'
-  ) {
+  let src = $('#shieldIMG').attr('src');
+  if (src === 'images/Peacock Shield.svg' || src === 'images/Peacock Shield White.svg') {
     //If On
     changeAdBlock('off');
-  } else if (
-    src === 'images/Peacock Shield Empty.svg' ||
-    src === 'images\\Peacock Shield Empty.svg'
-  ) {
+  } else if (src === 'images/Peacock Shield Empty.svg' || src === 'images/Peacock Shield White Empty.svg') {
     //If Off
     changeAdBlock('on');
   } else {
-    console.log(src + ' | ' + __dirname);
+    console.log(src);
   }
 }
 
@@ -453,8 +539,8 @@ async function loadPage(val) {
     } else if (val.includes('://') || val.startsWith('data:') || val.startsWith('localhost:') && !val.includes(' ')) {
       tabs.current().webview.loadURL(val);
     } else {
-      getSearchEnginePrefix(async function(prefix) {
-        tabs.current().webview.loadURL(prefix + val);
+      getSearchEngine(async function(engine) {
+        tabs.current().webview.loadURL(engine.url + val);
       });
     }
   }
@@ -467,25 +553,6 @@ async function finishLoad(event, tab) {
   try {
     tab.setTitle(tab.webview.getTitle());
   } catch (e) {}
-
-  let address = tab.webview.src;
-  if(address.startsWith('http')) store.logHistory(address, tab.webview.getTitle());
-
-  let src = new URL(address);
-  if(src.protocol == 'http:' || src.protocol == 'https:') {
-    $('#url').val(address.substr(src.protocol.length + 2));
-  } else {
-    $('#url').val(address);
-  }
-
-  let fav = `https://www.google.com/s2/favicons?domain=${src.origin}`;
-  tab.setIcon(fav);
-
-  if(tab.initialized === undefined || tab.initialized === false) {
-    $('#url').focus();
-    $('#url').select();
-    tab.initialized = true;
-  }
 }
 
 async function initWebView(tab) {
@@ -494,138 +561,130 @@ async function initWebView(tab) {
   tab.webview.addEventListener('did-start-loading', async (e) => { web.loadStart(tab, extensions) });
   tab.webview.addEventListener('did-stop-loading', async (e) => { web.loadStop(tab, extensions) });
   tab.webview.addEventListener('did-finish-load', async (e) => { finishLoad(e, tab) });
-  tab.webview.addEventListener('did-fail-load', async (e) => { web.failLoad(e, tab.webview) });
+  tab.webview.addEventListener('did-fail-load', async (e) => {web.failLoad(e, tab.webview); });
   tab.webview.addEventListener('enter-html-full-screen', async (e) => { web.enterFllscrn() });
   tab.webview.addEventListener('leave-html-full-screen', async (e) => { web.leaveFllscrn() });
   tab.webview.addEventListener('update-target-url', async (e) => { web.updateTargetURL(e) });
-  tab.webview.addEventListener('dom-ready', async (e) => { web.domReady(tab.webview, store) });
+  tab.webview.addEventListener('dom-ready', async (e) => { web.domReady(tab, store) });
   tab.webview.addEventListener('new-window', async (e) => { web.newWindow(e, true, tabs) });
-  tab.webview.addEventListener('page-favicon-updated', async (e) => { web.faviconUpdated(tab) });
+  tab.webview.addEventListener('page-favicon-updated', async (e) => { web.faviconUpdated(tab, e.favicons) });
   tab.webview.addEventListener('page-title-updated', async (e) => { web.titleUpdated(e, tab) });
   tab.webview.addEventListener('did-change-theme-color', async (e) => { web.changeThemeColor(e) });
-  tab.webview.addEventListener('did-navigate', async (e) => { web.didNavigate(e.url) });
-  tab.webview.addEventListener('did-navigate-in-page', async (e) => { web.didNavigate(e.url) });
-  tab.webview.addEventListener('ipc-message', async (e) => {
-    if(e.channel = 'flags.js') {
-      let flags = join(__dirname, 'data/flags.json');
-      let fs = require('fs');
-      jsonfile.readFile(flags, async function(err, json) {
-        if(err) return console.error(err);
-
-        if(e.args[0].value) {
-          json[e.args[0].flag] = true;
-        } else {
-          delete json[e.args[0].flag];
-        }
-
-        jsonfile.writeFile(flags, json, async function (err) {});
-      });
-    }
-  });
+  tab.webview.addEventListener('did-navigate', async (e) => { web.didNavigate(e.url, tab.webview, store) });
+  tab.webview.addEventListener('did-navigate-in-page', async (e) => { web.didNavigate(e.url, tab.webview, store) });
   tab.webview.addEventListener('found-in-page', async (e) => {
     $('#matches').text(e.result.activeMatchOrdinal.toString() + ' of ' + e.result.matches.toString() + ' matches');
   });
-}
+  tab.webview.addEventListener('ipc-message', async (e) => {
+    switch (e.channel) {
+      case 'flags.js':
+        let flags = join(__dirname, 'data/flags.json');
+        let fs = require('fs');
+        jsonfile.readFile(flags, async function(err, json) {
+          if(err) return console.error(err);
 
-async function toggleSnackbar(text='', duration=100, buttons=[], callback=console.log, timeout=true) {
-  if($('#snackbar').css('opacity') == 0) { // If Snackbar closed.
+          if(e.args[0].value) {
+            json[e.args[0].flag] = true;
+          } else {
+            delete json[e.args[0].flag];
+          }
 
-    $('#snackbar').empty();
-    $('#snackbar').append('<p>' + text + '</p>');
-
-    if(buttons != []){
-      buttons.forEach((button, index) => {
-        $('#snackbar').append('<div>' + button + '</div>');
-        $('#snackbar div:last').click(() => {
-          callback(button);
-          $('#snackbar')
-            .css('top', '15px')
-            .css('display', 'flex')
-            .css('opacity', 1)
-            .animate(
-              { opacity: 0, top: '5px', display: 'none' },
-              { queue: false, duration: duration }
-            );
+          jsonfile.writeFile(flags, json, async function (err) {});
         });
-      });
+        break;
+      case 'alert':
+        showAlert(e.args[0]);
+        break;
+      default:
+      break;
     }
+    if(e.channel == 'flags.js') {
 
-    $('#snackbar')
-      .css('top', '5px')
-      .css('opacity', 0)
-      .animate(
-        { opacity: 1, top: '15px' },
-        { queue: false, duration: duration }
-      );
-
-    if(timeout){
-      setTimeout(function () {
-        if($('#snackbar').css('opacity') != 0) { // If Snackbar closed.
-          $('#snackbar')
-            .css('top', '15px')
-            .css('display', 'none')
-            .css('opacity', 1)
-            .animate(
-            { opacity: 0, top: '5px' },
-            { queue: false, duration: duration, display: 'flex' }
-          );
-        }
-      }, 3000);
     }
-  } else { // If Snackbar open.
-    $('#snackbar')
-    .css('top', '15px')
-    .css('display', 'flex')
-    .css('opacity', 1)
-    .animate(
-      { opacity: 0, top: '5px', display: 'none' },
-      { queue: false, duration: duration }
-      );
-  }
+  });
 }
 
-tabGroup.on('tab-added', async (tab, tabGroup) => {
-  tab.activate();
-  initWebView(tab);
-});
+async function showSnackbar(text='', items=[], duration=100, buttons=[], callback=console.log) {
+  $('#snackbar p').text(text);
 
-tabGroup.on('tab-removed', async (tab, tabContainer) => {
-  if(tabGroup.getTabs().length === 0) { remote.app.quit(); }
-});
-
-tabGroup.on('tab-active', async (tab, tabGroup) => {
-  let address = tab.webview.src;
-  let src = new URL(address);
-  let noProtocol = address.substr(src.protocol.length + 2);
-  try {
-    let address = tab.webview.src;
-    let src = new URL(address);
-    $('#url').val(noProtocol);
-    tab.setTitle(tab.webview.getTitle());
-  } catch (e) {
-    setTimeout(async function () {
-      $('#url').val(noProtocol);
-      tab.setTitle(tab.webview.getTitle());
-    }, 500);
+  $('#snackbar ul').empty();
+  if(items != []){
+    items.forEach((item, index) => {
+      $('#snackbar ul').append(`<li>Access your ${item}</li>`);
+    });
   }
 
-  tab.on('webview-ready', (tabSmall) => {
-    let addr = tabSmall.webview.src;
-    let noProt = addr.substr((new URL(addr)).protocol.length + 2);
-  	$('#url').val(noProt);
-    tabSmall.setTitle(tabSmall.webview.getTitle());
+  $('#snackbar div').empty();
+  if(buttons != []){
+    buttons.forEach((button, index) => {
+      $('#snackbar div').append(`<button type="button" name="button">${button}</button>`);
+      $('#snackbar div button:last').click(async () => {
+        callback(button);
+        $('#search').removeClass('search-active');
+        $('#snackbar').css('display', 'none');
+      });
+    });
+  }
+
+  $('#snackbar button').click(async () => {
+    callback('close');
+    $('#search').removeClass('search-active');
+    $('#snackbar').css('display', 'none');
+  });
+
+  $('#search').addClass('search-active');
+  $('#snackbar').css('display', 'block');
+}
+
+async function hideSnackbar() {
+  $('#snackbar').css('display', 'none');
+}
+
+tabs.added(async (tab) => {
+  //tab.activate();
+  initWebView(tab);
+
+  tab.ready = 0;
+  tab.on('icon-changed', (image, tabby) => {
+    let icon = tab.tabElements.icon;
+    icon.children[0].addEventListener('error', async () => {
+      icon.innerHTML = `<div class="earth"><svg viewBox="0 0 24 24">
+        <path fill="currentcolor" d="M17.9,17.39C17.64,16.59 16.89,16 16,16H15V13A1,1 0 0,0 14,12H8V10H10A1,1 0 0,0 11,9V7H13A2,2
+        0 0,0 15,5V4.59C17.93,5.77 20,8.64 20,12C20,14.08 19.2,15.97 17.9,17.39M11,19.93C7.05,19.44 4,16.08 4,12C4,11.38 4.08,
+        10.78 4.21,10.21L9,15V16A2,2 0 0,0 11,18M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z" />
+        </svg></div>`;
+    });
   });
 });
+
+tabs.removed(async (tab, tabContainer) => {
+  if(tabs.length() === 0) { remote.app.quit(); }
+});
+
+tabs.active(async (tab) => { web.changeTab(tab, store); });
 
 $('#shield').click(toggleAdblock);
 $('#back').click(async (e) => { tabs.current().webview.goBack() });
 $('#forward').click(async (e) => { tabs.current().webview.goForward() });
-$('#refresh').click(async (e) => {
-  if(this.src == 'images/refresh.svg') {
-    tabs.current().webview.reload()
-  } else {
-    tabs.current().webview.stop();
+$('#refresh').mousedown(async (e) => {
+  switch(e.which)
+  {
+    case 1:
+      if($('#refresh').children().first().attr('src') == 'images/refresh.svg') {
+        tabs.current().webview.reload()
+      } else {
+        tabs.current().webview.stop();
+      }
+    break;
+    case 2:
+      let webby = tabs.current().webview;
+      tabs.new(webby.getTitle(), webby.src, ()=>{}, true);
+    break;
+    case 3:
+      //right Click
+    break;
   }
+  return true;// to allow the browser to know that we handled it.
 });
 
 require('autocompleter')({
@@ -635,7 +694,7 @@ require('autocompleter')({
     div.textContent = item.phrase;
 
     let text = new RegExp('(' + currentValue + ')', 'ig');
-    $(div).html($(div).text().replace(text, '<b>$1</b>'));
+    $(div).html('<b>' + $(div).text().replace(text, '</b>$1<b>') + '</b>');
 
     $(div).hover(async function() {
         $('.selected').removeClass('selected');
@@ -678,10 +737,17 @@ $('#browser').bind('DOMNodeInserted DOMNodeRemoved', async (e) => {
         $('#url').css('border-radius','4px 4px 0px 0px');
         $('#url').css('margin', '-10.5px 10px 0px 10px');
         $('#url').css('height', '30px');
+
+        getSearchEngine(async (engine) => {
+          $('#search').css('filter', 'invert(0)');
+          $('#search').attr('src', engine.icon);
+        });
       } else {
         $('#url').css('border-radius','4px');
         $('#url').css('margin', '-5.5px 10px 0px 10px');
         $('#url').css('height', '20px');
+
+        web.setSearchIcon(tabs.current().webview.src);
       }
     }
 });
@@ -696,6 +762,10 @@ $('#url').on('keypress', async (e) => {
   }
 });
 
+getSearchEngine(async (e) => {
+  $('#url').attr('placeholder', `Search ${e.name} or type a URL`);
+});
+
 $('#url').blur(async (e) => {
   $('#url').css('border-radius','4px');
   $('#url').css('margin', '-5.5px 10px 0px 10px');
@@ -705,8 +775,16 @@ $('#url').blur(async (e) => {
 $('#star').click(async (e) => {
   let url = tabs.current().webview.src;
   let title = tabs.current().webview.getTitle();
-  $('#star').attr('src', 'images/star_filled.svg');
-  store.addBookmark(url, title);
+
+  store.isBookmarked(url).then((isBookmarked) => {
+    if(isBookmarked) {
+      $('#star').attr('src', 'images/bookmark.svg');
+      store.removeBookmark(url);
+    } else {
+      $('#star').attr('src', 'images/bookmark-saved.svg');
+      store.addBookmark(url, title);
+    }
+  });
 });
 $('#settings').click(openSettings);
 $('#pip').click(async (e) => {
@@ -718,6 +796,61 @@ $('#pip').click(async (e) => {
     }
   `, true).then((result) => {console.log(result);});
 })
+
+async function initCertDialog() {
+  let bg = (window.theme == 'dark') ? '#292A2D' : '#FFFFFF';
+  certDialog = new BrowserWindow({
+    frame: false,
+    resizable: false,
+    backgroundColor: bg,
+    width: 490,
+    height: 600,
+    webPreferences: {
+      nodeIntegration: true
+    },
+    show: false,
+    icon: join(__dirname, 'images/peacock.ico')
+  });
+
+  certDialog.on('page-title-updated', async () => { certDialog.show(); });
+}
+
+async function showCertificateDialog (certificate) {
+  certificate.bg = (window.theme == 'dark') ? '#292A2D' : '#FFFFFF';
+
+  let params = encodeURIComponent(JSON.stringify(certificate));
+
+  let { format } = require('url');
+  certDialog.loadURL(format({
+    pathname: join(__dirname, 'pages/certificate.html'),
+    protocol: 'file:',
+    slashes: true
+  }) + '?' + params);
+}
+
+$('#search').click(async (e) => {
+  switch ($('#search').attr('src')) {
+    case 'images/lock.svg':
+      let host = new URL(tabs.current().webview.src).host;
+
+      let https = require('https');
+      let options = {
+        host: host,
+        port: 443,
+        method: 'GET'
+      };
+
+      let req = https.request(options, function(res) {
+        let cert = res.connection.getPeerCertificate();
+        showCertificateDialog(cert);
+      });
+
+      req.end();
+      break;
+    default:
+      break;
+  }
+});
 
 $('#star').on('mouseover mouseout', function(e) {
     $(this).toggleClass('star-hover', e.type === 'mouseover');
@@ -732,15 +865,12 @@ $('#omnibox > #url').on('mouseover mouseout', function(e) {
 $('#find a').click(function() {  $(this).toggleClass('down');  });
 $('#close-find').click(function() {  findInPage();  });
 
-initWebView();
-
 var options = {
   url: 'https://api.github.com/repos/Codiscite/peacock/releases',
   headers: {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Peacock/2.0.591 Chrome/78.0.3905.1 Electron/8.0.0 Safari/537.36'
   }
 };
-
 require('request').get(options, async function (error, response, body) {
   if (error) console.error(error);
 
@@ -771,6 +901,21 @@ require('request').get(options, async function (error, response, body) {
     console.log(`Using newest version! v${version}`);
   }
 }, 'jsonp');
+
+let firstTab;
+if(remote.process.argv.length > 2) {
+  let arg = remote.process.argv[2];
+  arg = (arg.startsWith('http') || arg.startsWith('peacock')) ? arg : 'https://' + arg;
+  firstTab = tabs.new('New Tab', arg);
+} else {
+  firstTab = tabs.new('DuckDuckGo', 'https://duckduckgo.com/');
+}
+web.changeTab(firstTab, store);
+
+initCertDialog();
+initAlert();
+
+initWebView();
 
 /*extensions.forEach(function (item, index) {
   let badge = $('#omnibox').after(item.badge).next();
