@@ -19,7 +19,7 @@ body {
 }
 
 .etabs-tab.active {
-  background: #262729;
+  background: #393939;
 }
 
 .etabs-tab {
@@ -31,19 +31,15 @@ body {
 }
 
 .etabs-tab.visible.active::after {
-  background: linear-gradient(90deg, #26272900 0%, #262729 75%, #26272980 100%);
+  background: linear-gradient(90deg, #39393900 0%, #393939 75%, #39393980 100%);
 }
 
-.etabs-tab.visible:hover::after, .etabs-tab.visible.active:hover::after {
-  background: linear-gradient(90deg, #31323500 0%, #313235 75%, #31323580 100%);
+.etabs-tab.visible:not(.active):hover::after {
+  background: linear-gradient(90deg, #1f1f1f00 0%, #1f1f1f 75%, #1f1f1f80 100%);
 }
 
 #navigation, #topbar, .etabs-views {
-  background: transparent;
-}
-
-#shieldIMG {
-  content:url('../../images/Peacock Shield.png');
+  background: #393939;
 }
 
 #navigation div:not(#omnibox):not(.badge) img, #back-arrow, #search, #star {
@@ -59,16 +55,16 @@ body {
 }
 
 #url{
-  background-color: #222325;
+  background-color: #222222;
   color: #fefefe;
   box-shadow: none;
 }
 
-.etabs-tab:hover {
-  background-color: #313235 !important;
+.etabs-tab:not(.active):hover {
+  background-color: #1f1f1f !important;
 }
 
-#dialog {
+#target {
   color: white;
   background-color: rgb(46, 48, 51);
 }
@@ -108,10 +104,6 @@ body {
 
 .btn, .note {
   color: #dedede;
-}
-
-.gu-mirror:not(#omnibox):not(#shield), .gu-transit:not(#omnibox):not(#shield) {
-  filter: invert(1) !important;
 }
 
 #shield.gu-mirror, #shield.gu-transit, #shieldIMG.gu-mirror, #shieldIMG.gu-transit {
@@ -154,13 +146,8 @@ body {
   color: white;
 }
 
-.autocomplete > div.selected {
-  box-shadow: inset 4px 0px 0px 0px #717375;
-}
-
 .autocomplete > div:hover, .autocomplete > div.selected {
   background: #2c2d2f;
-  padding-left: 25px;
 }
 
 .delete-bookmark {
@@ -210,21 +197,19 @@ body {
 }
 
 .url-hover {
-  box-shadow: inset 0px 0px 0px 2px #3c3c3c !important;
-  background-color: #2f3033 !important;
+  background-color: #444444 !important;
   color: #fefefe !important;
-  transition: all 0.1s !important;
+  transition: all 0.25s !important;
 }
 
 b {
   color: white;
 }
 
-#url::selection {
-  background: #FFD563;
-  color: white;
-}
-
 #find > *:not(input) {
   color: white !important;
+}
+
+.spinner, .earth svg {
+  color: white;
 }

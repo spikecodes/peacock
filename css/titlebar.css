@@ -1,6 +1,5 @@
 #titlebar {
   position: fixed;
-  font-family: "Segoe UI", sans-serif;
   height: 50px;
   background: transparent;
   width: 100%;
@@ -22,7 +21,6 @@
   top: 0;
   right: 0;
   height: 70%;
-  font-family: "Segoe MDL2 Assets";
   font-size: 10px;
 }
 
@@ -33,6 +31,10 @@
   align-items: center;
   width: 100%;
   height: 100%;
+}
+
+#window-controls .button span {
+  font-family: "Segoe MDL2 Assets" !important;
 }
 
 #window-controls #min-button {

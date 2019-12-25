@@ -7,12 +7,14 @@ const themes = require("path").join(__dirname, "../css/themes");
 
 const store = require("../js/store.js");
 
-const { ipcRenderer } = require("electron");
+const { ipcRenderer, remote } = require("electron");
 
-var darkMode;
+let settingsInfo = JSON.parse(decodeURIComponent(window.location.href.split('?')[1]));
 
-ipcRenderer.on("updateProfile", async function(event, args) { updateProfile(); });
-ipcRenderer.on("nativeTheme", async function(event, args) { darkMode = args; });
+window.darkMode = settingsInfo.darkMode; loadTheme();
+remote.getCurrentWindow().on('focus', updateProfile);
+
+window.theme = 'light';
 
 //Discord Rich Presence
 try {
@@ -137,29 +139,38 @@ require('fs').readdir(themes, (err, files) => {
 
 function loadTheme() {
 	jsonfile.readFile(settingsFile, function (err, obj) {
-	  if (err) console.error(err);
-		let theme = obj.theme.toLowerCase();
-    if (theme === "light") {
-			if($('head link[href*="../css/themes"]').length > 0){
-				$('head link[href*="../css/themes"]').remove();
-			}
-    } else if (theme === "default") {
-      if (darkMode) {
-        // If Dark Mode
-        $("head").append('<link rel="stylesheet" href="../css/themes/dark.css">');
-      } else {
-        // If Light Mode
-        if($('head link[href*="../css/themes"]').length > 0){
+    if (err) { alert(err); return; }
+    let theme = obj.theme.toLowerCase();
+    let newTheme = theme;
+
+    if(window.darkMode && theme == 'default') newTheme = 'dark';
+
+    if (window.theme != newTheme) {
+      if (theme === "light") {
+        window.theme = 'light';
+  			if($('head link[href*="../css/themes"]').length > 0){
   				$('head link[href*="../css/themes"]').remove();
   			}
+      } else if (theme === "default") {
+        if (window.darkMode) {
+          // If Dark Mode
+          window.theme = 'dark';
+          $("head").append('<link rel="stylesheet" href="../css/themes/dark.css">');
+        } else {
+          // If Light Mode
+          window.theme = 'light';
+          if($('head link[href*="../css/themes"]').length > 0){
+    				$('head link[href*="../css/themes"]').remove();
+    			}
+        }
+      } else {
+        window.theme = 'dark';
+        $("head").append('<link rel="stylesheet" href="../css/themes/' + theme + '.css">');
       }
-    } else {
-      $("head").append('<link rel="stylesheet" href="../css/themes/' + theme + '.css">');
     }
+    document.body.style.display = 'block';
 	});
 }
-
-loadTheme();
 
 function signOutOfBlockstack() {
   require('./blockchain.js').getUserSession().signUserOut();
@@ -278,4 +289,4 @@ function updateProfile() {
 
 $(document).ready(function () {
   updateProfile();
-})
+});

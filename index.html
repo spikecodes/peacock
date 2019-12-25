@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="UTF-8">
-  <title>Peacock</title>
+  <title>Peacock Main Window</title>
   <script>window.$ = window.jQuery = require('jquery');</script>
   <link href="css/fonts/Nexa/Nexa.css" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css?family=Roboto&display=swap" rel="stylesheet">
@@ -19,9 +19,7 @@
   <!-- <div id="permission-container">
     <div id="permissions">ERROR</div>
   </div> -->
-  <div id="dialog-container">
-    <div id="dialog"></div>
-  </div>
+  <div id="target"></div>
   <header id="titlebar">
     <div id="drag-region">
       <div id="window-controls">
@@ -48,27 +46,31 @@
   <div id="topbar">
     <center>
       <nav id="navigation">
-        <div id="back">
+        <div id="back" title="Click to go back">
           <img src="images/arrow-left.svg">
         </div>
-        <div id="forward">
+        <div id="forward" title="Click to go forward">
           <img src="images/arrow-right.svg">
         </div>
-        <div id="refresh">
+        <div id="refresh" title="Reload this page">
           <img src="images/refresh.svg">
         </div>
         <div id="omnibox">
-          <img src="images/search.svg" id="search">
-          <input type="text" id="url" onfocus="this.select();" onmouseup="return false;">
-          <img src="images/bookmark.svg" id="star">
+          <img src="images/search.svg" id="search" title="View site information">
+          <input autofocus autocorrect="off" autocapitalize="off" spellcheck="false" type="text" id="url" onfocus="this.select();" onmouseup="return false;">
+          <img src="images/bookmark.svg" id="star" title="Bookmark this tab">
         </div>
-        <div id="pip">
+        <div id="pip"
+title="Picture in Picture
+Has access to this site">
           <img src="images/picture-in-picture.svg">
         </div>
-        <div id="shield" class="badge">
+        <div id="shield" class="badge"
+title="Peacock Shield
+Has access to this site">
           <img id="shieldIMG" src="images/Peacock Shield.svg">
         </div>
-        <div id="settings">
+        <div id="settings" title="Customize and control Peacock">
           <img id="gear" src="images/menu.svg">
         </div>
       </nav>
@@ -82,9 +84,10 @@
     <button id="close-find">×</button>
   </footer>
   <div id="snackbar">
-    <p>Allow <b>duckduckgo.com</b> to use your <b>location</b>?</p>
-    <div>YES</div>
-    <div>NO</div>
+    <button id="close-snackbar">×</button>
+    <p>duckduckgo.com wants to</p>
+    <ul></ul>
+    <div></div>
   </div>
   <script>
     // You can also require other files to run in this process
