@@ -23,28 +23,28 @@ exports.startVPN_Old = function () {
 }
 
 exports.stopVPN = function () {
-  if(tor == null){
-    console.log("Tor not running!");
-  } else {
-    let sess = require("electron").remote.session.fromPartition("persist:peacock");
-    sess.setProxy({proxyRules:null}, function () {});
-    tor.kill();
-    console.log("Tor stopped running.");
-  }
+  // if(tor == null){
+  //   console.log("Tor not running!");
+  // } else {
+  //   let sess = require("electron").remote.session.fromPartition("persist:peacock");
+  //   sess.setProxy({proxyRules:null}, function () {});
+  //   tor.kill();
+  //   console.log("Tor stopped running.");
+  // }
 }
 
 exports.startVPN = function (tor_dir) {
-  if(tor == null){
-    var exec = require('child_process').execFile;
-
-    tor = exec(tor_dir, function(err, data) {});
-
-    setTimeout(function () {
-      let sess = require("electron").remote.session.fromPartition("persist:peacock");
-      sess.setProxy({proxyRules:"socks5://127.0.0.1:9050"}, () => { });
-      console.log("Tor started running!");
-    }, 500);
-  } else {
-    console.log("Tor already exists!");
-  }
+  // if(tor == null){
+  //   var exec = require('child_process').execFile;
+  //
+  //   tor = exec(tor_dir, function(err, data) {});
+  //
+  //   setTimeout(function () {
+  //     let sess = require("electron").remote.session.fromPartition("persist:peacock");
+  //     sess.setProxy({proxyRules:"socks5://127.0.0.1:9050"}, () => { });
+  //     console.log("Tor started running!");
+  //   }, 500);
+  // } else {
+  //   console.log("Tor already exists!");
+  // }
 }

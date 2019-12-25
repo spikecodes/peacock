@@ -52,25 +52,27 @@ function init() {
     closeButton.addEventListener("click", event => {
         // var { app } = remote;
         // app.quit();
+        win = remote.getCurrentWindow();
+
+        let closeWindow = function () { win.close(); };
+        if(document.title == 'Peacock Main Window') closeWindow = function () { remote.app.quit(); };
+
         let tc;
         try {
           tc = tabCount();
         } catch (e) {
-          window = remote.getCurrentWindow();
-          window.close();
+          closeWindow();
           return;
         }
 
         if(tc && tc > 1) {
           if (confirm('You are about to close ' + tc + ' tabs. Are you sure you want to continue?')) {
-            window = remote.getCurrentWindow();
-            window.close();
+            closeWindow();
           } else {
             // Do nothing!
           }
         } else {
-          window = remote.getCurrentWindow();
-          window.close();
+          closeWindow();
         }
     });
 

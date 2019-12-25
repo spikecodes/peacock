@@ -118,7 +118,7 @@ video {
 }
 
 * {
-  font-family: Roboto;
+  font-family: "Roboto", sans-serif !important;
   font-weight: unset;
 }
 
@@ -141,7 +141,7 @@ body {
   height: 100%;
   width: 100%;
   display: block;
-  background: #f3f3f3;
+  background: #efeeee;
   overflow-y: hidden;
   /* padding-right: 17px; /* Increase/decrease this value for cross-browser compatibility */
   */box-sizing: content-box; /* So the width will be 100% + 17px */
@@ -200,7 +200,6 @@ webview {
   position: fixed;
   background: grey;
   z-index: 11;
-  font-family: "Roboto", sans-serif;
   width: 100%;
   width: auto;
   display: block;
@@ -247,7 +246,7 @@ webview {
 
 #topbar {
   z-index: 4;
-  margin-top: 47px;
+  margin-top: 41px;
   position: fixed;
   width: 100%;
   background: transparent;
@@ -259,7 +258,7 @@ webview {
 
 #navigation {
   width: 100%;
-  height: 40px;
+  height: 38px;
   background: transparent;
   display: block;
   top: 0;
@@ -277,11 +276,17 @@ webview {
 }
 
 #navigation #omnibox #search {
-  margin-left: 22px;
+  margin-left: 12px;
   position: absolute;
-  margin-top: 3px;
-  width: 18.5px;
-  cursor: text;
+  margin-top: -3px;
+  width: 20px;
+  padding: 5px;
+  cursor: default;
+  border-radius: 4px;
+}
+
+#navigation #omnibox #search:hover, .search-active {
+  background: rgba(0, 0, 0, 0.1);
 }
 
 #navigation #omnibox #star {
@@ -311,17 +316,15 @@ webview {
   border-radius: 4px;
   padding: 7px 15px;
   color: #2e3033;
-  background-color: white;
+  background-color: #F1F3F4;
   margin: -5.5px 10px 0px 10px;
   cursor: text;
-  font-family: Roboto;
   padding-left: 40px;
   transition: all 0.01s;
 }
 
-#url::selection {
-  background: #313a43;
-  color: white;
+#url::placeholder {
+  color: #909192;
 }
 
 #tabs {
@@ -402,35 +405,23 @@ webview {
   height: calc(100vh - 28px);
 }
 
-#dialog {
+#target {
   white-space: nowrap;
   text-overflow: ellipsis;
   overflow: hidden;
-  max-width: 1000px;
-  padding: 0px 10px;
-  padding-top: 1px;
-  border-radius: 4px;
+
+  z-index: 11;
+
+  padding: 7px;
+  padding-top: 8px;
 
   background-color: #f7f7f9;
-  vertical-align: middle;
-  line-height: 24px;
-  color: #050708;
-  position: relative;
-  float: left;
-  left: 5px;
-  font-size: 15px;
-  bottom: -20px;
-}
 
-#dialog-container {
-  bottom: 25px;
+  color: #121212;
   position: fixed;
-  z-index: 11;
-  font-family: "Roboto", sans-serif;
-  width: 100%;
-  opacity: 0;
-  transition: all 0.05s;
-  pointer-events: none;
+  left: 0px;
+  bottom: 0px;
+  font-size: 14px;
 }
 
 #notifications {
@@ -451,19 +442,16 @@ webview {
 }
 
 .autocomplete > div {
-  font-family: "Roboto";
   font-size: 13px;
   padding: 15px 15px;
-  background: white;
+  background: #F1F3F4;
   transition: all 0.035s;
   color: #2e3033;
   border-radius: none;
 }
 
 .autocomplete > div.selected {
-  background: #f7f7f9;
-  padding-left: 19px;
-  box-shadow: inset 4px 0px 0px 0px #313a43;
+  background: #e2e8eb;
   cursor: pointer;
 }
 
@@ -475,8 +463,9 @@ b {
   font-weight: 700;
 }
 
-#navigation {
-  background: transparent;
+#navigation, #topbar, .etabs-views {
+  background: white;
+  border: none !important;
 }
 
 #find {
@@ -487,7 +476,6 @@ b {
   bottom: 0;
   height: 35px;
   display: none;
-  font-family: "Roboto", sans-serif;
   line-height: 35px;
   padding-left: 10px;
 }
@@ -532,86 +520,106 @@ b {
 
 /* The snackbar - position it at the bottom and in the middle of the screen */
 #snackbar {
-  opacity: 0;
   display: none;
 
-  min-width: 250px;
-  margin-left: -125px;
-  background-color: #c9ffdf;
-  border: 2px solid #7fdca5;
-  color: #222225;
-  text-align: center;
-  border-radius: 4px;
+  box-shadow: 0 1px 5px 1px #00000063;
+  background-color: #292A2D;
+  color: white !important;
+  border-radius: 3px;
 
-  padding: 16px;
   z-index: 10;
   position: absolute;
-  top: 5px;
-  left: 0px;
-  right: 0px;
-  margin: auto;
-  width: fit-content;
-  height: 10px;
-  line-height: 10px;
+  top: 82px;
+  left: 200px;
+  margin: 0px;
+  width: 320px;
+  height: 130px;
 
-  font-family: "Roboto", sans-serif;
+  padding: 22px 15px;
+  box-sizing: border-box;
+}
+
+#snackbar #close-snackbar {
+  position: absolute;
+  right: 4px;
+  top: 4px;
+  background: transparent;
+  color: white;
+  border: none;
+  font-size: 20px;
+  padding: 1px 7px;
+  box-sizing: border-box;
+  border-radius: 20px;
+}
+
+#snackbar #close-snackbar:hover {
+  background: rgba(255,255,255,0.075);
+}
+
+#snackbar div button:hover {
+  background: rgba(255,255,255,0.05);
+}
+
+#snackbar div button:focus {
+  background: rgba(255,255,255,0.1);
 }
 
 #snackbar p {
-  margin-right: 10px;
-  color: #222225;
+  color: white;
+  font-size: 14px;
 }
 
-#snackbar > p > b {
-  color: #222225;
+#snackbar ul {
+  margin-top: 15px;
+  margin-left: 30px;
+}
+
+#snackbar ul li {
+  color: white;
+  font-size: 12px;
 }
 
 #snackbar div {
-  color: #222225;
-  background-color: #eee;
-  padding: 10px 15px;
-  line-height: 10px;
-  width: fit-content;
-  height: 10px;
-  margin-left: 5px;
-  margin-top: -12px;
+  position: absolute;
+  right: 15px;
+  bottom: 15px;
+}
+
+#snackbar div button {
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.1);
+  color: #FFD563;
   border-radius: 4px;
-  border: 2px solid rgba(0, 0, 0, 0.1);
-  font-weight: bold;
-
-  cursor: pointer;
-  transition: all 0.1s;
-}
-
-#snackbar div:hover {
-  transform: translate(0px, -3.5px);
-  background-color: white;
-  box-shadow: 0px 3.5px 0px 0px #d2d1d6;
-}
-
-#snackbar div:active {
-  transform: translate(0px, 0px);
-  box-shadow: unset !important;
+  width: 65px;
+  height: 33px;
+  margin-left: 4px;
 }
 
 #pip {
   display: none !important;
 }
 
-.spinner {
+.earth, .earth svg {
+  width: 19px;
+  height: 19px;
+  top: 0;
+  bottom: 0;
+  margin: auto;
   display: inline-block;
-  animation: spinner-rotate 1.4s linear infinite;
-  width: 18px;
-  height: auto;
   position: absolute;
-}
-
-.spinner-light {
   color: black;
 }
 
-.spinner-dark {
-  color: white;
+.spinner {
+  width: 19px;
+  height: 19px;
+  top: 0;
+  bottom: 0;
+  margin: auto;
+  display: inline-block;
+  animation: spinner-rotate 1.4s linear infinite;
+  position: absolute;
+  color: black;
 }
 
 .svg {
@@ -643,6 +651,37 @@ b {
     stroke-dasharray: 100px, 200px;
     stroke-dashoffset: -125px;
   }
+}
+
+.messageBox {
+  position: absolute;
+  width: 100%;
+}
+
+.message {
+  background: #272A2F;
+  width: 294px;
+  height: 50px;
+  color: white;
+  position: relative;
+  top: 37px;
+  opacity: 0.9;
+  z-index: 5;
+}
+
+.message p {
+  color: white;
+  position: relative;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.message p span {
+  border-radius: 2px;
+  border: white solid 1px;
+  padding: 5px;
+  border-radius: 2px;
+  color: white;
 }
 
 .disabled {
