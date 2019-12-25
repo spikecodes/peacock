@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title></title>
+    <link href='https://fonts.google.com/specimen/Roboto?selection.family=Roboto:400,500' rel='stylesheet'>
+  </head>
+  <body style="font-family: Roboto; font-size: 16px;">
+    <main style="padding: 5px 10px;">
+      <p style="font-size: 16px; line-height: 10px; font-family: Roboto; font-weight: 500;" id="url">www.google.com says</h2>
+      <p style="opacity: 0.75; line-height: 10px; font-family: Roboto;" id="message">noodle</p>
+      <button style="
+        position: fixed;
+        right: 20px;
+        bottom: 20px;
+        border: 0;
+        border-radius: 5px;
+        background: #FFD563;
+        font-family: Roboto;
+        font-weight: 500;
+        padding: 10px 25px;"
+        type="button" name="button" id="btn" autofocus>OK</button>
+    </main>
+  </body>
+
+  <script type="text/javascript">
+    let { remote } = require('electron');
+    let alertInfo = JSON.parse(decodeURIComponent(window.location.href.split('?')[1]));
+
+    document.getElementById('btn').onclick = () => { remote.getCurrentWindow().hide(); }
+
+    switch (alertInfo.type) {
+      case 'alert':
+        document.body.style.color = (alertInfo.bg == 'dark') ? 'white' : 'black';
+        document.body.style.backgroundColor = (alertInfo.bg == 'dark') ? '#292A2D' : 'white';
+        let url = (new URL(alertInfo.url)).hostname;
+        document.getElementById('url').innerHTML = url + ' says';
+        document.getElementById('message').innerText = alertInfo.message;
+
+        document.title = 'Alert';
+        break;
+      default:
+        break;
+    }
+  </script>
+</html>
