@@ -62,6 +62,41 @@ exports.getHistory = async function () {
   }
 }
 
+exports.removeHistoryItem = async function (url) {
+  await checkFiles();
+  let loc = await storeLocation();
+
+  if(loc === "Blockstack"){
+    if (blockchain.getUserSession().isUserSignedIn()) {
+      blockchain.getUserSession().getFile("history.json").then(data => {
+        var curr = JSON.parse(data);
+
+        for(var i = curr.length - 1; i >= 0; i--) {
+          if(curr[i].url == url) {
+           curr.splice(i, 1);
+           break;
+          }
+        }
+
+        blockchain.getUserSession().putFile("history.json", JSON.stringify(curr));
+      });
+    } else {
+      console.log("Not signed into Blockstack, Blockstack required to log history.");
+    }
+  } else {
+    jsonfile.readFile(historyFile, function(err, curr) {
+      for(var i = curr.length - 1; i >= 0; i--) {
+        if(curr[i].url == url) {
+         curr.splice(i, 1);
+         break;
+        }
+      }
+
+      jsonfile.writeFile(historyFile, curr, function(err) {});
+    });
+  }
+}
+
 exports.clearHistory = async function () {
   await checkFiles();
   let loc = await storeLocation();
@@ -92,13 +127,15 @@ exports.logHistory = async function (site, title) {
   let item = {};
   item.id = require("uuid").v1();
   item.url = site;
-  item.icon = `https://www.google.com/s2/favicons?domain=${site}`;
   item.title = title;
 
   if(loc === "Blockstack"){
     if (blockchain.getUserSession().isUserSignedIn()) {
       blockchain.getUserSession().getFile("history.json").then(data => {
         var curr = JSON.parse(data);
+
+        if(curr[curr.length-1].url == item.url) return;
+
         curr.push(item);
         blockchain.getUserSession().putFile("history.json", JSON.stringify(curr));
       });

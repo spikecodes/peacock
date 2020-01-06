@@ -51,7 +51,6 @@ exports.new = function (docTitle, url, callback=()=>{}, background=false) {
     webviewAttributes: {
       partition: "persist:peacock",
       sandbox: true,
-      plugins: false,
       preload: 'js/preload.js',
       disablewebsecurity: true
     },
@@ -99,10 +98,10 @@ exports.makeTabGroup = function (newTab_title, newTab_url, callback=()=>{}) {
       });
 
       $('.etabs-tab-button-new').replaceWith($('.etabs-tab-button-new').clone());
-      $('.etabs-tab-button-new').click(async () => { newTab("DuckDuckGo", "https://duckduckgo.com/"); });
+      $('.etabs-tab-button-new').click(async () => { newTab(newTab_title, newTab_url); });
       $('.etabs-tab-button-new').attr('title', 'New tab');
 
-      callback();
+      callback(tabGroup);
     },
     newTab: {
      title: newTab_title,

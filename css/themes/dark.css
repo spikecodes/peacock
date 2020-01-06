@@ -137,17 +137,21 @@ body {
   color: white;
 }
 
-.autocomplete {
+#autocomplete {
   box-shadow: 0px 10px 27px -12px rgba(0, 0, 0, 0.75);
 }
 
-.autocomplete > div{
-  background: #222325;
+#autocomplete > div{
+  background: #3C4043;
   color: white;
 }
 
-.autocomplete > div:hover, .autocomplete > div.selected {
-  background: #2c2d2f;
+#autocomplete > div:hover, #autocomplete > div.selected {
+  background: #5B5F61;
+}
+
+#autocomplete > div > img {
+  filter: invert(1);
 }
 
 .delete-bookmark {
