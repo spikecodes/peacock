@@ -9,12 +9,12 @@ const menuTemplate = [
 					label: 'Open Settings',
 					accelerator: 'CmdOrCtrl+Shift+S',
 					click: async () => {
-						mainWindow.webContents.send('keyboardShortcut', 'settings');
+						sendToRenderer('keyboardShortcut', 'settings');
 					}
 				},
 				{
 					label: 'Open DevTools',
-					accelerator: 'CmdOrCtrl+Shift+I',
+					accelerator: 'CmdOrCtrl+Alt+I',
 					click: async () => {
 						if(mainWindow.isDevToolsOpened()){
 							mainWindow.closeDevTools();
@@ -27,7 +27,7 @@ const menuTemplate = [
 					label: 'Restart Peacock',
 					accelerator: 'CmdOrCtrl+Alt+R',
 					click: async () => {
-						// mainWindow.webContents.send('keyboardShortcut', 'restart');
+						// sendToRenderer('keyboardShortcut', 'restart');
 						app.relaunch();
 						app.exit(0);
 					}
@@ -36,56 +36,56 @@ const menuTemplate = [
 					label: 'Open History',
 					accelerator: 'CmdOrCtrl+H',
 					click: async () => {
-						mainWindow.webContents.send('keyboardShortcut', 'history');
+						sendToRenderer('keyboardShortcut', 'history');
 					}
 				},
 				{
 					label: 'Clear History',
 					accelerator: 'CmdOrCtrl+Shift+H',
 					click: async () => {
-						mainWindow.webContents.send('keyboardShortcut', 'clearHistory');
+						sendToRenderer('keyboardShortcut', 'clearHistory');
 					}
 				},
 				{
 					label: 'Start VPN',
 					accelerator: 'CmdOrCtrl+Shift+V',
 					click: async () => {
-						mainWindow.webContents.send('keyboardShortcut', 'startVPN');
+						sendToRenderer('keyboardShortcut', 'startVPN');
 					}
 				},
 				{
 					label: 'Stop VPN',
 					accelerator: 'CmdOrCtrl+Alt+V',
 					click: async () => {
-						mainWindow.webContents.send('keyboardShortcut', 'stopVPN');
+						sendToRenderer('keyboardShortcut', 'stopVPN');
 					}
 				},
 				{
 					label: 'Focus Searchbar',
 					accelerator: 'CmdOrCtrl+E',
 					click: async () => {
-						mainWindow.webContents.send('keyboardShortcut', 'focusSearchbar');
+						sendToRenderer('keyboardShortcut', 'focusSearchbar');
 					}
 				},
 				{
 					label: 'Focus Searchbar',
 					accelerator: 'CmdOrCtrl+L',
 					click: async () => {
-						mainWindow.webContents.send('keyboardShortcut', 'focusSearchbar');
+						sendToRenderer('keyboardShortcut', 'focusSearchbar');
 					}
 				},
 				{
 					label: 'Get Metrics',
 					accelerator: 'CmdOrCtrl+G',
 					click: async () => {
-						mainWindow.webContents.send('keyboardShortcut', 'getMetrics');
+						sendToRenderer('keyboardShortcut', 'getMetrics');
 					}
 				},
 				{
 					label: 'Toggle Customization Mode',
 					accelerator: 'CmdOrCtrl+Alt+C',
 					click: async () => {
-						mainWindow.webContents.send('keyboardShortcut', 'toggleCustomization');
+						sendToRenderer('keyboardShortcut', 'toggleCustomization');
 					}
 				}
 			]
@@ -95,58 +95,72 @@ const menuTemplate = [
 			submenu: [
 				{
 					label: 'Open DevTools',
-					accelerator: 'CmdOrCtrl+Alt+I',
+					accelerator: 'CmdOrCtrl+Shift+I',
 					click: async () => {
-						mainWindow.webContents.send('keyboardShortcut', 'devTools');
+						sendToRenderer('keyboardShortcut', 'devTools');
 					}
 				},
 				{
 					label: 'Zoom In',
 					accelerator: 'CmdOrCtrl+=',
 					click: async () => {
-						mainWindow.webContents.send('keyboardShortcut', 'zoomIn');
+						sendToRenderer('keyboardShortcut', 'zoomIn');
 					}
 				},
 				{
 					label: 'Zoom Out',
 					accelerator: 'CmdOrCtrl+-',
 					click: async () => {
-						mainWindow.webContents.send('keyboardShortcut', 'zoomOut');
+						sendToRenderer('keyboardShortcut', 'zoomOut');
 					}
 				},
 				{
 					label: 'Reset Zoom',
 					accelerator: 'CmdOrCtrl+Shift+-',
 					click: async () => {
-						mainWindow.webContents.send('keyboardShortcut', 'resetZoom');
+						sendToRenderer('keyboardShortcut', 'resetZoom');
 					}
 				},
 				{
-					label: 'Refresh Page',
-					accelerator: 'CmdOrCtrl+R',
+					label: 'Back',
+					accelerator: 'Alt+Left',
 					click: async () => {
-						mainWindow.webContents.send('keyboardShortcut', 'refreshPage');
+						sendToRenderer('keyboardShortcut', 'backPage');
+					}
+				},
+				{
+					label: 'Forward',
+					accelerator: 'Alt+Right',
+					click: async () => {
+						sendToRenderer('keyboardShortcut', 'forwardPage');
 					}
 				},
 				{
 					label: 'Reload Page',
 					accelerator: 'F5',
 					click: async () => {
-						mainWindow.webContents.send('keyboardShortcut', 'refreshPage');
+						sendToRenderer('keyboardShortcut', 'refreshPage');
 					}
 				},
 				{
 					label: 'Force Reload Page',
 					accelerator: 'CmdOrCtrl+F5',
 					click: async () => {
-						mainWindow.webContents.send('keyboardShortcut', 'forceReload');
+						sendToRenderer('keyboardShortcut', 'forceReload');
 					}
 				},
 				{
 					label: 'Find in Page',
 					accelerator: 'CmdOrCtrl+F',
 					click: async () => {
-						mainWindow.webContents.send('keyboardShortcut', 'findInPage');
+						sendToRenderer('keyboardShortcut', 'findInPage');
+					}
+				},
+				{
+					label: 'Save as...',
+					accelerator: 'CmdOrCtrl+S',
+					click: async () => {
+						sendToRenderer('keyboardShortcut', 'savePage');
 					}
 				}
 			]
@@ -158,35 +172,35 @@ const menuTemplate = [
 					label: 'Next Tab',
 					accelerator: 'CmdOrCtrl+Tab',
 					click: async () => {
-						mainWindow.webContents.send('keyboardShortcut', 'nextTab');
+						sendToRenderer('keyboardShortcut', 'nextTab');
 					}
 				},
 				{
 					label: 'Previous Tab',
 					accelerator: 'CmdOrCtrl+Shift+Tab',
 					click: async () => {
-						mainWindow.webContents.send('keyboardShortcut', 'backTab');
+						sendToRenderer('keyboardShortcut', 'backTab');
 					}
 				},
 				{
 					label: 'New Tab',
 					accelerator: 'CmdOrCtrl+T',
 					click: async () => {
-						mainWindow.webContents.send('keyboardShortcut', 'newTab');
+						sendToRenderer('keyboardShortcut', 'newTab');
 					}
 				},
 				{
 					label: 'Close Tab',
 					accelerator: 'CmdOrCtrl+W',
 					click: async () => {
-						mainWindow.webContents.send('keyboardShortcut', 'closeTab');
+						sendToRenderer('keyboardShortcut', 'closeTab');
 					}
 				},
 				{
 					label: 'Open Closed Tab',
 					accelerator: 'CmdOrCtrl+Shift+T',
 					click: async () => {
-						mainWindow.webContents.send('keyboardShortcut', 'openClosedTab');
+						sendToRenderer('keyboardShortcut', 'openClosedTab');
 					}
 				}
 			]
@@ -194,10 +208,10 @@ const menuTemplate = [
 ];
 
 const { format } = require('url');
-const { join, normalize } = require("path");
+const { join, normalize } = require('path');
 
-const settingsFile = join(__dirname, "data/settings.json");
-const flags = join(__dirname, "data/flags.json");
+const settingsFile = join(__dirname, 'data/settings.json');
+const flags = join(__dirname, 'data/flags.json');
 
 const server = require('child_process').fork(__dirname + '/server.js');
 
@@ -224,12 +238,12 @@ server.on('message', async (m) => {
 
 require('jsonfile').readFile(settingsFile, async (err, obj) => {
 	let dl = require('electron-dl');
-	if(obj.save_location === "Use Save As Window"){
+	if(obj.save_location === 'Use Save As Window'){
 		dl({saveAs: true});
-	} else if (obj.save_location === "Downloads"){
+	} else if (obj.save_location === 'Downloads'){
 		dl({saveAs: false});
 	} else {
-		console.error("ERROR");
+		console.error('ERROR');
 	}
 });
 // Keep a global reference of the window object, if you don't, the window will
@@ -237,25 +251,30 @@ require('jsonfile').readFile(settingsFile, async (err, obj) => {
 let mainWindow;
 
 ipcMain.on('adblock-change', (event, arg) => {
-	var data = arg.split(":");
-	if (data[1] === "on") {
+	var data = arg.split(':');
+	if (data[1] === 'on') {
 		enableAdBlocking();
-	} else if (data[1] === "off") {
+	} else if (data[1] === 'off') {
 		disableAdBlocking();
 	}
 });
 
 ipcMain.on('openPage', (event, arg) => {
-	mainWindow.webContents.send('openPage', arg);
+	sendToRenderer('openPage', arg);
 });
 
 ipcMain.on('signIntoBlockstack', (e, a) => {
-	mainWindow.webContents.send('keyboardShortcut','signIntoBlockstack');
+	sendToRenderer('keyboardShortcut','signIntoBlockstack');
 });
 
 ipcMain.on('setGlobal', (e, globalVal) => {
 	global[globalVal[0]] = globalVal[1];
 });
+
+async function sendToRenderer(channel, message) {
+	try { mainWindow.webContents.send(channel, message); }
+	catch (e) { console.log(e); }
+}
 
 async function authCallback(authResponse) {
 	// Bring app window to front
@@ -263,11 +282,11 @@ async function authCallback(authResponse) {
 
 	let { decodeToken } = require('blockstack');
 	const token = decodeToken(authResponse);
-	mainWindow.webContents.send('blockstackSignIn', authResponse);
+	sendToRenderer('blockstackSignIn', authResponse);
 };
 
 async function enableAdBlocking() {
-	console.time("Adblocker load time");
+	console.time('Adblocker load time');
 
 	if (existsSync(join(__dirname, 'data/blocker.txt'))) {
 		readFile(join(__dirname, 'data/blocker.txt'), async (err, contents) => {
@@ -279,22 +298,22 @@ async function enableAdBlocking() {
 
 			const blocker = ElectronBlocker.deserialize(data);
 
-			blocker.enableBlockingInSession(session.fromPartition("persist:peacock"));
+			blocker.enableBlockingInSession(session.fromPartition('persist:peacock'));
 			blocker.on('request-blocked', async (request) => {
-		    mainWindow.webContents.send('ad-blocked', request);
+				sendToRenderer('ad-blocked', request);
 		  });
 
-			console.timeEnd("Adblocker load time");
+			console.timeEnd('Adblocker load time');
 		});
 	} else {
 		ElectronBlocker.fromPrebuiltAdsAndTracking(fetch).then((blocker) => {
-			blocker.enableBlockingInSession(session.fromPartition("persist:peacock"));
+			blocker.enableBlockingInSession(session.fromPartition('persist:peacock'));
 			blocker.on('request-blocked', async (request) => {
-		    mainWindow.webContents.send('ad-blocked', request);
+		    sendToRenderer('ad-blocked', request);
 		  });
 			const buffer = blocker.serialize();
 			writeFile(join(__dirname, 'data/blocker.txt'), buffer, async (err) => {
-				if (err) throw err; console.log('Peacock Shield serialized.'); console.timeEnd("Adblocker load time"); });
+				if (err) throw err; console.log('Peacock Shield serialized.'); console.timeEnd('Adblocker load time'); });
 		});
 	}
 }
@@ -310,11 +329,11 @@ async function disableAdBlocking() {
 
 			const blocker = ElectronBlocker.deserialize(data);
 
-			blocker.disableBlockingInSession(session.fromPartition("persist:peacock"));
+			blocker.disableBlockingInSession(session.fromPartition('persist:peacock'));
 		});
 	} else {
 		ElectronBlocker.fromPrebuiltAdsAndTracking(fetch).then((blocker) => {
-			blocker.disableBlockingInSession(session.fromPartition("persist:peacock"));
+			blocker.disableBlockingInSession(session.fromPartition('persist:peacock'));
 			const buffer = blocker.serialize();
 			writeFile(join(__dirname, 'data/blocker.txt'), buffer, async (err) => {
 				if (err) throw err; console.log('Peacock Shield serialized.'); });
@@ -346,16 +365,13 @@ async function createWindow() {
 		icon: join(__dirname, 'images/peacock.ico')
 	});
 
-	mainWindow.on('focus', async () => { mainWindow.webContents.send('focus', ''); });
+	mainWindow.on('focus', async () => {
+		sendToRenderer('focus', '');
+	});
 
 	Menu.setApplicationMenu(Menu.buildFromTemplate(menuTemplate));
 
 	enableAdBlocking();
-
-	//if(!app.isDefaultProtocolClient('peacock')) { app.setAsDefaultProtocolClient('peacock') };
-
-	// const extensions = new ExtensibleSession(session.defaultSession);
-	// extensions.loadExtension('Grammarly'); // Path to the extension to load
 
 	// and load the index.html of the app.
 	mainWindow.loadURL(format({
@@ -367,7 +383,8 @@ async function createWindow() {
 	mainWindow.maximize();
 
 	mainWindow.webContents.on('crashed', async () => {
-		require('electron-unhandled').logError("Peacock has crashed. 😢");
+		console.log('crashed');
+		//require('electron-unhandled').logError('Peacock has crashed. 😢');
 	});
 
 	// Open the DevTools.
@@ -399,71 +416,13 @@ app.on('window-all-closed', async () => {
 	}
 });
 
-app.on('session-created', async (newSession) => {
-  newSession.webRequest.onBeforeSendHeaders(async (details, callback) => {
-		const requestHeaders = {
-			['DNT']: '1',
-			['User-Agent']: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.79 Safari/537.36',
-			['ACCEPT']: 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
-			['ACCEPT-LANGUAGE']: 'en-US,en;q=0.9',
-			['ACCEPT-ENCODING']: 'gzip, deflate, br',
-			['SEC-FETCH-MODE']: 'navigate',
-			['SEC-FETCH-SITE']: 'cross-site',
-			['SEC-FETCH-USER']: '?1',
-			['UPGRADE-INSECURE-REQUESTS']: '1'
-		};
-    callback({ cancel: false, requestHeaders: requestHeaders });
-  });
-
-	newSession.protocol.registerFileProtocol('peacock', (req, cb) => {
-		var url = new URL(req.url);
-		if(url.hostname == 'network-error') {
-			cb({ path: join(__dirname, '/pages/', `network-error.html`) });
-		} else {
-			url = req.url.replace(url.protocol, '');
-			cb({ path: join(__dirname, '/pages/', `${ url }.html`) });
-		}
-  }, function (error) {
-    if (error) console.error('Failed to register protocol');
-  });
-
-	newSession.protocol.registerStringProtocol('chrome', (req, cb) => {
-    cb({ url: req.url.replace('chrome', 'peacock') });
-  }, function (error) {
-    if (error) console.error('Failed to register protocol');
-  });
+app.on('renderer-process-crashed', async () => {
+	console.log('rp-crashed');
 });
 
 app.on('web-contents-created', async (e, contents) => {
   if (contents.getType() == 'webview') {
-    require('electron-context-menu')({
-      window: contents,
-			prepend: (defaultActions, params, browserWindow) => [
-				{
-					label: 'View Image',
-					visible: params.mediaType === 'image',
-					click: async () => { mainWindow.send('loadPage', params.srcURL); }
-				},
-				{
-					label: 'Open Link in New Tab',
-					visible: params.linkURL.length > 0,
-					click: async () => {
-						mainWindow.webContents.send('openPage', params.linkURL);
-					}
-				},
-				{
-					label: 'Search Google for “{selection}”',
-					// Only show it when right-clicking text
-					visible: params.selectionText.trim().length > 0,
-					click: async () => { mainWindow.send('loadPage', `https://google.com/search?q=${encodeURIComponent(params.selectionText)}`); }
-				}
-			],
-			showLookUpSelection: true,
-      showCopyImageAddress: true,
-			showSaveImageAs: true,
-			showInspectElement: true
-    });
-		mainWindow.webContents.send('nativeTheme', nativeTheme.shouldUseDarkColors);
+		sendToRenderer('nativeTheme', nativeTheme.shouldUseDarkColors);
   }
 });
 
@@ -481,10 +440,10 @@ app.on('activate', async () => {
 //   callback(true);
 // });
 
-app.on('certificate-error', (event, webContents, url, error, certificate, callback) => {
-	console.log('err');
-  dialog.showCertificateTrustDialog(mainWindow, {certificate: certificate});
-});
+// app.on('certificate-error', (event, webContents, url, error, certificate, callback) => {
+// 	console.log(error);
+//  dialog.showCertificateTrustDialog(mainWindow, {certificate: certificate});
+// });
 
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and require them here.
