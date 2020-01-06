@@ -309,9 +309,10 @@ webview {
 }
 
 #url {
+  box-sizing: border-box;
   border: none;
   outline: none;
-  height: 20px;
+  height: 34px;
   width: 90%;
   border-radius: 4px;
   padding: 7px 15px;
@@ -435,13 +436,17 @@ webview {
   max-width: 300px;
 }
 
-.autocomplete {
+#autocomplete {
+  top: 86.5px;
+  left: 170px;
+  position: fixed;
+  height: auto;
   border-radius: 0px 0px 4px 4px;
   box-shadow: 0px 10px 27px -10px rgba(140, 140, 140, 0.5);
   z-index: 5;
 }
 
-.autocomplete > div {
+#autocomplete > div {
   font-size: 13px;
   padding: 15px 15px;
   background: #F1F3F4;
@@ -450,13 +455,20 @@ webview {
   border-radius: none;
 }
 
-.autocomplete > div.selected {
+#autocomplete > div.selected {
   background: #e2e8eb;
   cursor: pointer;
 }
 
-.autocomplete > div:last-child {
+#autocomplete > div:last-child {
   border-radius: 0px 0px 4px 4px;
+}
+
+#autocomplete > div > img {
+  opacity: .2;
+  width: 20px;
+  margin-right: 10px;
+  margin-bottom: -6px;
 }
 
 b {
@@ -518,8 +530,8 @@ b {
   background: rgba(0, 0, 0, 0.075) !important;
 }
 
-/* The snackbar - position it at the bottom and in the middle of the screen */
-#snackbar {
+/* The snackbar */
+#snackbar, #site-info {
   display: none;
 
   box-shadow: 0 1px 5px 1px #00000063;
@@ -539,7 +551,7 @@ b {
   box-sizing: border-box;
 }
 
-#snackbar #close-snackbar {
+#snackbar #close-snackbar, #site-info #info-close {
   position: absolute;
   right: 4px;
   top: 4px;
@@ -552,8 +564,8 @@ b {
   border-radius: 20px;
 }
 
-#snackbar #close-snackbar:hover {
-  background: rgba(255,255,255,0.075);
+#snackbar #close-snackbar:hover, #info-close:hover {
+  background: rgba(255,255,255,0.075) !important;
 }
 
 #snackbar div button:hover {
@@ -594,6 +606,99 @@ b {
   height: 33px;
   margin-left: 4px;
 }
+
+#site-info {
+  left: 230px;
+  width: 320px;
+  height: auto;
+}
+
+#info-header h2 {
+  color: #81C995;
+  font-weight: 500;
+  font-size: 15px;
+  font-weight: 500;
+}
+
+#info-header h3 {
+  font-size: 13px;
+  opacity: 0.8;
+  color: white;
+  margin-top: 10px;
+  letter-spacing: -0.25px;
+  line-height: 20px;
+}
+
+#info-header h4 {
+  color: #FFD563;
+  margin-top: 7px;
+  font-size: 13px;
+}
+
+#info-header h4:hover { cursor: pointer; }
+
+#info-buttons, #info-permissions {
+  display: flex;
+  flex-direction: column;
+  height: 135px;
+  margin-top: 15px;
+  border-top: 1px solid #ffffff29;
+  padding-top: 5px;
+}
+
+#info-permissions {
+  padding-top: 0px;
+  border-top: none;
+  height: auto;
+}
+
+#info-buttons button, #info-perm {
+  padding: 0px;
+  background: none;
+  border: none;
+  display: inline-flex;
+  align-items: center;
+  flex-grow: 1;
+}
+
+#perm-allow {
+  background: rgba(0,0,0,0.35);
+  color: white;
+  border: none;
+  padding: 7px 15px;
+  border-radius: 3px;
+  position: absolute;
+  right: 25px;
+  width: 80px;
+  text-align: left;
+}
+
+#info-buttons button:hover {
+  background: rgba(255,255,255,0.075);
+}
+
+#info-buttons img, #info-perm img {
+  filter: invert(1);
+  margin-right: 10px;
+  opacity: 0.75;
+}
+
+#info-buttons p, #info-buttons label, #info-perm p { color: white; }
+
+#info-buttons p, #info-perm p {
+  opacity: 0.85;
+  font-size: 13px;
+}
+
+#info-buttons label {
+  margin-left: 7px;
+  font-size: 12px;
+  opacity: 0.5;
+}
+
+#info-perm { height: 35px; }
+
+#perm-allow {}
 
 #pip {
   display: none !important;

@@ -6,21 +6,21 @@ window.$ = window.jQuery = require('jquery');
 
 let { remote } = require('electron');
 function webContents(webview) { return remote.webContents.fromId(webview.getWebContentsId()); }
+exports.webContents = webContents;
 
 function setURLBar(url, tab) {
   let bar = $('#url');
   if(!firstTime) {
-    if(!(!!tab.initialized)) {
-      bar.val('');
-      tab.initialized = true;
-
-      setTimeout(function () {
+    try {
+      if(url == 'peacock://newtab') {
+        bar.val('');
         bar.focus();
-      }, 250);
-    } else {
-      let protocol = (new URL(url)).protocol;
-      bar.val(protocol.startsWith('http') ? url.substr(protocol.length + 2) : url);
-    }
+        bar.select();
+      } else {
+        let protocol = (new URL(url)).protocol;
+        bar.val(protocol.startsWith('http') ? url.substr(protocol.length + 2) : url);
+      }
+    } catch (e) {}
   } else {
     firstTime = false;
   }
@@ -107,22 +107,27 @@ exports.failLoad = function(event, webview) {
 }
 
 exports.didNavigate = function (url, webview, store) {
-  store.logHistory(url, webview.getTitle());
+  try {
+    let protocol = (new URL(url)).protocol;
+    if(protocol.startsWith('http')) {
+      store.logHistory(url, webview.getTitle());
+    }
+  } catch (e) {}
   setSearchIcon(url);
 }
 
 exports.enterFllscrn = function() {
-  document.getElementById("navigation").style.display = "none";
-  document.getElementById("titlebar").style.display = "none";
-  document.getElementById("etabs-tabgroup").style.setProperty('display', 'none', 'important');
-  document.getElementById("etabs-views").style.marginTop = "0px";
-  document.getElementById("etabs-views").style.height = "100%";
+  document.getElementById('navigation').style.display = 'none';
+  document.getElementById('titlebar').style.display = 'none';
+  document.getElementById('etabs-tabgroup').style.setProperty('display', 'none', 'important');
+  document.getElementById('etabs-views').style.marginTop = '0px';
+  document.getElementById('etabs-views').style.height = '100%';
 }
 
 exports.leaveFllscrn = function() {
-  document.getElementById("navigation").style.display = "block";
-  document.getElementById("titlebar").style.display = "block";
-  document.getElementById("etabs-tabgroup").style.display = "block";
+  document.getElementById('navigation').style.display = 'block';
+  document.getElementById('titlebar').style.display = 'block';
+  document.getElementById('etabs-tabgroup').style.display = "block";
   document.getElementById("etabs-views").style.marginTop = "89px";
   document.getElementById("etabs-views").style.height = "calc(100% - 89px)";
 }
@@ -130,8 +135,7 @@ exports.leaveFllscrn = function() {
 exports.domReady = function (tab, store) {
   let webview = tab.webview;
 
-  tab.ready++;
-  if (tab.ready > 2) { setURLBar(tab.webview.src, tab); }
+  setURLBar(tab.webview.src, tab);
 
   store.isBookmarked(webview.src).then((result) => {
     document.getElementById('star').style.visibility = 'visible';
@@ -185,8 +189,16 @@ exports.domReady = function (tab, store) {
       window.error = {errorCode: '-300', validatedURL: 'peacock://network-error', darkMode: window.darkMode};
       break;
     case 'peacock://version':
-      console.log(process.versions);
       webContents(webview).send('setVersions', process.versions);
+      break;
+    case 'peacock://newtab':
+      let bookmarks = [];
+      store.getHistory().then(obj => {
+        obj.forEach((item, i) => {
+          bookmarks.push(item.url);
+        });
+        webContents(webview).send('sendBookmarks', bookmarks);
+      });
       break;
     default:
       break;
@@ -225,6 +237,11 @@ exports.changeTab = function (tab, store) {
   });
 
   setURLBar(tab.webview.src, tab);
+
+  try {
+    let protocol = (new URL(tab.webview.src)).protocol;
+    if(protocol.startsWith('http')) setSearchIcon(tab.webview.src);
+  } catch (e) {}
 
   try {
     if(tab.webview.canGoBack()) {

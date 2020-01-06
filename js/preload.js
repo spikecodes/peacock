@@ -76,6 +76,14 @@ if (window.location.protocol == 'peacock:') {
 		setVersions(versions);
 	});
 
+	ipcRenderer.once('sendBookmarks', (event, bookmarks) => {
+		listSites(bookmarks);
+	});
+
+	global.richSendToHost = (channel, purpose, args) => {
+		ipcRenderer.sendToHost(channel, purpose, args);
+	}
+
 	global.sendToHost = (channel, message) => {
 		ipcRenderer.sendToHost(channel, message);
 	}

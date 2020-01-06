@@ -203,7 +203,7 @@ function loadHistory() {
     if(items.length > 0) {
       for (var i = 0; i < items.length; i++) { // For each item in history log:
         let item = '<a href="#" data-url="' + items[i].url + '" class="list-group-item list-group-item-action item-history default-item">'
-          + '<img class="history-icon" src="' + items[i].icon + '"><span class="history-title">' + items[i].title +
+          + '<img class="history-icon" src="https://www.google.com/s2/favicons?domain=' + items[i].url + '"><span class="history-title">' + items[i].title +
           '</span><br><span class="history-url">' + items[i].url + '</span></a>';
          $(".group-history").append(item); // Display the item in the bookmarks list.
       }
@@ -238,7 +238,7 @@ function loadBookmarks() {
 
         let icon;
         if(obj[i].icon === "blank favicon"){
-          icon = require("path").join(__dirname, "../images/blank.png");
+          icon = require("path").join(__dirname, "../images/se");
         } else { icon = obj[i].icon ;}
 
         let book = '<a href="#" data-url="' + obj[i].url + '" class="list-group-item list-group-item-action item-bookmarks">'
