@@ -215,18 +215,6 @@ const flags = join(__dirname, 'data/flags.json');
 
 const server = require('child_process').fork(__dirname + '/server.js');
 
-const { existsSync, readFile, writeFile } = require('fs');
-
-const { ElectronBlocker } = require('@cliqz/adblocker-electron');
-const { fetch } = require('cross-fetch');
-
-require('jsonfile').readFile(flags, async (err, obj) => {
-	Object.keys(obj).forEach(function (key) {
-		console.log('Added flag: ' + key);
-		app.commandLine.appendSwitch(key);
-	});
-});
-
 // Quit server process if main app will quit
 app.on('will-quit', async () => {
 	server.send('quit');
@@ -249,15 +237,6 @@ require('jsonfile').readFile(settingsFile, async (err, obj) => {
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
 let mainWindow;
-
-ipcMain.on('adblock-change', (event, arg) => {
-	var data = arg.split(':');
-	if (data[1] === 'on') {
-		enableAdBlocking();
-	} else if (data[1] === 'off') {
-		disableAdBlocking();
-	}
-});
 
 ipcMain.on('openPage', (event, arg) => {
 	sendToRenderer('openPage', arg);
@@ -284,62 +263,6 @@ async function authCallback(authResponse) {
 	const token = decodeToken(authResponse);
 	sendToRenderer('blockstackSignIn', authResponse);
 };
-
-async function enableAdBlocking() {
-	console.time('Adblocker load time');
-
-	if (existsSync(join(__dirname, 'data/blocker.txt'))) {
-		readFile(join(__dirname, 'data/blocker.txt'), async (err, contents) => {
-			if (err) throw err;
-
-			let data;
-			if(typeof contents === 'string') { data = Buffer.from(contents); } else if (Buffer.isBuffer(contents)) { data = contents; }
-			else { console.log(typeof contents); }
-
-			const blocker = ElectronBlocker.deserialize(data);
-
-			blocker.enableBlockingInSession(session.fromPartition('persist:peacock'));
-			blocker.on('request-blocked', async (request) => {
-				sendToRenderer('ad-blocked', request);
-		  });
-
-			console.timeEnd('Adblocker load time');
-		});
-	} else {
-		ElectronBlocker.fromPrebuiltAdsAndTracking(fetch).then((blocker) => {
-			blocker.enableBlockingInSession(session.fromPartition('persist:peacock'));
-			blocker.on('request-blocked', async (request) => {
-		    sendToRenderer('ad-blocked', request);
-		  });
-			const buffer = blocker.serialize();
-			writeFile(join(__dirname, 'data/blocker.txt'), buffer, async (err) => {
-				if (err) throw err; console.log('Peacock Shield serialized.'); console.timeEnd('Adblocker load time'); });
-		});
-	}
-}
-
-async function disableAdBlocking() {
-	if (existsSync(join(__dirname, 'data/blocker.txt'))) {
-		readFile(join(__dirname, 'data/blocker.txt'), async (err, contents) => {
-			if (err) throw err;
-
-			let data;
-			if(typeof contents === 'string') { data = Buffer.from(contents); } else if (Buffer.isBuffer(contents)) { data = contents; }
-			else { console.log(typeof contents); }
-
-			const blocker = ElectronBlocker.deserialize(data);
-
-			blocker.disableBlockingInSession(session.fromPartition('persist:peacock'));
-		});
-	} else {
-		ElectronBlocker.fromPrebuiltAdsAndTracking(fetch).then((blocker) => {
-			blocker.disableBlockingInSession(session.fromPartition('persist:peacock'));
-			const buffer = blocker.serialize();
-			writeFile(join(__dirname, 'data/blocker.txt'), buffer, async (err) => {
-				if (err) throw err; console.log('Peacock Shield serialized.'); });
-		});
-	}
-}
 
 async function createWindow() {
 	// Create the browser window.
@@ -370,8 +293,6 @@ async function createWindow() {
 	});
 
 	Menu.setApplicationMenu(Menu.buildFromTemplate(menuTemplate));
-
-	enableAdBlocking();
 
 	// and load the index.html of the app.
 	mainWindow.loadURL(format({

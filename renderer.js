@@ -5,25 +5,34 @@ const jsonfile = require('jsonfile');
 
 require('v8-compile-cache');
 
-const { ipcRenderer, remote, webFrame, nativeImage } = require('electron');
-const { BrowserWindow, screen, dialog } = remote;
+const { remote, webFrame, nativeImage } = require('electron');
+const { BrowserView, BrowserWindow, screen, dialog, nativeTheme, ipcMain, app } = remote;
+require('electron').ipcMain = ipcMain;
 
 const { join, normalize } = require('path');
+
+const { ElectronBlocker } = require('@cliqz/adblocker-electron');
+
+const { existsSync, readFile, writeFile } = require('fs');
 
 const bookmarks = join(__dirname, 'data/bookmarks.json');
 const settingsFile = join(__dirname, 'data/settings.json');
 const search_engines = join(__dirname, 'data/search_engines.json');
 const blocked = join(__dirname, 'data/blocked.json');
 const permissionsFile = join(__dirname, 'data/permissions.json');
+const flags = join(__dirname, 'data/flags.json');
 
 const tabs = require('./js/tabs.js');
-const web = require('./js/web.js');
-web.setDocument(document);
-// const extensions = require('./js/extensions.js').setup();
-const extensions = null;
-
 const blockchain = require('./js/blockchain.js');
 const store = require('./js/store.js');
+const web = require('./js/web.js');
+web.setDocument(document);
+
+const webtab = require('./js/web-tab.js');
+webtab.setDocument(document);
+
+// const extensions = require('./js/extensions.js').setup();
+const extensions = null;
 
 const { version } = require('./package.json');
 
@@ -81,17 +90,12 @@ return tabs.length();
 }
 
 window.theme = 'light';
-window.darkMode = false;
 
-tabs.makeTabGroup('New Tab', 'peacock://newtab');
+//tabs.makeTabGroup('New Tab', 'peacock://newtab');
 
-var alertWin;
-var settings;
-var certDialog;
+var alertWin, settings, certDialog;
 
-ipcRenderer.on('nativeTheme', async function(event, arg) {
-window.darkMode = arg;
-});
+window.darkMode = nativeTheme.shouldUseDarkColors || false;
 
 /*const {openNewGitHubIssue, debugInfo} = require('electron-util');
 require('electron-unhandled')({
@@ -105,8 +109,8 @@ reportButton: error => {
 }
 });*/
 
-ipcRenderer.on('ad-blocked', async function (event, ad) {
-/*jsonfile.readFile(blocked, async function(err, obj) {
+/*ipcMain.on('ad-blocked', async function (event, ad) {
+jsonfile.readFile(blocked, async function(err, obj) {
   if(err) {console.error(err); return;}
 
   var adRequest = { type: ad.type, url: ad.url, sourceHostname: ad.sourceHostname };
@@ -116,10 +120,10 @@ ipcRenderer.on('ad-blocked', async function (event, ad) {
   let result = obj;
   result.push(adRequest);
   jsonfile.writeFile(blocked, result, async function (err) {});
-});*/
 });
+});*/
 
-ipcRenderer.on('blockstackSignIn', async function(event, token) {
+ipcMain.on('blockstackSignIn', async function(event, token) {
 if (blockchain.getUserSession().isUserSignedIn()) {
   tabs.current().close();
 } else {
@@ -130,7 +134,7 @@ if (blockchain.getUserSession().isUserSignedIn()) {
 
 let nav;
 let viewHeight = $('.etabs-views').height();
-ipcRenderer.on('keyboardShortcut', async function(event, shortcut) {
+ipcMain.on('keyboardShortcut', async function(event, shortcut) {
 let { startVPN, stopVPN } = require('./js/vpn.js');
 switch (shortcut) {
   case 'settings':
@@ -230,12 +234,74 @@ switch (shortcut) {
 });
 
 let popup;
-ipcRenderer.on('focus', async function(event, args) { if(popup){ popup.close(); popup = null; } loadTheme(); });
+remote.getCurrentWindow().on('focus', async function(event, args) { if(popup){ popup.close(); popup = null; } loadTheme(); });
 
-ipcRenderer.on('loadPage', async function(event, args) { tabs.current().webview.loadURL(args); });
+ipcMain.on('loadPage', async function(event, args) { tabs.current().webview.loadURL(args); });
 
-ipcRenderer.on('openPage', async function(event, args) { tabs.new('Loading...', args); });
+ipcMain.on('openPage', async function(event, args) { tabs.new('Loading...', args); });
 
+// Adblock
+async function enableAdBlocking() {
+	console.time('Adblocker load time');
+
+  let session = remote.session.fromPartition('persist:peacock');
+
+	if (existsSync(join(__dirname, 'data/blocker.txt'))) {
+		readFile(join(__dirname, 'data/blocker.txt'), async (err, contents) => {
+			if (err) throw err;
+
+			let data;
+			if(typeof contents === 'string') { data = Buffer.from(contents); } else if (Buffer.isBuffer(contents)) { data = contents; }
+			else { console.log(typeof contents); }
+
+			const blocker = ElectronBlocker.deserialize(data);
+
+			blocker.enableBlockingInSession(session);
+			blocker.on('request-blocked', async (request) => {
+				sendToRenderer('ad-blocked', request);
+		  });
+
+			console.timeEnd('Adblocker load time');
+		});
+	} else {
+		ElectronBlocker.fromPrebuiltAdsAndTracking(fetch).then((blocker) => {
+			blocker.enableBlockingInSession(session);
+			blocker.on('request-blocked', async (request) => {
+		    sendToRenderer('ad-blocked', request);
+		  });
+			const buffer = blocker.serialize();
+			writeFile(join(__dirname, 'data/blocker.txt'), buffer, async (err) => {
+				if (err) throw err; console.log('Peacock Shield serialized.'); console.timeEnd('Adblocker load time'); });
+		});
+	}
+}
+
+async function disableAdBlocking() {
+  let session = remote.session.fromPartition('persist:peacock');
+
+	if (existsSync(join(__dirname, 'data/blocker.txt'))) {
+		readFile(join(__dirname, 'data/blocker.txt'), async (err, contents) => {
+			if (err) throw err;
+
+			let data;
+			if(typeof contents === 'string') { data = Buffer.from(contents); } else if (Buffer.isBuffer(contents)) { data = contents; }
+			else { console.log(typeof contents); }
+
+			const blocker = ElectronBlocker.deserialize(data);
+
+			blocker.disableBlockingInSession(session);
+		});
+	} else {
+		ElectronBlocker.fromPrebuiltAdsAndTracking(fetch).then((blocker) => {
+			blocker.disableBlockingInSession(session);
+			const buffer = blocker.serialize();
+			writeFile(join(__dirname, 'data/blocker.txt'), buffer, async (err) => {
+				if (err) throw err; console.log('Peacock Shield serialized.'); });
+		});
+	}
+}
+
+// Single-use event listener
 async function onetime(node, type, callback) {
 // create event
 node.addEventListener(type, function(e) {
@@ -376,46 +442,46 @@ if(parseInt( $('.etabs-views').css('height') ) === viewHeight - 35){
 }
 
 async function openSettings() {
-// let url = normalize(`${__dirname}/pages/settings.html`);
-// window.location.href = url;
+  // let url = normalize(`${__dirname}/pages/settings.html`);
+  // window.location.href = url;
 
-if(settings != undefined && settings != null){ // If Settings Already Exists
-	settings.focus(); // Focus on it
-} else { // If Settings Doesn't Already Exist
-  let bg = (window.theme == 'dark') ? '#292A2D' : '#ffffff';
-  let params = encodeURIComponent(JSON.stringify({ darkMode: (window.theme == 'dark') }));
+  if(settings != undefined && settings != null){ // If Settings Already Exists
+  	settings.focus(); // Focus on it
+  } else { // If Settings Doesn't Already Exist
+    let bg = (window.theme == 'dark') ? '#292A2D' : '#ffffff';
+    let params = encodeURIComponent(JSON.stringify({ darkMode: (window.theme == 'dark') }));
 
-	settings = new BrowserWindow({
-		frame: false,
-		minWidth: 700,
-    minHeight: 550,
-		titleBarStyle: 'hiddenInset',
-		backgroundColor: bg,
-		webPreferences: {
-			nodeIntegration: true,
-			plugins: true,
-      contextIsolation: false,
-      enableBlinkFeatures: 'OverlayScrollbars',
-      webviewTag: false
-		},
-		width: 900,
-		height: 700,
-		icon: join(__dirname, 'images/peacock.ico')
-	}); // Create Settings
+  	settings = new BrowserWindow({
+  		frame: false,
+  		minWidth: 700,
+      minHeight: 550,
+  		titleBarStyle: 'hiddenInset',
+  		backgroundColor: bg,
+  		webPreferences: {
+  			nodeIntegration: true,
+  			plugins: true,
+        contextIsolation: false,
+        enableBlinkFeatures: 'OverlayScrollbars',
+        webviewTag: false
+  		},
+  		width: 900,
+  		height: 700,
+  		icon: join(__dirname, 'images/peacock.ico')
+  	}); // Create Settings
 
-  // Open Developer Tools:
-  settings.openDevTools();
+    // Open Developer Tools:
+    settings.openDevTools();
 
-	// and load the html of the app.
-  let { format } = require('url');
-	settings.loadURL(format({
-		pathname: join(__dirname, 'pages/settings.html'),
-		protocol: 'file:',
-		slashes: true
-	}) + '?' + params);
+  	// and load the html of the app.
+    let { format } = require('url');
+  	settings.loadURL(format({
+  		pathname: join(__dirname, 'pages/settings.html'),
+  		protocol: 'file:',
+  		slashes: true
+  	}) + '?' + params);
 
-	settings.on('closed', async () => { settings = null; });
-}
+  	settings.on('closed', async () => { settings = null; });
+  }
 }
 
 async function initAlert() {
@@ -487,46 +553,35 @@ jsonfile.readFile(settingsFile, async function(err, objecteroonie) {
 });
 }
 
-async function changeAdBlock(toWhat) {
-ipcRenderer.send('adblock-change', 'adblock:' + toWhat);
+async function changeAdBlock(enabled) {
+  let session = web.webContents(tabs.current().webview).session;
 
-if (window.theme === 'dark') {
-  $('#shieldIMG').attr('src', 'images/loading-dark.gif');
-} else {
-  $('#shieldIMG').attr('src', 'images/loading-light.gif');
-}
+  if (enabled) { enableAdBlocking(session); }
+  else { disableAdBlocking(session); }
 
-setTimeout(async function() {
-  tabs.current().webview.reload();
-  if (toWhat === 'on') {
-    if(window.theme === 'dark') {
-      $('#shieldIMG').attr('src', 'images/Peacock Shield White.svg');
-    } else {
-      $('#shieldIMG').attr('src', 'images/Peacock Shield.svg');
-    }
-  } else if (toWhat === 'off') {
-    if(window.theme === 'dark') {
-      $('#shieldIMG').attr('src', 'images/Peacock Shield White Empty.svg');
-    } else {
-      $('#shieldIMG').attr('src', 'images/Peacock Shield Empty.svg');
-    }
-  } else {
-    console.error('Adblocker not working.');
-  }
-}, 3000);
+  let tone = (window.theme === 'dark') ? 'dark' : 'light';
+  $('#shieldIMG').attr('src', 'images/loading-' + tone + '.gif');
+
+  setTimeout(async function() {
+    tabs.current().webview.reload();
+    let suffix = (window.theme === 'dark') ? ' White' : '';
+    suffix += (toWhat) ? '' : ' Empty';
+
+    $('#shieldIMG').attr('src', 'images/Peacock Shield' + suffix + '.svg');
+  }, 3000);
 }
 
 async function toggleAdblock() {
-let src = $('#shieldIMG').attr('src');
-if (sr.startsWith('images/Peacock Shield') && !src.endsWith('Empty.svg')) {
-  //If On
-  changeAdBlock('off');
-} else if (src.endsWith('Empty.svg')) {
-  //If Off
-  changeAdBlock('on');
-} else {
-  console.log(src);
-}
+  let src = $('#shieldIMG').attr('src');
+  if (sr.startsWith('images/Peacock Shield') && !src.endsWith('Empty.svg')) {
+    //If On
+    changeAdBlock(false);
+  } else if (src.endsWith('Empty.svg')) {
+    //If Off
+    changeAdBlock(true);
+  } else {
+    console.log(src);
+  }
 }
 
 async function loadPage(val) {
@@ -561,29 +616,28 @@ try {
 }
 
 async function initWebView(tab) {
-tab = tab || tabs.current();
+  tab = tab || tabs.currentView();
 
-tab.webview.addEventListener('did-start-loading', async (e) => { web.loadStart(tab, extensions) });
-tab.webview.addEventListener('did-stop-loading', async (e) => { web.loadStop(tab, extensions) });
-tab.webview.addEventListener('did-finish-load', async (e) => { finishLoad(e, tab) });
-tab.webview.addEventListener('did-fail-load', async (e) => {web.failLoad(e, tab.webview); });
-tab.webview.addEventListener('enter-html-full-screen', async (e) => { web.enterFllscrn() });
-tab.webview.addEventListener('leave-html-full-screen', async (e) => { web.leaveFllscrn() });
-tab.webview.addEventListener('update-target-url', async (e) => { web.updateTargetURL(e) });
-tab.webview.addEventListener('dom-ready', async (e) => { web.domReady(tab, store) });
-tab.webview.addEventListener('new-window', async (e) => { web.newWindow(e, true, tabs) });
-tab.webview.addEventListener('page-favicon-updated', async (e) => { web.faviconUpdated(tab, e.favicons) });
-tab.webview.addEventListener('page-title-updated', async (e) => { web.titleUpdated(e, tab) });
-tab.webview.addEventListener('did-change-theme-color', async (e) => { web.changeThemeColor(e) });
-tab.webview.addEventListener('did-navigate', async (e) => { web.didNavigate(e.url, tab.webview, store) });
-tab.webview.addEventListener('did-navigate-in-page', async (e) => { web.didNavigate(e.url, tab.webview, store) });
-tab.webview.addEventListener('found-in-page', async (e) => {
-  $('#matches').text(e.result.activeMatchOrdinal.toString() + ' of ' + e.result.matches.toString() + ' matches');
-});
-tab.webview.addEventListener('ipc-message', async (e) => {
+  tab.webview.addEventListener('did-start-loading', async (e) => { web.loadStart(tab, extensions) });
+  tab.webview.addEventListener('did-stop-loading', async (e) => { web.loadStop(tab, extensions) });
+  tab.webview.addEventListener('did-finish-load', async (e) => { finishLoad(e, tab) });
+  tab.webview.addEventListener('did-fail-load', async (e) => {web.failLoad(e, tab.webview); });
+  tab.webview.addEventListener('enter-html-full-screen', async (e) => { web.enterFllscrn() });
+  tab.webview.addEventListener('leave-html-full-screen', async (e) => { web.leaveFllscrn() });
+  tab.webview.addEventListener('update-target-url', async (e) => { web.updateTargetURL(e) });
+  tab.webview.addEventListener('dom-ready', async (e) => { web.domReady(tab, store) });
+  tab.webview.addEventListener('new-window', async (e) => { web.newWindow(e, true, tabs) });
+  tab.webview.addEventListener('page-favicon-updated', async (e) => { web.faviconUpdated(tab, e.favicons) });
+  tab.webview.addEventListener('page-title-updated', async (e) => { web.titleUpdated(e, tab) });
+  tab.webview.addEventListener('did-change-theme-color', async (e) => { web.changeThemeColor(e) });
+  tab.webview.addEventListener('did-navigate', async (e) => { web.didNavigate(e.url, tab.webview, store) });
+  tab.webview.addEventListener('did-navigate-in-page', async (e) => { web.didNavigate(e.url, tab.webview, store) });
+  tab.webview.addEventListener('found-in-page', async (e) => {
+    $('#matches').text(e.result.activeMatchOrdinal.toString() + ' of ' + e.result.matches.toString() + ' matches');
+  });
+  tab.webview.addEventListener('ipc-message', async (e) => {
   switch (e.channel) {
     case 'flags.js':
-      let flags = join(__dirname, 'data/flags.json');
       let fs = require('fs');
       jsonfile.readFile(flags, async function(err, json) {
         if(err) return console.error(err);
@@ -655,6 +709,17 @@ $('#snackbar').css('display', 'block');
 async function hideSnackbar() {
 $('#snackbar').css('display', 'none');
 }
+
+
+async function loadFlags() {
+  jsonfile.readFile(flags, async (err, obj) => {
+  	Object.keys(obj).forEach(function (key) {
+  		console.log('Added flag: ' + key);
+  		app.commandLine.appendSwitch(key);
+  	});
+  });
+}
+
 
 async function toggleSiteInfo() {
 if($('#site-info').is(":visible")) {
@@ -876,6 +941,8 @@ onetime(tab.webview, 'dom-ready', async (e) => {
       }
     }
   });
+
+  enableAdBlocking(tabSession);
 });
 
 tab.ready = 0;
@@ -1250,66 +1317,70 @@ if (Number(newestVersion) > Number(currentVersion)) {
 }
 }, 'jsonp');
 
-let firstTab;
-if(remote.process.argv.length > 2) {
-  let arg = remote.process.argv[2];
-  arg = (arg.startsWith('http') || arg.startsWith('peacock')) ? arg : 'https://' + arg;
-  firstTab = tabs.new('New Tab', arg);
-} else {
-  firstTab = tabs.new('New Tab', 'about:blank');
-  let tab = firstTab;
-  onetime(tab.webview, 'dom-ready', async (e) => {
-    let contents = web.webContents(tab.webview);
-    let tabSession = contents.session;
-
-    tabSession.setPermissionRequestHandler(handlePermission);
-
-    tabSession.webRequest.onBeforeSendHeaders(async (details, callback) => {
-      let headers = details.requestHeaders;
-      headers['DNT'] = '1';
-      headers['User-Agent'] = userAgent;
-      callback({ cancel: false, requestHeaders: headers });
-    });
-
-    // tabSession.webRequest.onErrorOccurred(async (details) => {
-    //   if(details.error != "net::ERR_BLOCKED_BY_CLIENT") console.log(details);
-    // });
-
-  	tabSession.protocol.registerFileProtocol('peacock', (req, cb) => {
-  		var url = new URL(req.url);
-  		if(url.hostname == 'network-error') {
-  			cb({ path: join(__dirname, '/pages/', `network-error.html`) });
-  		} else {
-  			url = req.url.replace(url.protocol, '');
-  			cb({ path: join(__dirname, '/pages/', `${ url }.html`) });
-  		}
-    }, (error) => {});
-
-    tabSession.cookies.on('changed', async (e, cookie, cause, rem) => {
-      if(!rem) {
-        let split = cookie.domain.split('.');
-        let domain = split[split.length - 2] + '.' + split[split.length - 1];
-        split = (new URL(contents.getURL())).host.split('.');
-        let host = split[split.length - 2] + '.' + split[split.length - 1];
-        if(domain != host) {
-          tabSession.cookies.remove(contents.getURL(), cookie.name);
-        }
-      }
-    });
-
-    tab.webview.loadURL('peacock://newtab');
-  });
-}
-web.changeTab(firstTab, store);
-
-initCertDialog();
-initAlert();
+// let firstTab;
+// if(remote.process.argv.length > 2) {
+//   let arg = remote.process.argv[2];
+//   arg = (arg.startsWith('http') || arg.startsWith('peacock')) ? arg : 'https://' + arg;
+//   firstTab = tabs.new('New Tab', arg);
+// } else {
+//   firstTab = tabs.new('New Tab', 'about:blank');
+//   let tab = firstTab;
+//   onetime(tab.webview, 'dom-ready', async (e) => {
+//     let contents = web.webContents(tab.webview);
+//     let tabSession = contents.session;
+//
+//     tabSession.setPermissionRequestHandler(handlePermission);
+//
+//     tabSession.webRequest.onBeforeSendHeaders(async (details, callback) => {
+//       let headers = details.requestHeaders;
+//       headers['DNT'] = '1';
+//       headers['User-Agent'] = userAgent;
+//       callback({ cancel: false, requestHeaders: headers });
+//     });
+//
+//     // tabSession.webRequest.onErrorOccurred(async (details) => {
+//     //   if(details.error != "net::ERR_BLOCKED_BY_CLIENT") console.log(details);
+//     // });
+//
+//   	tabSession.protocol.registerFileProtocol('peacock', (req, cb) => {
+//   		var url = new URL(req.url);
+//   		if(url.hostname == 'network-error') {
+//   			cb({ path: join(__dirname, '/pages/', `network-error.html`) });
+//   		} else {
+//   			url = req.url.replace(url.protocol, '');
+//   			cb({ path: join(__dirname, '/pages/', `${ url }.html`) });
+//   		}
+//     }, (error) => {});
+//
+//     tabSession.cookies.on('changed', async (e, cookie, cause, rem) => {
+//       if(!rem) {
+//         let split = cookie.domain.split('.');
+//         let domain = split[split.length - 2] + '.' + split[split.length - 1];
+//         split = (new URL(contents.getURL())).host.split('.');
+//         let host = split[split.length - 2] + '.' + split[split.length - 1];
+//         if(domain != host) {
+//           tabSession.cookies.remove(contents.getURL(), cookie.name);
+//         }
+//       }
+//     });
+//
+//     tab.webview.loadURL('peacock://newtab');
+//   });
+// }
+// web.changeTab(firstTab, store);
+//
+// initCertDialog();
+// initAlert();
+//
+// loadFlags();
 
 remote.getCurrentWindow().on('closed', async () => {
   certDialog.close();
   alertWin.close();
   if(settings) settings.close();
 });
+
+let view = tabs.newView('peacock://newtab');
 
 /*extensions.forEach(function (item, index) {
 let badge = $('#omnibox').after(item.badge).next();
