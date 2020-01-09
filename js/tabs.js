@@ -124,6 +124,120 @@ exports.makeTabGroup = function (newTab_title, newTab_url, callback=()=>{}) {
 }
 exports.getTabGroup = function () { return tabGroup; }
 
-exports.added = function (callback) { tabGroup.on('tab-added', callback); }
-exports.removed = function (callback) { tabGroup.on('tab-removed', callback); }
-exports.active = function (callback) { tabGroup.on('tab-active', callback); }
+exports.added = function (callback) {   /*tabGroup.on('tab-added', callback);*/   }
+exports.removed = function (callback) { /*tabGroup.on('tab-removed', callback);*/ }
+exports.active = function (callback) {  /*tabGroup.on('tab-active', callback);*/  }
+
+async function initBrowserView(view) {
+  const web = require('./web-tab');
+  const store = require('./store');
+
+  view.webContents.on('did-start-loading', async (e) => { web.loadStart(view) });
+  view.webContents.on('did-stop-loading', async (e) => { web.loadStop(view) });
+  //view.webContents.on('did-finish-load', async (e) => { finishLoad(e, tab) });
+  view.webContents.on('did-fail-load', async (e) => {web.failLoad(e, view); });
+  view.webContents.on('enter-html-full-screen', async (e) => { web.enterFllscrn() });
+  view.webContents.on('leave-html-full-screen', async (e) => { web.leaveFllscrn() });
+  view.webContents.on('update-target-url', async (e) => { web.updateTargetURL(e) });
+  view.webContents.on('dom-ready', async (e) => { web.domReady(view, store) });
+  view.webContents.on('new-window', async (e) => { web.newWindow(e, true, this.newView) });
+  view.webContents.on('page-favicon-updated', async (e) => { web.faviconUpdated(view, e.favicons) });
+  view.webContents.on('page-title-updated', async (e) => { web.titleUpdated(view, e) });
+  view.webContents.on('did-change-theme-color', async (e) => { web.changeThemeColor(e) });
+  view.webContents.on('did-navigate', async (e) => { web.didNavigate(e.url, view, store) });
+  view.webContents.on('did-navigate-in-page', async (e) => { web.didNavigate(e.url, view, store) });
+  view.webContents.on('found-in-page', async (e) => {
+    $('#matches').text(e.result.activeMatchOrdinal.toString() + ' of ' + e.result.matches.toString() + ' matches');
+  });
+  view.webContents.on('ipc-message', async (e) => {
+    switch (e.channel) {
+      case 'flags.js':
+        let fs = require('fs');
+        jsonfile.readFile(flags, async function(err, json) {
+          if(err) return console.error(err);
+
+          if(e.args[0].value) {
+            json[e.args[0].flag] = true;
+          } else {
+            delete json[e.args[0].flag];
+          }
+
+          jsonfile.writeFile(flags, json, async function (err) {});
+        });
+        break;
+      case 'alert':
+        showAlert(e.args[0]);
+        break;
+      case 'newTab':
+        if(e.args[0] == 'focusSearchbar') {
+          $('#url').val('');
+          $('#url').focus();
+          $('#url').select();
+        } else if (e.args[0] == 'removeHistoryItem') {
+          store.removeHistoryItem(e.args[1]);
+        }
+        else if(e.args[0] == 'settings') {
+          console.log(e.args[1]);
+        }
+      default:
+      break;
+    }
+    if(e.channel == 'flags.js') {}
+  });
+}
+
+exports.newView = function (url, userAgent) {
+  const { remote } = require('electron');
+  const { BrowserView } = remote;
+  const { join } = require('path');
+
+  let view = new BrowserView({
+    partition: "persist:peacock",
+    sandbox: true,
+    preload: 'js/preload.js',
+    disablewebsecurity: true
+  });
+  let tabSession = view.webContents.session;
+
+  let winBounds = remote.getCurrentWindow().getBounds();
+
+  remote.getCurrentWindow().setBrowserView(view);
+  view.setBounds({ x: 0, y: 89, width: window.outerWidth, height: winBounds.height - 89 });
+
+  window.onresize = async () => {
+    let bounds = view.getBounds();
+    winBounds = remote.getCurrentWindow().getBounds();
+    view.setBounds({ x: bounds.x, y: bounds.y, width: window.outerWidth, height: winBounds.height - 89 });
+  };
+
+  tabSession.webRequest.onBeforeSendHeaders(async (details, callback) => {
+    let headers = details.requestHeaders;
+    headers['DNT'] = '1';
+    headers['User-Agent'] = userAgent;
+    callback({ cancel: false, requestHeaders: headers });
+  });
+
+  tabSession.protocol.registerFileProtocol('peacock', (req, cb) => {
+    var url = new URL(req.url);
+    if(url.hostname == 'network-error') {
+      cb({ path: join(__dirname, '../pages/', `network-error.html`) });
+    } else {
+      url = req.url.replace(url.protocol, '');
+      cb({ path: join(__dirname, '../pages/', `${ url }.html`) });
+    }
+  }, (error) => {});
+
+  view.setIcon = async (icon) => { console.log(icon); }
+  view.setTitle = async (title) => { console.log(title); }
+
+  view.webContents.loadURL(url);
+
+  initBrowserView(view);
+  this.viewAdded(view);
+
+  return view;
+}
+
+exports.viewAdded = function (view) {
+  console.log('view added');
+}
