@@ -1,12 +1,13 @@
 // This file is required by the index.html file and will
 // be executed in the renderer process for that window.
 // All of the Node.js APIs are available in this process.
-const jsonfile = require('jsonfile');
-
 require('v8-compile-cache');
 
+const jsonfile = require('jsonfile');
+
+
 const { remote, webFrame, nativeImage } = require('electron');
-const { BrowserView, BrowserWindow, screen, dialog, nativeTheme, ipcMain, app } = remote;
+const { BrowserView, BrowserWindow, screen, dialog, nativeTheme, ipcMain, app, Menu } = remote;
 require('electron').ipcMain = ipcMain;
 
 const { join, normalize } = require('path');
@@ -22,11 +23,10 @@ const blocked = join(__dirname, 'data/blocked.json');
 const permissionsFile = join(__dirname, 'data/permissions.json');
 const flags = join(__dirname, 'data/flags.json');
 
+const mail = require('./js/mail.js');
 const tabs = require('./js/tabs.js');
 const blockchain = require('./js/blockchain.js');
 const store = require('./js/store.js');
-const web = require('./js/web.js');
-web.setDocument(document);
 
 const webtab = require('./js/web-tab.js');
 webtab.setDocument(document);
@@ -132,111 +132,177 @@ if (blockchain.getUserSession().isUserSignedIn()) {
 }
 });
 
-let nav;
-let viewHeight = $('.etabs-views').height();
-ipcMain.on('keyboardShortcut', async function(event, shortcut) {
-let { startVPN, stopVPN } = require('./js/vpn.js');
-switch (shortcut) {
-  case 'settings':
-    openSettings();
-    break;
-  case 'devTools':
-    remote.webContents.fromId(tabs.current().webview.getWebContentsId()).toggleDevTools();
-    break;
-  case 'nextTab':
-    if (tabs.length() === 1) {
-      // Do nothing
-    } else if (tabs.current().id === tabs.length() - 1) {
-      tabs.get(0).activate();
+ipcMain.on('alert', async function(e, data) {
+  showAlert(data);
+});
+
+ipcMain.on('flags.js', async function(e, data) {
+  let fs = require('fs');
+  jsonfile.readFile(flags, async function(err, json) {
+    if(err) return console.error(err);
+
+    if(data.value) {
+      json[data.flag] = true;
     } else {
-      tabs.get(tabs.current().id + 1).activate();
+      delete json[data.flag];
     }
 
-    break;
-  case 'backTab':
-    if (tabs.length() === 1) {
-      // Do nothing
-    } else if (tabs.current().id === 0) {
-      // If First Tab
-      tabs.get(tabs.length() - 1).activate(); // Activate Last Tab
-    } else {
-      // If Not First Tab
-      tabs.get(tabs.current().id - 1).activate(); // Activate Previous Tab
-    }
-    break;
-  case 'newTab':
-    tabs.new('DuckDuckGo', 'https://duckduckgo.com/');
-    break;
-  case 'closeTab':
-    tabs.close();
-    break;
-  case 'openClosedTab':
-    tabs.openClosedTab();
-    break;
-  case 'signIntoBlockstack':
-    tabs.new('Blockstack', blockchain.signIntoBlockstack());
-    break;
-  case 'history':
-    store.getHistory().then(console.log);
-    break;
-  case 'clearHistory':
-    store.clearHistory();
-    break;
-  case 'startVPN':
-    startVPN(join(__dirname, 'tor-win32-0.4.1.6/Tor/tor.exe'));
-    break;
-  case 'stopVPN':
-    stopVPN();
-    break;
-  case 'zoomIn':
-    tabs.current().webview.setZoomFactor(tabs.current().webview.getZoomFactor() + 0.1);
-    break;
-  case 'zoomOut':
-    tabs.current().webview.setZoomFactor(tabs.current().webview.getZoomFactor() - 0.1);
-    break;
-  case 'resetZoom':
-    webFrame.setZoomFactor(1.0);
-    tabs.current().webview.setZoomFactor(1.0);
-    break;
-  case 'focusSearchbar':
+    jsonfile.writeFile(flags, json, async function (err) {});
+  });
+});
+
+ipcMain.on('newTab', async function(e, action, extra) {
+  if(action == 'focusSearchbar') {
+    $('#url').val('');
     $('#url').focus();
     $('#url').select();
-    break;
-  case 'backPage':
-    tabs.current().webview.goBack();
-    break;
-  case 'forwardPage':
-    tabs.current().webview.goForward();
-    break;
-  case 'savePage':
-    savePage(web.webContents(tabs.current().webview));
-    break;
-  case 'refreshPage':
-    tabs.current().webview.reload();
-    break;
-  case 'forceReload':
-    tabs.current().webview.reloadIgnoringCache();
-    break;
-  case 'getMetrics':
-    //console.log(remote.app.getAppMetrics());
-    showSnackbar('Allow <b>duckduckgo.com</b> to access <b>location</b>?', 100, ['YES', 'NO']);
-    break;
-  case 'toggleCustomization':
-    if(!nav){ nav = require('dragula')([$('#navigation')], {}); }
-    else { nav.destroy(); nav = undefined; }
-    break;
-  case 'findInPage':
-    findInPage();
-    break;
-  default:
-    break;
-}
+  } else if (action == 'removeHistoryItem') {
+    store.removeHistoryItem(extra);
+  }
+  else if(action == 'settings') {
+    console.log(extra);
+  }
 });
+
+ipcMain.on('mail', async function(e, action, data) {
+  switch (action) {
+    case 'new':
+      mail.new(data.alias, (result) => {
+        e.returnValue = result;
+      }, data.name);
+      //e.returnValue = 'spikey';
+      break;
+    case 'setAddress':
+      jsonfile.readFile(settingsFile, async function(err, obj) {
+        obj.mail.address = data;
+        jsonfile.writeFile(settingsFile, obj, async function (err) {});
+      });
+      break;
+    case 'getAddress':
+      jsonfile.readFile(settingsFile, async function(err, obj) {
+        console.log('address', obj.mail.address);
+        e.returnValue = obj.mail.address;
+      });
+      break;
+    default:
+      break;
+  }
+});
+
+let nav;
+let viewHeight = $('.etabs-views').height();
+async function keyboardShortcut(shortcut) {
+  let { startVPN, stopVPN } = require('./js/vpn.js');
+  switch (shortcut) {
+    case 'settings':
+      openSettings();
+      break;
+    case 'devTools':
+      tabs.currentView().webContents.openDevTools({ mode: 'right' });;
+      break;
+    case 'nextTab':
+      if (tabs.length() === 1) {
+        // Do nothing
+      } else if (tabs.current().id === tabs.length() - 1) {
+        tabs.get(0).activate();
+      } else {
+        tabs.get(tabs.current().id + 1).activate();
+      }
+
+      break;
+    case 'backTab':
+      if (tabs.length() === 1) {
+        // Do nothing
+      } else if (tabs.current().id === 0) {
+        // If First Tab
+        tabs.get(tabs.length() - 1).activate(); // Activate Last Tab
+      } else {
+        // If Not First Tab
+        tabs.get(tabs.current().id - 1).activate(); // Activate Previous Tab
+      }
+      break;
+    case 'newTab':
+      tabs.new('DuckDuckGo', 'https://duckduckgo.com/');
+      break;
+    case 'closeTab':
+      tabs.close();
+      break;
+    case 'openClosedTab':
+      tabs.openClosedTab();
+      break;
+    case 'signIntoBlockstack':
+      tabs.new('Blockstack', blockchain.signIntoBlockstack());
+      break;
+    case 'history':
+      store.getHistory().then(console.log);
+      break;
+    case 'clearHistory':
+      store.clearHistory();
+      break;
+    case 'startVPN':
+      startVPN(join(__dirname, 'tor-win32-0.4.1.6/Tor/tor.exe'));
+      break;
+    case 'stopVPN':
+      stopVPN();
+      break;
+    case 'zoomIn':
+      tabs.currentView().webContents.setZoomFactor(tabs.currentView().webContents.getZoomFactor() + 0.1);
+      break;
+    case 'zoomOut':
+      tabs.currentView().webContents.setZoomFactor(tabs.currentView().webContents.getZoomFactor() - 0.1);
+      break;
+    case 'resetZoom':
+      webFrame.setZoomFactor(1.0);
+      tabs.currentView().webContents.setZoomFactor(1.0);
+      break;
+    case 'focusSearchbar':
+      $('#url').focus();
+      $('#url').select();
+      break;
+    case 'backPage':
+      tabs.currentView().webContents.goBack();
+      break;
+    case 'forwardPage':
+      tabs.currentView().webContents.goForward();
+      break;
+    case 'savePage':
+      tabs.savePage(tabs.currentView().webContents);
+      break;
+    case 'refreshPage':
+      tabs.currentView().webContents.reload();
+      break;
+    case 'forceReload':
+      tabs.currentView().webContents.reloadIgnoringCache();
+      break;
+    case 'getMetrics':
+      //console.log(remote.app.getAppMetrics());
+      showSnackbar('Allow <b>duckduckgo.com</b> to access <b>location</b>?', 100, ['YES', 'NO']);
+      break;
+    case 'toggleCustomization':
+      if(!nav){ nav = require('dragula')([$('#navigation')], {}); }
+      else { nav.destroy(); nav = undefined; }
+      break;
+    case 'findInPage':
+      findInPage();
+      break;
+    default:
+      break;
+  }
+}
 
 let popup;
 remote.getCurrentWindow().on('focus', async function(event, args) { if(popup){ popup.close(); popup = null; } loadTheme(); });
+remote.getCurrentWindow().on('maximize', async function(event, args) {
+  console.log('max');
+  let view = remote.getCurrentWindow().getBrowserView();
+  if(!view) return;
+  let bounds = view.getBounds();
 
-ipcMain.on('loadPage', async function(event, args) { tabs.current().webview.loadURL(args); });
+  winBounds = remote.getCurrentWindow().getBounds();
+  view.setBounds({ x: bounds.x, y: bounds.y, width: window.outerWidth, height: winBounds.height - 89 });
+});
+
+ipcMain.on('loadPage', async function(event, args) { tabs.currentView().webContents.loadURL(args); });
 
 ipcMain.on('openPage', async function(event, args) { tabs.new('Loading...', args); });
 
@@ -407,7 +473,7 @@ if(parseInt( $('.etabs-views').css('height') ) === viewHeight - 35){
 
       if (e.which == 13 && e.shiftKey) {
         if(val.length > 0){
-          tabs.current().webview.findInPage(val, {
+          tabs.currentView().webContents.findInPage(val, {
             findNext: true,
             forward: false,
             matchCase: $('#match-case').hasClass('down')
@@ -415,7 +481,7 @@ if(parseInt( $('.etabs-views').css('height') ) === viewHeight - 35){
         }
       } else if (e.which == 13) {
         if(val.length > 0){
-          tabs.current().webview.findInPage(val, {
+          tabs.currentView().webContents.findInPage(val, {
             findNext: true,
             matchCase: $('#match-case').hasClass('down')
           });
@@ -426,13 +492,13 @@ if(parseInt( $('.etabs-views').css('height') ) === viewHeight - 35){
     $('#find input').on('input', function () {
       val = $('#find input').val();
       if(val.length > 0) {
-        tabs.current().webview.findInPage(val, {
+        tabs.currentView().webContents.findInPage(val, {
           findNext: false,
           matchCase: $('#match-case').hasClass('down')
         });
       } else {
         try {
-          tabs.current().webview.stopFindInPage('clearSelection');
+          tabs.currentView().webContents.stopFindInPage('clearSelection');
         } catch (e) { }
         $('#matches').text('');
       }
@@ -485,35 +551,37 @@ async function openSettings() {
 }
 
 async function initAlert() {
-let bg = (window.theme == 'dark') ? '#292A2D' : '#ffffff';
+  let bg = (window.theme == 'dark') ? '#292A2D' : '#ffffff';
 
-var screenSize = {width: window.outerWidth, height: window.outerHeight};
+  var screenSize = {width: window.outerWidth, height: window.outerHeight};
 
-let args = {
-  frame: false,
-  resizable: false,
-  skipTaskbar: true,
-  x: (screenSize.width / 2) - (450 / 2),
-  y: 50,
-  width: 450,
-  height: 130,
-  show: false,
-  webPreferences: {
-    nodeIntegration: true
-  },
-  alwaysOnTop: true,
-  icon: join(__dirname, 'images/peacock.ico')
-};
+  let args = {
+    frame: false,
+    resizable: false,
+    skipTaskbar: true,
+    x: (screenSize.width / 2) - (450 / 2),
+    y: 50,
+    width: 450,
+    height: 130,
+    show: false,
+    webPreferences: {
+      nodeIntegration: true
+    },
+    alwaysOnTop: true,
+    icon: join(__dirname, 'images/peacock.ico')
+  };
 
-alertWin = new BrowserWindow(args);
+  alertWin = new BrowserWindow(args);
 
-alertWin.on('blur', async () => { alertWin.hide(); });
-alertWin.on('page-title-updated', async () => { alertWin.show(); });
+  alertWin.on('blur', async () => { alertWin.hide(); });
+  alertWin.on('page-title-updated', async () => { alertWin.show(); });
 }
 
 async function showAlert(input) {
   switch (input.type) {
     case 'alert':
+      console.log(input);
+
       let defaultParams = { bg: window.theme };
       let params = encodeURIComponent(JSON.stringify({...input, ...defaultParams}));
 
@@ -554,7 +622,7 @@ jsonfile.readFile(settingsFile, async function(err, objecteroonie) {
 }
 
 async function changeAdBlock(enabled) {
-  let session = web.webContents(tabs.current().webview).session;
+  let session = tabs.currentView().webContents.session;
 
   if (enabled) { enableAdBlocking(session); }
   else { disableAdBlocking(session); }
@@ -563,7 +631,7 @@ async function changeAdBlock(enabled) {
   $('#shieldIMG').attr('src', 'images/loading-' + tone + '.gif');
 
   setTimeout(async function() {
-    tabs.current().webview.reload();
+    tabs.currentView().webContents.reload();
     let suffix = (window.theme === 'dark') ? ' White' : '';
     suffix += (toWhat) ? '' : ' Empty';
 
@@ -589,18 +657,18 @@ $('#url').blur();
 
 try {
   new URL(val);
-  tabs.current().webview.loadURL(val);
+  tabs.currentView().webContents.loadURL(val);
 } catch (e) {
   if (val.includes('.') && !val.includes(' ')) {
     $('#url').val(val);
-    tabs.current().webview.loadURL('https://' + val);
+    tabs.currentView().webContents.loadURL('https://' + val);
   } else if (val.includes('://') || val.startsWith('data:') || val.startsWith('localhost:') && !val.includes(' ')) {
     $('#url').val(val);
-    tabs.current().webview.loadURL(val);
+    tabs.currentView().webContents.loadURL(val);
   } else {
     getSearchEngine(async function(engine) {
       $('#url').val(engine.url + val);
-      tabs.current().webview.loadURL(engine.url + val);
+      tabs.currentView().webContents.loadURL(engine.url + val);
     });
   }
 }
@@ -638,33 +706,10 @@ async function initWebView(tab) {
   tab.webview.addEventListener('ipc-message', async (e) => {
   switch (e.channel) {
     case 'flags.js':
-      let fs = require('fs');
-      jsonfile.readFile(flags, async function(err, json) {
-        if(err) return console.error(err);
 
-        if(e.args[0].value) {
-          json[e.args[0].flag] = true;
-        } else {
-          delete json[e.args[0].flag];
-        }
-
-        jsonfile.writeFile(flags, json, async function (err) {});
-      });
-      break;
-    case 'alert':
-      showAlert(e.args[0]);
       break;
     case 'newTab':
-      if(e.args[0] == 'focusSearchbar') {
-        $('#url').val('');
-        $('#url').focus();
-        $('#url').select();
-      } else if (e.args[0] == 'removeHistoryItem') {
-        store.removeHistoryItem(e.args[1]);
-      }
-      else if(e.args[0] == 'settings') {
-        console.log(e.args[1]);
-      }
+
     default:
     break;
   }
@@ -726,7 +771,7 @@ if($('#site-info').is(":visible")) {
   $('#search').removeClass('search-active');
   $('#site-info').css('display', 'none');
 } else {
-  let url = new URL(tabs.current().webview.src);
+  let url = new URL(tabs.currentView().webContents.getURL());
 
   $('#info-permissions').empty();
   getPermissions(url.host).then((obj) => {
@@ -769,35 +814,9 @@ jsonfile.readFile(permissionsFile, async function(err, obj) {
 }
 
 async function cookies(contents, site) {
-contents = contents || web.webContents(tabs.current().webview);
+contents = contents || tabs.currentView().webContents;
 site = site || contents.getURL();
 return contents.session.cookies.get({ url: site });
-}
-
-async function savePage(contents) {
-let filters = [
-  { name: 'Webpage, Complete', extensions: ['htm', 'html'] },
-  { name: 'Webpage, HTML Only', extensions: ['html', 'htm'] },
-  { name: 'Webpage, Single File', extensions: ['mhtml'] }
-];
-
-let options = {
-  title: 'Save as...',
-  filters: filters
-};
-
-dialog.showSaveDialog(options).then((details) => {
-  if(!details.cancelled){
-    let path = details.filePath;
-    let saveType;
-    if(path.endsWith('htm')) saveType = 'HTMLComplete';
-    if(path.endsWith('html')) saveType = 'HTMLOnly';
-    if(path.endsWith('mhtml')) saveType = 'MHTML';
-
-    contents.savePage(path, saveType).then(() => {
-      console.log('Page was saved successfully.') }).catch(err => { console.error(err) });
-  }
-});
 }
 
 async function handlePermission (webContents, permission, callback, details) {
@@ -849,63 +868,6 @@ initWebView(tab);
 onetime(tab.webview, 'dom-ready', async (e) => {
   let contents = web.webContents(tab.webview);
   let tabSession = contents.session;
-
-  require('electron-context-menu')({
-    window: contents,
-    prepend: (defaultActions, params, browserWindow) => [
-      {
-        label: 'Back',
-        accelerator: 'Alt+Left',
-        visible: params.selectionText.length == 0,
-        enabled: contents.canGoBack(),
-        click: async () => { tabs.current().webview.goBack(); }
-      },
-      {
-        label: 'Forward',
-        accelerator: 'Alt+Right',
-        visible: params.selectionText.length == 0,
-        enabled: contents.canGoForward(),
-        click: async () => { tabs.current().webview.goForward(); }
-      },
-      {
-        label: 'Reload',
-        accelerator: 'CmdOrCtrl+R',
-        visible: params.selectionText.length == 0,
-        click: async () => { tabs.current().webview.reload(); }
-      },
-      {
-        type: 'separator'
-      },
-      {
-        label: 'Save as...',
-        accelerator: 'CmdOrCtrl+S',
-        visible: params.selectionText.length == 0,
-        click: async () => { savePage(contents); }
-      },
-      {
-        type: 'separator'
-      },
-      {
-        label: 'View Image',
-        visible: params.mediaType === 'image',
-        click: async () => { tabs.current().webview.loadURL(params.srcURL); }
-      },
-      {
-        label: 'Open Link in New Tab',
-        visible: params.linkURL.length > 0,
-        click: async () => { tabs.new('Loading...', params.linkURL); }
-      },
-      {
-        label: 'Search Google for “{selection}”',
-        visible: params.selectionText.trim().length > 0,
-        click: async () => { tabs.current().webview.loadURL(`https://google.com/search?q=${encodeURIComponent(params.selectionText)}`); }
-      }
-    ],
-    showLookUpSelection: true,
-    showCopyImageAddress: true,
-    showSaveImageAs: true,
-    showInspectElement: true
-  });
 
   tabSession.setPermissionRequestHandler(handlePermission);
 
@@ -962,24 +924,22 @@ tabs.removed(async (tab, tabContainer) => {
 if(tabs.length() === 0) { remote.app.quit(); }
 });
 
-tabs.active(async (tab) => { web.changeTab(tab, store); });
-
 $('#shield').click(toggleAdblock);
-$('#back').click(async (e) => { tabs.current().webview.goBack() });
-$('#forward').click(async (e) => { tabs.current().webview.goForward() });
+$('#back').click(async (e) => { tabs.currentView().webContents.goBack() });
+$('#forward').click(async (e) => { tabs.currentView().webContents.goForward() });
 $('#refresh').mousedown(async (e) => {
 switch(e.which)
 {
   case 1:
     if($('#refresh').children().first().attr('src') == 'images/refresh.svg') {
-      tabs.current().webview.reload()
+      tabs.currentView().webContents.reload()
     } else {
-      tabs.current().webview.stop();
+      tabs.currentView().webContents.stop();
     }
   break;
   case 2:
-    let webby = tabs.current().webview;
-    tabs.new(webby.getTitle(), webby.src, ()=>{}, true);
+    let webby = tabs.currentView().webContents;
+    tabs.new(webby.getTitle(), webby.getURL(), ()=>{}, true);
   break;
   case 3:
     //right Click
@@ -994,108 +954,66 @@ $('#autocomplete').width($('#url').width() + 55);
 }).observe($('#url')[0]);
 
 $('#url').on('input', function() {
-let value = $(this).val().toLowerCase();
+  let value = $(this).val().toLowerCase();
 
-if(value == '') { hideAutocomplete(); return; }
+  if(value == '') { hideAutocomplete(); return; }
 
-var options = {
-  url: `https://ac.duckduckgo.com/ac/?t=peacock&type=list&q=${value}`,
-  headers: { 'User-Agent': userAgent }
-};
-
-require('request').get(options, function (error, response, body) {
-  if(error) { console.error(error); return; }
-
-  let results = JSON.parse(body)[1];
-  //if(!results || results.length == 0) { hideAutocomplete(); return; }
-
-  if(results[0] != value) results.unshift(value);
-  results = results.slice(0, 6);
-
-  $('#autocomplete').empty();
-
-  results.forEach(async (item, index) => {
-    var div = document.createElement('div');
-    //let fixed = item.replace(value.replace(/\s/g, ''), '</b>' + value.replace(/\s/g, '') + '<b>');
-
-    let img = document.createElement('img');
-    if(validURL(item)) {
-      img.src = `https://www.google.com/s2/favicons?domain=${item}`;
-      $(img).css('filter', 'invert(0)');
-      $(img).css('opacity', '1');
-
-      img.addEventListener('error', async () => {
-        img.src = 'images/earth.svg';
-        $(img).css('filter', 'invert(1)');
-        $(img).css('opacity', '0.2');
-      });
-    } else {
-      img.src = 'images/search.svg';
-    }
-
-    $(div).html(item);
-    $(div).prepend(img);
-
-    $(div).hover(async function() {
-      $('.selected').removeClass('selected');
-      $(this).addClass('selected');
-    }, async function() {
-      $(this).removeClass('selected');
-      $('#autocomplete > div').first().addClass('selected');
-    });
-
-    $(div).click(async function() {
-      loadPage($(div).text());
-    });
-
-    $('#autocomplete').append(div);
-  });
-
-  showAutocomplete();
-});
-});
-
-/*require('autocompleter')({
-input: document.getElementById('url'),
-render: function(item, currentValue) {
-  var div = document.createElement('div');
-  div.textContent = item.phrase;
-
-  let text = new RegExp('(' + currentValue + ')', 'ig');
-  $(div).html('<b>' + $(div).text().replace(text, '</b>$1<b>') + '</b>');
-
-  $(div).hover(async function() {
-      $('.selected').removeClass('selected');
-      $(this).addClass('selected');
-    }, async function() {
-      $(this).removeClass('selected');
-      $('.autocomplete > div').first().addClass('selected');
-    });
-  return div;
-},
-fetch: function(text, update) {
   var options = {
-    url: `https://ac.duckduckgo.com/ac/?t=peacock&q=${text.toLowerCase()}`,
+    url: `https://ac.duckduckgo.com/ac/?t=peacock&type=list&q=${value}`,
     headers: { 'User-Agent': userAgent }
   };
 
   require('request').get(options, function (error, response, body) {
-    if(error) { console.error(error); update( [{'phrase': [text]}] ); return; }
-    if(body.startsWith('<')) { update( [{'phrase': [text]}] ); return; }
+    if(error) { console.error(error); return; }
 
-    let results = JSON.parse(body);
-    results.unshift({'phrase': [text]});
-    update(results);
+    let results = JSON.parse(body)[1];
+    //if(!results || results.length == 0) { hideAutocomplete(); return; }
+
+    if(results[0] != value) results.unshift(value);
+    results = results.slice(0, 6);
+
+    $('#autocomplete').empty();
+
+    results.forEach(async (item, index) => {
+      var div = document.createElement('div');
+      //let fixed = item.replace(value.replace(/\s/g, ''), '</b>' + value.replace(/\s/g, '') + '<b>');
+
+      let img = document.createElement('img');
+      if(validURL(item)) {
+        img.src = `https://www.google.com/s2/favicons?domain=${item}`;
+        $(img).css('filter', 'invert(0)');
+        $(img).css('opacity', '1');
+
+        img.addEventListener('error', async () => {
+          img.src = 'images/earth.svg';
+          $(img).css('filter', 'invert(1)');
+          $(img).css('opacity', '0.2');
+        });
+      } else {
+        img.src = 'images/search.svg';
+      }
+
+      $(div).html(item);
+      $(div).prepend(img);
+
+      $(div).hover(async function() {
+        $('.selected').removeClass('selected');
+        $(this).addClass('selected');
+      }, async function() {
+        $(this).removeClass('selected');
+        $('#autocomplete > div').first().addClass('selected');
+      });
+
+      $(div).click(async function() {
+        loadPage($(div).text());
+      });
+
+      $('#autocomplete').append(div);
+    });
+
+    showAutocomplete();
   });
-},
-onSelect: function(item, input) {
-  if($('.autocomplete > div').first().hasClass('selected')){
-    loadPage($('#url').val());
-  } else {
-    loadPage(item.phrase);
-  }
-}
-});*/
+});
 
 function showAutocomplete() {
   $('#autocomplete').css('display', 'block');
@@ -1124,7 +1042,7 @@ function hideAutocomplete() {
   $('#url').css('margin', '-5.5px 10px 0px 10px');
   $('#url').css('height', '34px');
 
-  web.setSearchIcon(tabs.current().webview.src);
+  webtab.setSearchIcon(tabs.currentView().webContents.getURL());
 }
 
 $('#url').keypress(async (e) => {
@@ -1176,8 +1094,8 @@ setTimeout(function () {
 }, 75);
 });
 $('#star').click(async (e) => {
-let url = tabs.current().webview.src;
-let title = tabs.current().webview.getTitle();
+let url = tabs.currentView().webContents.getURL();
+let title = tabs.currentView().webContents.getTitle();
 
 store.isBookmarked(url).then((isBookmarked) => {
   if(isBookmarked) {
@@ -1191,7 +1109,7 @@ store.isBookmarked(url).then((isBookmarked) => {
 });
 $('#settings').click(openSettings);
 $('#pip').click(async (e) => {
-remote.webContents.fromId(tabs.current().webview.getWebContentsId()).executeJavaScript(`
+tabs.currentView().webContents.executeJavaScript(`
   if(!!document.pictureInPictureElement){ // Is PiP
     document.exitPictureInPicture();
   } else { // Not PiP
@@ -1253,7 +1171,7 @@ cookies().then((cookies) => {
 });
 $('#certificate').click(async (e) => {
 toggleSiteInfo();
-let host = new URL(tabs.current().webview.src).host;
+let host = new URL(tabs.currentView().webContents.getURL()).host;
 
 let https = require('https');
 let options = {
@@ -1317,62 +1235,62 @@ if (Number(newestVersion) > Number(currentVersion)) {
 }
 }, 'jsonp');
 
-// let firstTab;
-// if(remote.process.argv.length > 2) {
-//   let arg = remote.process.argv[2];
-//   arg = (arg.startsWith('http') || arg.startsWith('peacock')) ? arg : 'https://' + arg;
-//   firstTab = tabs.new('New Tab', arg);
-// } else {
-//   firstTab = tabs.new('New Tab', 'about:blank');
-//   let tab = firstTab;
-//   onetime(tab.webview, 'dom-ready', async (e) => {
-//     let contents = web.webContents(tab.webview);
-//     let tabSession = contents.session;
-//
-//     tabSession.setPermissionRequestHandler(handlePermission);
-//
-//     tabSession.webRequest.onBeforeSendHeaders(async (details, callback) => {
-//       let headers = details.requestHeaders;
-//       headers['DNT'] = '1';
-//       headers['User-Agent'] = userAgent;
-//       callback({ cancel: false, requestHeaders: headers });
-//     });
-//
-//     // tabSession.webRequest.onErrorOccurred(async (details) => {
-//     //   if(details.error != "net::ERR_BLOCKED_BY_CLIENT") console.log(details);
-//     // });
-//
-//   	tabSession.protocol.registerFileProtocol('peacock', (req, cb) => {
-//   		var url = new URL(req.url);
-//   		if(url.hostname == 'network-error') {
-//   			cb({ path: join(__dirname, '/pages/', `network-error.html`) });
-//   		} else {
-//   			url = req.url.replace(url.protocol, '');
-//   			cb({ path: join(__dirname, '/pages/', `${ url }.html`) });
-//   		}
-//     }, (error) => {});
-//
-//     tabSession.cookies.on('changed', async (e, cookie, cause, rem) => {
-//       if(!rem) {
-//         let split = cookie.domain.split('.');
-//         let domain = split[split.length - 2] + '.' + split[split.length - 1];
-//         split = (new URL(contents.getURL())).host.split('.');
-//         let host = split[split.length - 2] + '.' + split[split.length - 1];
-//         if(domain != host) {
-//           tabSession.cookies.remove(contents.getURL(), cookie.name);
-//         }
-//       }
-//     });
-//
-//     tab.webview.loadURL('peacock://newtab');
-//   });
-// }
-// web.changeTab(firstTab, store);
-//
-// initCertDialog();
-// initAlert();
-//
-// loadFlags();
+/*let firstTab;
+if(remote.process.argv.length > 2) {
+  let arg = remote.process.argv[2];
+  arg = (arg.startsWith('http') || arg.startsWith('peacock')) ? arg : 'https://' + arg;
+  firstTab = tabs.new('New Tab', arg);
+} else {
+  firstTab = tabs.new('New Tab', 'about:blank');
+  let tab = firstTab;
+  onetime(tab.webview, 'dom-ready', async (e) => {
+    let contents = web.webContents(tab.webview);
+    let tabSession = contents.session;
+
+    tabSession.setPermissionRequestHandler(handlePermission);
+
+    tabSession.webRequest.onBeforeSendHeaders(async (details, callback) => {
+      let headers = details.requestHeaders;
+      headers['DNT'] = '1';
+      headers['User-Agent'] = userAgent;
+      callback({ cancel: false, requestHeaders: headers });
+    });
+
+    // tabSession.webRequest.onErrorOccurred(async (details) => {
+    //   if(details.error != "net::ERR_BLOCKED_BY_CLIENT") console.log(details);
+    // });
+
+  	tabSession.protocol.registerFileProtocol('peacock', (req, cb) => {
+  		var url = new URL(req.url);
+  		if(url.hostname == 'network-error') {
+  			cb({ path: join(__dirname, '/pages/', `network-error.html`) });
+  		} else {
+  			url = req.url.replace(url.protocol, '');
+  			cb({ path: join(__dirname, '/pages/', `${ url }.html`) });
+  		}
+    }, (error) => {});
+
+    tabSession.cookies.on('changed', async (e, cookie, cause, rem) => {
+      if(!rem) {
+        let split = cookie.domain.split('.');
+        let domain = split[split.length - 2] + '.' + split[split.length - 1];
+        split = (new URL(contents.getURL())).host.split('.');
+        let host = split[split.length - 2] + '.' + split[split.length - 1];
+        if(domain != host) {
+          tabSession.cookies.remove(contents.getURL(), cookie.name);
+        }
+      }
+    });
+
+    tab.webview.loadURL('peacock://newtab');
+  });
+}
+web.changeTab(firstTab, store);*/
+
+initCertDialog();
+initAlert();
+
+loadFlags();
 
 remote.getCurrentWindow().on('closed', async () => {
   certDialog.close();
@@ -1380,7 +1298,209 @@ remote.getCurrentWindow().on('closed', async () => {
   if(settings) settings.close();
 });
 
-let view = tabs.newView('peacock://newtab');
+const menuTemplate = [
+		{
+			label: 'Window',
+			submenu: [
+				{
+					label: 'Open Settings',
+					accelerator: 'CmdOrCtrl+Shift+S',
+					click: async () => {
+						keyboardShortcut('settings');
+					}
+				},
+				{
+					label: 'Open DevTools',
+					accelerator: 'CmdOrCtrl+Alt+I',
+					click: async () => {
+						remote.getCurrentWindow().openDevTools({ mode: 'detach' });;
+					}
+				},
+				{
+					label: 'Restart Peacock',
+					accelerator: 'CmdOrCtrl+Alt+R',
+					click: async () => {
+						// keyboardShortcut('restart');
+						app.relaunch();
+						app.exit(0);
+					}
+				},
+				{
+					label: 'Open History',
+					accelerator: 'CmdOrCtrl+H',
+					click: async () => {
+						keyboardShortcut('history');
+					}
+				},
+				{
+					label: 'Clear History',
+					accelerator: 'CmdOrCtrl+Shift+H',
+					click: async () => {
+						keyboardShortcut('clearHistory');
+					}
+				},
+				{
+					label: 'Start VPN',
+					accelerator: 'CmdOrCtrl+Shift+V',
+					click: async () => {
+						keyboardShortcut('startVPN');
+					}
+				},
+				{
+					label: 'Stop VPN',
+					accelerator: 'CmdOrCtrl+Alt+V',
+					click: async () => {
+						keyboardShortcut('stopVPN');
+					}
+				},
+				{
+					label: 'Focus Searchbar',
+					accelerator: 'CmdOrCtrl+E',
+					click: async () => {
+						keyboardShortcut('focusSearchbar');
+					}
+				},
+				{
+					label: 'Focus Searchbar',
+					accelerator: 'CmdOrCtrl+L',
+					click: async () => {
+						keyboardShortcut('focusSearchbar');
+					}
+				},
+				{
+					label: 'Get Metrics',
+					accelerator: 'CmdOrCtrl+G',
+					click: async () => {
+						keyboardShortcut('getMetrics');
+					}
+				},
+				{
+					label: 'Toggle Customization Mode',
+					accelerator: 'CmdOrCtrl+Alt+C',
+					click: async () => {
+						keyboardShortcut('toggleCustomization');
+					}
+				}
+			]
+		},
+		{
+			label: 'Website',
+			submenu: [
+				{
+					label: 'Open DevTools',
+					accelerator: 'CmdOrCtrl+Shift+I',
+					click: async () => {
+						keyboardShortcut('devTools');
+					}
+				},
+				{
+					label: 'Zoom In',
+					accelerator: 'CmdOrCtrl+=',
+					click: async () => {
+						keyboardShortcut('zoomIn');
+					}
+				},
+				{
+					label: 'Zoom Out',
+					accelerator: 'CmdOrCtrl+-',
+					click: async () => {
+						keyboardShortcut('zoomOut');
+					}
+				},
+				{
+					label: 'Reset Zoom',
+					accelerator: 'CmdOrCtrl+Shift+-',
+					click: async () => {
+						keyboardShortcut('resetZoom');
+					}
+				},
+				{
+					label: 'Back',
+					accelerator: 'Alt+Left',
+					click: async () => {
+						keyboardShortcut('backPage');
+					}
+				},
+				{
+					label: 'Forward',
+					accelerator: 'Alt+Right',
+					click: async () => {
+						keyboardShortcut('forwardPage');
+					}
+				},
+				{
+					label: 'Reload Page',
+					accelerator: 'F5',
+					click: async () => {
+						keyboardShortcut('refreshPage');
+					}
+				},
+				{
+					label: 'Force Reload Page',
+					accelerator: 'CmdOrCtrl+F5',
+					click: async () => {
+						keyboardShortcut('forceReload');
+					}
+				},
+				{
+					label: 'Find in Page',
+					accelerator: 'CmdOrCtrl+F',
+					click: async () => {
+						keyboardShortcut('findInPage');
+					}
+				},
+				{
+					label: 'Save as...',
+					accelerator: 'CmdOrCtrl+S',
+					click: async () => {
+						keyboardShortcut('savePage');
+					}
+				}
+			]
+		},
+		{
+			label: 'Tabs',
+			submenu: [
+				{
+					label: 'Next Tab',
+					accelerator: 'CmdOrCtrl+Tab',
+					click: async () => {
+						keyboardShortcut('nextTab');
+					}
+				},
+				{
+					label: 'Previous Tab',
+					accelerator: 'CmdOrCtrl+Shift+Tab',
+					click: async () => {
+						keyboardShortcut('backTab');
+					}
+				},
+				{
+					label: 'New Tab',
+					accelerator: 'CmdOrCtrl+T',
+					click: async () => {
+						keyboardShortcut('newTab');
+					}
+				},
+				{
+					label: 'Close Tab',
+					accelerator: 'CmdOrCtrl+W',
+					click: async () => {
+						keyboardShortcut('closeTab');
+					}
+				},
+				{
+					label: 'Open Closed Tab',
+					accelerator: 'CmdOrCtrl+Shift+T',
+					click: async () => {
+						keyboardShortcut('openClosedTab');
+					}
+				}
+			]
+		}
+];
+
+Menu.setApplicationMenu(Menu.buildFromTemplate(menuTemplate));
 
 /*extensions.forEach(function (item, index) {
 let badge = $('#omnibox').after(item.badge).next();
@@ -1426,7 +1546,7 @@ badge.mousedown(function(event) {
     case 2:
       tabs.new('Options', 'file://' + item.options);
     case 3:
-      tabs.current().webview.loadURL('file://' + item.options);
+      tabs.currentView().webContents.loadURL('file://' + item.options);
       break;
     default:
       console.log('You have a strange Mouse!');
