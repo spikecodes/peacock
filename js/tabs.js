@@ -1,19 +1,22 @@
+const { remote } = require('electron');
+
+const web = require('./web-tab');
+const store = require('./store');
+
+exports.tabs = [];
+
 var tabGroup;
 var closedTabs = [];
 
-function closeTab(tab) {
-  tab = tab || this.current();
+var activeTab;
 
-  let it = tab.tab;
-
-  closedTabs.push(tab.webview.src);
-
-  $(it).css('transition', 'all 0.1s !important');
-  $(it).fadeSlideLeft(100, async () => {
-    setTimeout(async function () {
-      tab.close();
-      $(it).css('transition', 'all 0.0s !important');
-    }, 200);
+async function onetime(node, type, callback) {
+  // create event
+  node.on(type, function(e) {
+  	// remove event
+  	node.off(e.type, arguments.callee);
+  	// call handler
+  	return callback(e);
   });
 }
 
@@ -71,10 +74,12 @@ exports.new = function (docTitle, url, callback=()=>{}, background=false) {
   return tab;
 }
 
-exports.close = closeTab;
-
 exports.current = function () {
   return tabGroup.getActiveTab();
+}
+
+exports.currentView = function () {
+  return activeTab;
 }
 
 exports.all = function () { return tabGroup.getTabs(); }
@@ -129,16 +134,13 @@ exports.removed = function (callback) { /*tabGroup.on('tab-removed', callback);*
 exports.active = function (callback) {  /*tabGroup.on('tab-active', callback);*/  }
 
 async function initBrowserView(view) {
-  const web = require('./web-tab');
-  const store = require('./store');
-
   view.webContents.on('did-start-loading', async (e) => { web.loadStart(view) });
   view.webContents.on('did-stop-loading', async (e) => { web.loadStop(view) });
   //view.webContents.on('did-finish-load', async (e) => { finishLoad(e, tab) });
   view.webContents.on('did-fail-load', async (e) => {web.failLoad(e, view); });
   view.webContents.on('enter-html-full-screen', async (e) => { web.enterFllscrn() });
   view.webContents.on('leave-html-full-screen', async (e) => { web.leaveFllscrn() });
-  view.webContents.on('update-target-url', async (e) => { web.updateTargetURL(e) });
+  view.webContents.on('update-target-url', async (e, url) => { web.updateTargetURL(e, url) });
   view.webContents.on('dom-ready', async (e) => { web.domReady(view, store) });
   view.webContents.on('new-window', async (e) => { web.newWindow(e, true, this.newView) });
   view.webContents.on('page-favicon-updated', async (e) => { web.faviconUpdated(view, e.favicons) });
@@ -149,59 +151,93 @@ async function initBrowserView(view) {
   view.webContents.on('found-in-page', async (e) => {
     $('#matches').text(e.result.activeMatchOrdinal.toString() + ' of ' + e.result.matches.toString() + ' matches');
   });
-  view.webContents.on('ipc-message', async (e) => {
-    switch (e.channel) {
-      case 'flags.js':
-        let fs = require('fs');
-        jsonfile.readFile(flags, async function(err, json) {
-          if(err) return console.error(err);
+  view.webContents.on('preload-error', async (e, path, err) => { console.error(err); });
+}
 
-          if(e.args[0].value) {
-            json[e.args[0].flag] = true;
-          } else {
-            delete json[e.args[0].flag];
-          }
+exports.savePage = function(contents) {
+  let filters = [
+    { name: 'Webpage, Complete', extensions: ['htm', 'html'] },
+    { name: 'Webpage, HTML Only', extensions: ['html', 'htm'] },
+    { name: 'Webpage, Single File', extensions: ['mhtml'] }
+  ];
 
-          jsonfile.writeFile(flags, json, async function (err) {});
-        });
-        break;
-      case 'alert':
-        showAlert(e.args[0]);
-        break;
-      case 'newTab':
-        if(e.args[0] == 'focusSearchbar') {
-          $('#url').val('');
-          $('#url').focus();
-          $('#url').select();
-        } else if (e.args[0] == 'removeHistoryItem') {
-          store.removeHistoryItem(e.args[1]);
-        }
-        else if(e.args[0] == 'settings') {
-          console.log(e.args[1]);
-        }
-      default:
-      break;
+  let options = {
+    title: 'Save as...',
+    filters: filters
+  };
+
+  dialog.showSaveDialog(options).then((details) => {
+    if(!details.cancelled){
+      let path = details.filePath;
+      let saveType;
+      if(path.endsWith('htm')) saveType = 'HTMLComplete';
+      if(path.endsWith('html')) saveType = 'HTMLOnly';
+      if(path.endsWith('mhtml')) saveType = 'MHTML';
+
+      contents.savePage(path, saveType).then(() => {
+        console.log('Page was saved successfully.') }).catch(err => { console.error(err) });
     }
-    if(e.channel == 'flags.js') {}
   });
 }
 
-exports.newView = function (url, userAgent) {
-  const { remote } = require('electron');
+exports.activate = function (view) {
+
+  if($('div.active').length > 0) $('div.active').removeClass('active');
+
+  console.log('set view', view);
+  remote.getCurrentWindow().setBrowserView(view);
+  remote.getCurrentWindow().setBrowserView(view);
+  view.tab.element.addClass('active');
+  activeTab = view;
+
+  this.viewActivated(view);
+}
+
+exports.close = function (view) {
+  view = view || this.currentView();
+
+  if(activeTab == view) {
+    let id = this.tabs.indexOf(view);
+    let length = this.tabs.length;
+
+    if (length == 1) { remote.app.quit(); return; }
+
+    let nextTab = (id != 0) ? this.tabs[id - 1] : this.tabs[id + 1];
+    this.activate(nextTab);
+  }
+
+  closedTabs.push(view.webContents.getURL());
+
+  let tab = view.tab.element;
+
+  this.viewClosed(view);
+
+  $(tab).css('transition', 'all 0.1s !important');
+  $(tab).fadeSlideLeft(100, async () => {
+    setTimeout(async function () {
+      view.tab.close();
+      view.destroy();
+      $(tab).css('transition', 'all 0.0s !important');
+    }, 200);
+  });
+
+}
+
+exports.newView = function (url, active=true) {
   const { BrowserView } = remote;
   const { join } = require('path');
 
+  let userAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:73.0) Gecko/20100101 Firefox/73.0';
+
   let view = new BrowserView({
-    partition: "persist:peacock",
-    sandbox: true,
-    preload: 'js/preload.js',
-    disablewebsecurity: true
+    webPreferences: {
+      preload: join(__dirname, 'preload.js')
+    }
   });
   let tabSession = view.webContents.session;
 
   let winBounds = remote.getCurrentWindow().getBounds();
 
-  remote.getCurrentWindow().setBrowserView(view);
   view.setBounds({ x: 0, y: 89, width: window.outerWidth, height: winBounds.height - 89 });
 
   window.onresize = async () => {
@@ -227,17 +263,123 @@ exports.newView = function (url, userAgent) {
     }
   }, (error) => {});
 
-  view.setIcon = async (icon) => { console.log(icon); }
-  view.setTitle = async (title) => { console.log(title); }
+  require('electron-context-menu')({
+    window: view.webContents,
+    prepend: (defaultActions, params, browserWindow) => [
+      {
+        label: 'Back',
+        accelerator: 'Alt+Left',
+        visible: params.selectionText.length == 0,
+        enabled: view.webContents.canGoBack(),
+        click: async () => { view.webContents.goBack(); }
+      },
+      {
+        label: 'Forward',
+        accelerator: 'Alt+Right',
+        visible: params.selectionText.length == 0,
+        enabled: view.webContents.canGoForward(),
+        click: async () => { view.webContents.goForward(); }
+      },
+      {
+        label: 'Reload',
+        accelerator: 'CmdOrCtrl+R',
+        visible: params.selectionText.length == 0,
+        click: async () => { view.webContents.reload(); }
+      },
+      {
+        type: 'separator'
+      },
+      {
+        label: 'Save as...',
+        accelerator: 'CmdOrCtrl+S',
+        visible: params.selectionText.length == 0,
+        click: async () => { this.savePage(view.webContents); }
+      },
+      {
+        type: 'separator'
+      },
+      {
+        label: 'View Image',
+        visible: params.mediaType === 'image',
+        click: async () => { view.webContents.loadURL(params.srcURL); }
+      },
+      {
+        label: 'Open Link in New Tab',
+        visible: params.linkURL.length > 0,
+        click: async () => { this.newView(params.linkURL); }
+      },
+      {
+        label: 'Search Google for “{selection}”',
+        visible: params.selectionText.trim().length > 0,
+        click: async () => { view.webContents.loadURL(`https://google.com/search?q=${encodeURIComponent(params.selectionText)}`); }
+      }
+    ],
+    showLookUpSelection: true,
+    showCopyImageAddress: true,
+    showSaveImageAs: true,
+    showInspectElement: true
+  });
+
+  $('.etabs-tabs').append(`<div class="etabs-tab visible" style="opacity: 1; width: 262px; transition: all 0.1s ease 0s;">
+      <span class="etabs-tab-icon">
+        <img src="https://www.google.com/s2/favicons?domain=null">
+      </span>
+
+      <span class="etabs-tab-title" title="New Tab">New Tab</span>
+
+      <span class="etabs-tab-buttons">
+        <button class="etabs-tab-button-close">✖</button>
+      </span>
+    </div>`);
+
+  view.tab = {
+    element: $('.etabs-tabs').children().last(),
+    setIcon: async (icon) => { view.tab.icon.attr('src', icon); },
+    setTitle: async (title) => { view.tab.title.text(title); },
+    close: async () => { view.tab.element.remove(); }
+  };
+
+  view.tab.icon = view.tab.element.children().eq(0).children().first();
+  view.tab.title = view.tab.element.children().eq(1);
+  view.tab.button = view.tab.element.children().eq(2).children().first();
+
+  view.tab.element.click(async (e) => {
+    this.activate(view);
+  });
+
+  view.tab.button.click(async (e) => {
+    e.stopPropagation();
+    this.close(view);
+  });
 
   view.webContents.loadURL(url);
-
   initBrowserView(view);
+
   this.viewAdded(view);
+
+  if(active) {
+    this.activate(view);
+  }
 
   return view;
 }
 
 exports.viewAdded = function (view) {
-  console.log('view added');
+  this.tabs.push(view);
 }
+
+exports.viewClosed = function (view, tabs=this.tabs) {
+  const index = this.tabs.indexOf(view);
+  if (index > -1) this.tabs.splice(index, 1);
+}
+
+exports.viewActivated = function (view) {
+  console.log('view activated: ' + this.tabs.indexOf(view));
+  web.changeTab(view, store);
+}
+
+$('.etabs-tab-button-new').click(async e => {
+  this.newView('peacock://newtab');
+});
+
+this.newView('peacock://newtab');

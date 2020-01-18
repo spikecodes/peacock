@@ -42,8 +42,8 @@ exports.setSearchIcon = setSearchIcon;
 exports.setDocument = function (input) { document = input; }
 
 exports.loadStart = function(view, extensions) {
-  // tab.tabElements.icon.innerHTML = `<div class="spinner"><svg class="svg" viewBox="22 22 44 44">
-  //   <circle class="circle" cx="44" cy="44" r="20.2" stroke-width="3.6" fill="none">
+  // tab.tabElements.icon.innerHTML = `<div class='spinner'><svg class='svg' viewBox='22 22 44 44'>
+  //   <circle class='circle' cx='44' cy='44' r='20.2' stroke-width='3.6' fill='none'>
   //   </circle></svg></div>`;
 
   document.getElementById('star').style.visibility = 'hidden';
@@ -68,7 +68,7 @@ exports.loadStop = function(view, extensions) {
   document.getElementById('refresh').children[0].src = 'images/refresh.svg';
 
   let url = new URL(view.webContents.getURL());
-  view.setIcon(`https://www.google.com/s2/favicons?domain=${url.origin}`);
+  view.tab.setIcon(`https://www.google.com/s2/favicons?domain=${url.origin}`);
 
   if(!extensions) return;
 
@@ -129,17 +129,19 @@ exports.enterFllscrn = function() {
 exports.leaveFllscrn = function() {
   document.getElementById('navigation').style.display = 'block';
   document.getElementById('titlebar').style.display = 'block';
-  document.getElementById('etabs-tabgroup').style.display = "block";
-  document.getElementById("etabs-views").style.marginTop = "89px";
-  document.getElementById("etabs-views").style.height = "calc(100% - 89px)";
+  document.getElementById('etabs-tabgroup').style.display = 'block';
+  document.getElementById('etabs-views').style.marginTop = '89px';
+  document.getElementById('etabs-views').style.height = 'calc(100% - 89px)';
 }
 
 exports.domReady = function (view, store) {
   //setURLBar(tab.webview.src, tab);
 
+  view.webContents.insertCSS('input::-webkit-calendar-picker-indicator {display: none;}');
+
   store.isBookmarked(view.webContents.getURL()).then((result) => {
     document.getElementById('star').style.visibility = 'visible';
-    document.getElementById('star').src = result ? "images/bookmark-saved.svg" : "images/bookmark.svg";
+    document.getElementById('star').src = result ? 'images/bookmark-saved.svg' : 'images/bookmark.svg';
   });
 
   if(view.webContents.canGoBack()) {
@@ -170,9 +172,9 @@ exports.domReady = function (view, store) {
   view.webContents.executeJavaScript(`document.getElementsByTagName('video').length`)
     .then((result) => {
       if(result === 1) {
-        document.getElementById("pip").style.cssText = 'display:block !important';
+        document.getElementById('pip').style.cssText = 'display:block !important';
       } else {
-        document.getElementById("pip").style.cssText = "display:none !important";
+        document.getElementById('pip').style.cssText = 'display:none !important';
       }
     });
 
@@ -205,43 +207,42 @@ exports.domReady = function (view, store) {
   }
 }
 
-exports.updateTargetURL = function (event) {
-  if (event.url != "") {
-    document.getElementById("target").style.opacity = 0.95;
-    document.getElementById("target").innerHTML = event.url;
+exports.updateTargetURL = function (event, url) {
+  if (url && url != '') {
+    console.log(url);
+    $('#target').css('opacity', '0.95');
+    $('#target').text(url);
   } else {
-    document.getElementById("target").style.opacity = 0;
+    $('#target').css('opacity', '0');
   }
 }
 
 exports.newWindow = function (event, legit=false, newtab) {
   if(legit){
     console.log(newTab);
-    //newtab("", event.url);
+    //newtab('', event.url);
   }
 }
 
 exports.faviconUpdated = function (view, favicons) {
-  if(favicons && favicons.length > 0) { view.setIcon(favicons[0]); }
+  if(favicons && favicons.length > 0) { view.tab.setIcon(favicons[0]); }
 }
 
 exports.titleUpdated = function (view, event) {
-  if(event.explicitSet){
-    view.setTitle(event.title);
-  }
+  view.tab.setTitle(event.title);
 }
 
 exports.changeTab = function (view, store) {
   store.isBookmarked(view.webContents.getURL()).then((result) => {
     document.getElementById('star').style.visibility = 'visible';
-    document.getElementById('star').src = result ? "images/bookmark-saved.svg" : "images/bookmark.svg";
+    document.getElementById('star').src = result ? 'images/bookmark-saved.svg' : 'images/bookmark.svg';
   });
 
   //setURLBar(view.webContents.getURL(), tab);
 
   try {
     let protocol = (new URL(view.webContents)).protocol;
-    if(protocol.startsWith('http')) setSearchIcon(content.getURL());
+    if(protocol.startsWith('http')) setSearchIcon(view.webContents.getURL());
   } catch (e) {}
 
   try {
@@ -264,9 +265,9 @@ exports.changeTab = function (view, store) {
     view.webContents.executeJavaScript(`document.getElementsByTagName('video').length`)
       .then((result) => {
         if(result === 1) {
-          document.getElementById("pip").style.cssText = 'display:block !important';
+          document.getElementById('pip').style.cssText = 'display:block !important';
         } else {
-          document.getElementById("pip").style.cssText = "display:none !important";
+          document.getElementById('pip').style.cssText = 'display:none !important';
         }
       });
   } catch (e) {}
@@ -277,7 +278,7 @@ exports.changeTab = function (view, store) {
 }
 
 exports.changeThemeColor = function (event) {
-  //document.querySelector(".etabs-tab.active").style.boxShadow = `inset 0px 0px 0px 1px ${event.themeColor}`;
+  //document.querySelector('.etabs-tab.active').style.boxShadow = `inset 0px 0px 0px 1px ${event.themeColor}`;
 }
 
 exports.exitPointerLock = function (view) {
