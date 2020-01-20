@@ -8,7 +8,7 @@ let { remote } = require('electron');
 function webContents(webview) { return remote.webContents.fromId(webview.getWebContentsId()); }
 exports.webContents = webContents;
 
-function setURLBar(url, tab) {
+function setURLBar(url) {
   let bar = $('#url');
   if(!firstTime) {
     try {
@@ -98,11 +98,11 @@ exports.loadStop = function(view, extensions) {
   });
 }
 
-exports.failLoad = function(event, view) {
-  if(event.errorCode != -27 && event.errorCode != -3) {
-    window.error = {errorCode: event.errorCode,
-      errorDescription: event.errorDescription,
-      validatedURL: event.validatedURL,
+exports.failLoad = function(event, view, errorCode, errorDescription, validatedURL) {
+  if(errorCode != -27 && errorCode != -3) {
+    window.error = {errorCode: errorCode,
+      errorDescription: errorDescription,
+      validatedURL: validatedURL,
       darkMode: window.darkMode};
     view.webContents.loadURL('peacock://network-error');
   }
@@ -118,24 +118,17 @@ exports.didNavigate = function (url, view, store) {
   setSearchIcon(url);
 }
 
-exports.enterFllscrn = function() {
-  document.getElementById('navigation').style.display = 'none';
-  document.getElementById('titlebar').style.display = 'none';
-  document.getElementById('etabs-tabgroup').style.setProperty('display', 'none', 'important');
-  document.getElementById('etabs-views').style.marginTop = '0px';
-  document.getElementById('etabs-views').style.height = '100%';
+exports.enterFllscrn = function(view, screen) {
+  view.setBounds({ x: 0, y: 0, width: screen.getPrimaryDisplay().size.width, height: screen.getPrimaryDisplay().size.height });
 }
 
-exports.leaveFllscrn = function() {
-  document.getElementById('navigation').style.display = 'block';
-  document.getElementById('titlebar').style.display = 'block';
-  document.getElementById('etabs-tabgroup').style.display = 'block';
-  document.getElementById('etabs-views').style.marginTop = '89px';
-  document.getElementById('etabs-views').style.height = 'calc(100% - 89px)';
+exports.leaveFllscrn = function(view, width, height) {
+  view.setBounds({ x: 0, y: 89, width: width, height: height - 89 });
+  view.setBounds({ x: 0, y: 89, width: width, height: height - 89 });
 }
 
 exports.domReady = function (view, store) {
-  //setURLBar(tab.webview.src, tab);
+  setURLBar(view.webContents.getURL());
 
   view.webContents.insertCSS('input::-webkit-calendar-picker-indicator {display: none;}');
 
@@ -209,7 +202,6 @@ exports.domReady = function (view, store) {
 
 exports.updateTargetURL = function (event, url) {
   if (url && url != '') {
-    console.log(url);
     $('#target').css('opacity', '0.95');
     $('#target').text(url);
   } else {
@@ -217,19 +209,17 @@ exports.updateTargetURL = function (event, url) {
   }
 }
 
-exports.newWindow = function (event, legit=false, newtab) {
-  if(legit){
-    console.log(newTab);
-    //newtab('', event.url);
-  }
+exports.newWindow = function (newView, url, frameName, disp, legit=false) {
+  if(legit) newView(url);
 }
 
 exports.faviconUpdated = function (view, favicons) {
   if(favicons && favicons.length > 0) { view.tab.setIcon(favicons[0]); }
 }
 
-exports.titleUpdated = function (view, event) {
-  view.tab.setTitle(event.title);
+exports.titleUpdated = function (view, event, title) {
+  view.tab.setTitle(title);
+  view.tab.title.attr('title', title);
 }
 
 exports.changeTab = function (view, store) {
@@ -238,7 +228,7 @@ exports.changeTab = function (view, store) {
     document.getElementById('star').src = result ? 'images/bookmark-saved.svg' : 'images/bookmark.svg';
   });
 
-  //setURLBar(view.webContents.getURL(), tab);
+  setURLBar(view.webContents.getURL());
 
   try {
     let protocol = (new URL(view.webContents)).protocol;

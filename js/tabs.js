@@ -41,8 +41,10 @@ $.fn.fadeSlideRight = function(speed,fn) {
 exports.openClosedTab = function () {
   if(closedTabs.length == 0) return;
   let item = closedTabs[closedTabs.length-1];
-  this.new(item, item);
-  closedTabs.pop(item);
+  this.newView(item);
+
+  const index = closedTabs.indexOf(item);
+  if (index > -1) closedTabs.splice(index, 1);
 }
 
 exports.new = function (docTitle, url, callback=()=>{}, background=false) {
@@ -74,20 +76,16 @@ exports.new = function (docTitle, url, callback=()=>{}, background=false) {
   return tab;
 }
 
-exports.current = function () {
-  return tabGroup.getActiveTab();
-}
-
 exports.currentView = function () {
   return activeTab;
 }
 
-exports.all = function () { return tabGroup.getTabs(); }
+exports.all = function () { return this.tabs; }
 
-exports.get = function (index) { return tabGroup.getTab(index); }
+exports.get = function (index) { return this.tabs[index]; }
 
 exports.length = function () {
-  return tabGroup.getTabs().length;
+  return this.tabs.length;
 }
 
 exports.makeTabGroup = function (newTab_title, newTab_url, callback=()=>{}) {
@@ -95,7 +93,7 @@ exports.makeTabGroup = function (newTab_title, newTab_url, callback=()=>{}) {
   let newTab = this.new;
   tabGroup = new TabGroup({
     ready: function(tabGroup) {
-      let drake = require("dragula")([tabGroup.tabContainer], {
+      require("dragula")([tabGroup.tabContainer], {
         direction: 'horizontal',
         moves: function (el, container, handle) {
          return $(handle).attr('class') != 'etabs-tab-button-close';
@@ -129,29 +127,38 @@ exports.makeTabGroup = function (newTab_title, newTab_url, callback=()=>{}) {
 }
 exports.getTabGroup = function () { return tabGroup; }
 
-exports.added = function (callback) {   /*tabGroup.on('tab-added', callback);*/   }
-exports.removed = function (callback) { /*tabGroup.on('tab-removed', callback);*/ }
-exports.active = function (callback) {  /*tabGroup.on('tab-active', callback);*/  }
-
-async function initBrowserView(view) {
+exports.initBrowserView = async (view) => {
   view.webContents.on('did-start-loading', async (e) => { web.loadStart(view) });
   view.webContents.on('did-stop-loading', async (e) => { web.loadStop(view) });
   //view.webContents.on('did-finish-load', async (e) => { finishLoad(e, tab) });
-  view.webContents.on('did-fail-load', async (e) => {web.failLoad(e, view); });
-  view.webContents.on('enter-html-full-screen', async (e) => { web.enterFllscrn() });
-  view.webContents.on('leave-html-full-screen', async (e) => { web.leaveFllscrn() });
+  view.webContents.on('did-fail-load', async (e, ec, ed, vu) => {web.failLoad(e, view, ec, ed, vu); });
+  view.webContents.on('enter-html-full-screen', async (e) => { web.enterFllscrn(view, remote.screen) });
+  view.webContents.on('leave-html-full-screen', async (e) => { web.leaveFllscrn(view, window.outerWidth, remote.getCurrentWindow().getBounds().height) });
   view.webContents.on('update-target-url', async (e, url) => { web.updateTargetURL(e, url) });
   view.webContents.on('dom-ready', async (e) => { web.domReady(view, store) });
-  view.webContents.on('new-window', async (e) => { web.newWindow(e, true, this.newView) });
+  view.webContents.on('new-window', async (e, url, f, disposition) => {
+    switch (disposition) {
+      case 'background-tab':
+        this.newView(url, false);
+        break;
+      default:
+        this.newView(url);
+        break;
+    }
+  });
   view.webContents.on('page-favicon-updated', async (e) => { web.faviconUpdated(view, e.favicons) });
-  view.webContents.on('page-title-updated', async (e) => { web.titleUpdated(view, e) });
+  view.webContents.on('page-title-updated', async (e, t) => { web.titleUpdated(view, e, t) });
   view.webContents.on('did-change-theme-color', async (e) => { web.changeThemeColor(e) });
   view.webContents.on('did-navigate', async (e) => { web.didNavigate(e.url, view, store) });
   view.webContents.on('did-navigate-in-page', async (e) => { web.didNavigate(e.url, view, store) });
+  view.webContents.on('preload-error', async (e, path, err) => { console.error("PRELOAD ERROR", err); });
+  view.webContents.on('certificate-error', async (e, url, err, cert, callback) => {
+    e.preventDefault();
+    console.log(err);
+  });
   view.webContents.on('found-in-page', async (e) => {
     $('#matches').text(e.result.activeMatchOrdinal.toString() + ' of ' + e.result.matches.toString() + ' matches');
   });
-  view.webContents.on('preload-error', async (e, path, err) => { console.error(err); });
 }
 
 exports.savePage = function(contents) {
@@ -184,7 +191,6 @@ exports.activate = function (view) {
 
   if($('div.active').length > 0) $('div.active').removeClass('active');
 
-  console.log('set view', view);
   remote.getCurrentWindow().setBrowserView(view);
   remote.getCurrentWindow().setBrowserView(view);
   view.tab.element.addClass('active');
@@ -223,7 +229,7 @@ exports.close = function (view) {
 
 }
 
-exports.newView = function (url, active=true) {
+exports.newView = function (url='peacock://newtab', active=true) {
   const { BrowserView } = remote;
   const { join } = require('path');
 
@@ -339,6 +345,11 @@ exports.newView = function (url, active=true) {
     close: async () => { view.tab.element.remove(); }
   };
 
+  view.tab.element.css('opacity', '0');
+  view.tab.element.css('width', '60px');
+  view.tab.element.css('transition', 'all 0.1s');
+  view.tab.element.fadeSlideRight(100);
+
   view.tab.icon = view.tab.element.children().eq(0).children().first();
   view.tab.title = view.tab.element.children().eq(1);
   view.tab.button = view.tab.element.children().eq(2).children().first();
@@ -352,8 +363,10 @@ exports.newView = function (url, active=true) {
     this.close(view);
   });
 
+  view.type = 'tab';
+
   view.webContents.loadURL(url);
-  initBrowserView(view);
+  this.initBrowserView(view);
 
   this.viewAdded(view);
 
@@ -364,22 +377,56 @@ exports.newView = function (url, active=true) {
   return view;
 }
 
-exports.viewAdded = function (view) {
-  this.tabs.push(view);
+exports.nextTab = async () => {
+  let length = this.tabs.length;
+  let index = this.tabs.indexOf(activeTab);
+
+  if (length == 1) return;
+
+  if (index == length - 1) { this.activate(this.tabs[0]); }
+  else { this.activate(this.tabs[index + 1]); }
 }
 
+exports.backTab = async () => {
+  let length = this.tabs.length;
+  let index = this.tabs.indexOf(activeTab);
+
+  if (length == 1) return;
+
+  if (index == 0) { this.activate(this.tabs[length - 1]); }
+  else { this.activate(this.tabs[index - 1]); }
+}
+
+exports.viewActivated = function (view) { web.changeTab(view, store); }
+exports.viewAdded = function (view) { this.tabs.push(view); }
 exports.viewClosed = function (view, tabs=this.tabs) {
   const index = this.tabs.indexOf(view);
   if (index > -1) this.tabs.splice(index, 1);
 }
 
-exports.viewActivated = function (view) {
-  console.log('view activated: ' + this.tabs.indexOf(view));
-  web.changeTab(view, store);
+exports.showDialog = async (text) => {
+  let { BrowserView } = remote;
+  let view = new BrowserView();
+  view.webContents.loadURL('data:,' + encodeURIComponent(text));
+  remote.getCurrentWindow().addBrowserView(view);
 }
 
 $('.etabs-tab-button-new').click(async e => {
   this.newView('peacock://newtab');
 });
 
-this.newView('peacock://newtab');
+let tabContainer = $('.etabs-tabs')[0];
+require("dragula")([tabContainer], {
+  direction: 'horizontal',
+  moves: function (el, container, handle) {
+    return !$(handle).hasClass('etabs-tab-button-close');
+  }
+});
+
+remote.app.on('certificate-error', (event, webContents, url, error, certificate, callback) => {
+  console.log(certificate, error);
+  event.preventDefault();
+  callback(true);
+});
+
+this.newView();
