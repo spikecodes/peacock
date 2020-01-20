@@ -41,16 +41,14 @@
 	"author": "Codiscite",
 	"license": "MIT",
 	"devDependencies": {
-		"blockstack": "^20.0.0-alpha.4",
 		"child_process": "^1.0.2",
-		"cross-fetch": "^3.0.4",
 		"electron": "^8.0.0-beta.7",
 		"electron-builder": "^21.2.0"
 	},
 	"dependencies": {
 		"@cliqz/adblocker-electron": "^1.4.1",
 		"async": "^3.1.0",
-		"blockstack": "^20.0.0-alpha.4",
+		"blockstack": "^19.3.0",
 		"child_process": "^1.0.2",
 		"cors": "^2.8.5",
 		"cross-fetch": "^3.0.4",

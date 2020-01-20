@@ -32,13 +32,7 @@ require('jsonfile').readFile(settingsFile, async (err, obj) => {
 // be closed automatically when the JavaScript object is garbage collected.
 let mainWindow;
 
-ipcMain.on('openPage', (event, arg) => {
-	sendToRenderer('openPage', arg);
-});
-
-ipcMain.on('signIntoBlockstack', (e, a) => {
-	sendToRenderer('keyboardShortcut','signIntoBlockstack');
-});
+process.noDeprecation = true;
 
 ipcMain.on('setGlobal', (e, globalVal) => {
 	global[globalVal[0]] = globalVal[1];
@@ -80,7 +74,7 @@ async function createWindow() {
 		icon: join(__dirname, 'images/peacock.ico')
 	});
 
-	mainWindow.openDevTools({ mode: 'detach' });
+	//mainWindow.openDevTools({ mode: 'detach' });
 
 	// and load the index.html of the app.
 	mainWindow.loadURL(format({

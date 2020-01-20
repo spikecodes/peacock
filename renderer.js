@@ -43,71 +43,57 @@ userAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:73.0) Gecko/20100101 F
 
 //Discord Rich Presence
 try {
-/*  const { Client } = require('discord-rpc');
-const clientId = '627363592408137749';
+  const { Client } = require('discord-rpc');
+  const clientId = '627363592408137749';
 
-const rpclient = new Client({
-  transport: 'ipc'
-});
-const startDate = new Date();
-const startTimestamp = startDate.getTime();
-
-async function setActivity() {
-  if (!rpclient) {
-    return;
-  }
-  var details = 'https://peacock.link/';
-  var state = 'Browsing the web...';
-  rpclient.setActivity({
-    details: details,
-    state: state,
-    startTimestamp,
-
-    largeImageKey: 'peacockbg_light',
-    largeImageText: `Peacock Browser v` + version,
-    instance: false
+  const rpclient = new Client({
+    transport: 'ipc'
   });
-}
+  const startDate = new Date();
+  const startTimestamp = startDate.getTime();
 
-rpclient.on('ready', () => {
-  setActivity();
+  async function setActivity() {
+    if (!rpclient) {
+      return;
+    }
+    var details = 'https://peacock.link/';
+    var state = 'Browsing the web...';
+    rpclient.setActivity({
+      details: details,
+      state: state,
+      startTimestamp,
 
-  setInterval(() => {
+      largeImageKey: 'peacockbg_light',
+      largeImageText: `Peacock Browser v` + version,
+      instance: false
+    });
+  }
+
+  rpclient.on('ready', () => {
     setActivity();
-  }, 15e3);
-});
 
-rpclient
-  .login({clientId})
-  .catch(console.log('Discord not open.'));*/
-} catch (e) {
-console.log('Discord not open.');
-}
+    setInterval(() => {
+      setActivity();
+    }, 15e3);
+  });
+
+  rpclient
+    .login({clientId})
+    .catch(console.log('Discord not open.'));
+  } catch (e) {
+    console.log('Discord not open.');
+  }
 //Discord Rich Presence
 
 exports.getTabCount = function() {
-return tabs.length();
+  return tabs.length();
 }
 
 window.theme = 'light';
 
-//tabs.makeTabGroup('New Tab', 'peacock://newtab');
-
 var alertWin, settings, certDialog;
 
 window.darkMode = nativeTheme.shouldUseDarkColors || false;
-
-/*const {openNewGitHubIssue, debugInfo} = require('electron-util');
-require('electron-unhandled')({
-showDialog: true,
-reportButton: error => {
-	openNewGitHubIssue({
-		user: 'Codiscite',
-		repo: 'peacock',
-		body: `\`\`\`\n${error.stack}\n\`\`\`\n\n---\n\n${debugInfo()}`
-	});
-}
-});*/
 
 /*ipcMain.on('ad-blocked', async function (event, ad) {
 jsonfile.readFile(blocked, async function(err, obj) {
@@ -124,12 +110,12 @@ jsonfile.readFile(blocked, async function(err, obj) {
 });*/
 
 ipcMain.on('blockstackSignIn', async function(event, token) {
-if (blockchain.getUserSession().isUserSignedIn()) {
-  tabs.current().close();
-} else {
-  blockchain.getUserSession().handlePendingSignIn(token);
-  tabs.current().close();
-}
+  if (blockchain.getUserSession().isUserSignedIn()) {
+    tabs.close();
+  } else {
+    blockchain.getUserSession().handlePendingSignIn(token);
+    tabs.close();
+  }
 });
 
 ipcMain.on('alert', async function(e, data) {
@@ -189,6 +175,10 @@ ipcMain.on('mail', async function(e, action, data) {
   }
 });
 
+ipcMain.on('signIntoBlockstack', (e, a) => {
+	tabs.newView(blockchain.signIntoBlockstack());
+});
+
 let nav;
 let viewHeight = $('.etabs-views').height();
 async function keyboardShortcut(shortcut) {
@@ -201,37 +191,19 @@ async function keyboardShortcut(shortcut) {
       tabs.currentView().webContents.openDevTools({ mode: 'right' });;
       break;
     case 'nextTab':
-      if (tabs.length() === 1) {
-        // Do nothing
-      } else if (tabs.current().id === tabs.length() - 1) {
-        tabs.get(0).activate();
-      } else {
-        tabs.get(tabs.current().id + 1).activate();
-      }
-
+      tabs.nextTab();
       break;
     case 'backTab':
-      if (tabs.length() === 1) {
-        // Do nothing
-      } else if (tabs.current().id === 0) {
-        // If First Tab
-        tabs.get(tabs.length() - 1).activate(); // Activate Last Tab
-      } else {
-        // If Not First Tab
-        tabs.get(tabs.current().id - 1).activate(); // Activate Previous Tab
-      }
+      tabs.backTab();
       break;
     case 'newTab':
-      tabs.new('DuckDuckGo', 'https://duckduckgo.com/');
+      tabs.newView();
       break;
     case 'closeTab':
       tabs.close();
       break;
     case 'openClosedTab':
       tabs.openClosedTab();
-      break;
-    case 'signIntoBlockstack':
-      tabs.new('Blockstack', blockchain.signIntoBlockstack());
       break;
     case 'history':
       store.getHistory().then(console.log);
@@ -246,14 +218,13 @@ async function keyboardShortcut(shortcut) {
       stopVPN();
       break;
     case 'zoomIn':
-      tabs.currentView().webContents.setZoomFactor(tabs.currentView().webContents.getZoomFactor() + 0.1);
+      tabs.currentView().webContents.zoomFactor += 0.1;
       break;
     case 'zoomOut':
-      tabs.currentView().webContents.setZoomFactor(tabs.currentView().webContents.getZoomFactor() - 0.1);
+      tabs.currentView().webContents.zoomFactor -= 0.1;
       break;
     case 'resetZoom':
-      webFrame.setZoomFactor(1.0);
-      tabs.currentView().webContents.setZoomFactor(1.0);
+      tabs.currentView().webContents.zoomFactor = 1;
       break;
     case 'focusSearchbar':
       $('#url').focus();
@@ -275,8 +246,7 @@ async function keyboardShortcut(shortcut) {
       tabs.currentView().webContents.reloadIgnoringCache();
       break;
     case 'getMetrics':
-      //console.log(remote.app.getAppMetrics());
-      showSnackbar('Allow <b>duckduckgo.com</b> to access <b>location</b>?', 100, ['YES', 'NO']);
+      //showSnackbar('Allow <b>duckduckgo.com</b> to access <b>location</b>?', 100, ['YES', 'NO']);
       break;
     case 'toggleCustomization':
       if(!nav){ nav = require('dragula')([$('#navigation')], {}); }
@@ -304,7 +274,7 @@ remote.getCurrentWindow().on('maximize', async function(event, args) {
 
 ipcMain.on('loadPage', async function(event, args) { tabs.currentView().webContents.loadURL(args); });
 
-ipcMain.on('openPage', async function(event, args) { tabs.new('Loading...', args); });
+ipcMain.on('openPage', async function(event, args) { tabs.newView(args); });
 
 // Adblock
 async function enableAdBlocking() {
@@ -528,7 +498,8 @@ async function openSettings() {
   			plugins: true,
         contextIsolation: false,
         enableBlinkFeatures: 'OverlayScrollbars',
-        webviewTag: false
+        webviewTag: false,
+  			enableRemoteModule: true
   		},
   		width: 900,
   		height: 700,
@@ -565,7 +536,8 @@ async function initAlert() {
     height: 130,
     show: false,
     webPreferences: {
-      nodeIntegration: true
+      nodeIntegration: true,
+      enableRemoteModule: true
     },
     alwaysOnTop: true,
     icon: join(__dirname, 'images/peacock.ico')
@@ -862,7 +834,7 @@ var pattern = new RegExp('^(https?:\\/\\/)?'+ // protocol
 return !!pattern.test(str);
 }
 
-tabs.added(async (tab) => {
+/*tabs.added(async (tab) => {
 initWebView(tab);
 
 onetime(tab.webview, 'dom-ready', async (e) => {
@@ -922,7 +894,7 @@ tab.on('icon-changed', (image, tabby) => {
 
 tabs.removed(async (tab, tabContainer) => {
 if(tabs.length() === 0) { remote.app.quit(); }
-});
+});*/
 
 $('#shield').click(toggleAdblock);
 $('#back').click(async (e) => { tabs.currentView().webContents.goBack() });
@@ -938,8 +910,8 @@ switch(e.which)
     }
   break;
   case 2:
-    let webby = tabs.currentView().webContents;
-    tabs.new(webby.getTitle(), webby.getURL(), ()=>{}, true);
+    let url = tabs.currentView().webContents.getURL();
+    tabs.newView(url);
   break;
   case 3:
     //right Click
@@ -1127,7 +1099,8 @@ certDialog = new BrowserWindow({
   width: 490,
   height: 600,
   webPreferences: {
-    nodeIntegration: true
+    nodeIntegration: true,
+    enableRemoteModule: true
   },
   show: false,
   icon: join(__dirname, 'images/peacock.ico')
@@ -1160,7 +1133,7 @@ if($('#search').attr('src') == 'images/lock.svg') {
 $('#info-close').click(toggleSiteInfo);
 $('#info-header h4').click(async (e) => {
 toggleSiteInfo();
-tabs.new('','https://support.google.com/chrome/answer/95617');
+tabs.newView('https://support.google.com/chrome/answer/95617');
 });
 $('#cookies').click(async (e) => {
 toggleSiteInfo();
@@ -1226,7 +1199,7 @@ if (Number(newestVersion) > Number(currentVersion)) {
 
   dialog.showMessageBox(null, optionso).then(data => {
     if(data.response === 1){
-      tabs.new('Peacock Download', 'https://github.com/Codiscite/peacock/releases/latest');
+      tabs.newView('https://github.com/Codiscite/peacock/releases/latest');
     }
     console.log(data.checkboxChecked);
   });
@@ -1501,6 +1474,23 @@ const menuTemplate = [
 ];
 
 Menu.setApplicationMenu(Menu.buildFromTemplate(menuTemplate));
+
+/*require('electron-context-menu')({
+  window: remote.getCurrentWebContents(),
+  prepend: (defaultActions, params, browserWindow) => [
+    {
+      label: 'New Tabs',
+      accelerator: 'Alt+Left',
+      visible: params.selectionText.length == 0,
+      enabled: view.webContents.canGoBack(),
+      click: async () => { view.webContents.goBack(); }
+    }
+  ],
+  showLookUpSelection: true,
+  showCopyImageAddress: true,
+  showSaveImageAs: true,
+  showInspectElement: true
+});*/
 
 /*extensions.forEach(function (item, index) {
 let badge = $('#omnibox').after(item.badge).next();
