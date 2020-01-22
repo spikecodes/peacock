@@ -1,5 +1,5 @@
 language: node_js
-node_js: "11.6.0"
+node_js: "12"
 
 # before_install:
 #   - npm install
@@ -22,7 +22,7 @@ jobs:
       os: osx
       osx_image: xcode10.1
       script:
-        - npm install electron-builder -g && npm run dist-all
+        - npm run dist-all
       before_cache:
         - rm -rf $HOME/.cache/electron-builder/wine
     # - stage: Deploy Windows & Mac
