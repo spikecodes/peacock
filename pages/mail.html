@@ -5,14 +5,9 @@
     <title>Peacock Mail</title>
     <link href="https://fonts.googleapis.com/css?family=Roboto&display=swap" rel="stylesheet">
     <style>
-      * {
-        font-family: 'Roboto';
-      }
-
-      a {
-        text-decoration: none;
-        color: #63E4FF;
-      }
+      * { font-family: 'Roboto'; }
+      body { background: white; }
+      span { cursor: pointer; color: #63E4FF; }
 
       .email {
         position: absolute;
@@ -33,22 +28,19 @@
         padding: 10px 20px;
         border: none;
         border-radius: 3px;
-        /* background: none; */
         background: #FFD563;
         font-size: 16px;
         cursor: pointer;
       }
 
-      .email p {
-        font-size: 15px;
-      }
+      .email p { font-size: 15px; }
     </style>
   </head>
   <body>
     <div class="email">
       <input id="addr" type="text" name="" value="" placeholder="Personal Email Address">
       <button id="set" type="button" name="button">SET</button>
-      <p id="detail">We will never send you emails, your email is never shared with a third party. <a href="#">Learn More</a></p>
+      <p id="detail">We will never send you emails, your email is never shared with a third party. <span>Learn More</span></p>
     </div>
   </body>
   <script type="text/javascript">
@@ -56,6 +48,7 @@
 
     document.getElementById('set').addEventListener('click', async e => {
       send('mail', 'setAddress', document.getElementById('addr').value);
+      alert('Email has been set!');
     });
   </script>
 </html>

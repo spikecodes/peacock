@@ -4,10 +4,12 @@ const {	join } = require('path');
 const { format } = require('url');
 
 global.alert = (message) => {
+	let url = (window.location.href.startsWith('peacock')) ? 'Peacock' : window.location.href;
+
 	ipcRenderer.send('alert', {
 		message: message,
 		type: 'alert',
-		url: window.location.href
+		url: url
 	});
 }
 
@@ -95,9 +97,9 @@ document.addEventListener('webkitfullscreenchange', fullscreenchange);
 if (window.location.protocol == 'peacock:') {
 
 	ipcRenderer.once('loadFlags', (event, data) => {
-		let json = JSON.parse(data);
-
-		setEnabled(Object.keys(json));
+		let keys = Object.keys(data);
+		var filtered = keys.filter(key => { return data[key] });
+		setEnabled(filtered);
 	});
 
 	ipcRenderer.once('setError', (event, details) => {
