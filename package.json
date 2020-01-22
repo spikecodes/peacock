@@ -35,7 +35,7 @@
 	"scripts": {
 		"start": "electron .",
 		"pack": "electron-builder --dir",
-		"release": "electron-builder --publish=always",
+		"release": "electron-builder -p always",
 		"dist-all": "electron-builder -mwl --publish=always"
 	},
 	"author": "Codiscite",
