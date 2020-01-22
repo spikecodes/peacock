@@ -1,7 +1,5 @@
-sudo: false
-
 language: node_js
-node_js: "13.7.0"
+node_js: "11.6.0"
 
 # before_install:
 #   - npm install
@@ -20,24 +18,24 @@ env:
 
 jobs:
   include:
-    # - stage: Deploy Windows, Mac and Linux
-    #   os: osx
-    #   osx_image: xcode10.1
-    #   script:
-    #     - npm install electron-builder -g && npm run dist-all
-    #   before_cache:
-    #     - rm -rf $HOME/.cache/electron-builder/wine
-    - stage: Deploy Windows & Mac
-      if: tag IS present
+    - stage: Deploy Windows, Mac and Linux
       os: osx
       osx_image: xcode10.1
       script:
-        - npm run release -- --mac --win
+        - npm install electron-builder -g && npm run dist-all
       before_cache:
         - rm -rf $HOME/.cache/electron-builder/wine
-    - stage: Deploy linux
-      if: tag IS present
-      os: linux
-      dist: trusty
-      script:
-        - npm run release
+    # - stage: Deploy Windows & Mac
+    #   if: tag IS present
+    #   os: osx
+    #   osx_image: xcode10.1
+    #   script:
+    #     - npm run release -- --mac --win
+    #   before_cache:
+    #     - rm -rf $HOME/.cache/electron-builder/wine
+    # - stage: Deploy linux
+    #   if: tag IS present
+    #   os: linux
+    #   dist: trusty
+    #   script:
+    #     - npm run release
