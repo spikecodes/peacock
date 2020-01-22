@@ -3,9 +3,6 @@
 // All of the Node.js APIs are available in this process.
 require('v8-compile-cache');
 
-const jsonfile = require('jsonfile');
-
-
 const { remote, webFrame, nativeImage } = require('electron');
 const { BrowserView, BrowserWindow, screen, dialog, nativeTheme, ipcMain, app, Menu } = remote;
 require('electron').ipcMain = ipcMain;
@@ -16,20 +13,38 @@ const { ElectronBlocker } = require('@cliqz/adblocker-electron');
 
 const { existsSync, readFile, writeFile } = require('fs');
 
-const bookmarks = join(__dirname, 'data/bookmarks.json');
-const settingsFile = join(__dirname, 'data/settings.json');
-const search_engines = join(__dirname, 'data/search_engines.json');
-const blocked = join(__dirname, 'data/blocked.json');
-const permissionsFile = join(__dirname, 'data/permissions.json');
-const flags = join(__dirname, 'data/flags.json');
-
 const mail = require('./js/mail.js');
 const tabs = require('./js/tabs.js');
 const blockchain = require('./js/blockchain.js');
-const store = require('./js/store.js');
+const storage = require('./js/store.js');
 
 const webtab = require('./js/web-tab.js');
-webtab.setDocument(document);
+
+const Store = require('electron-store');
+const store = new Store();
+
+if(!store.get('settings')) {
+  let data = {"search_engine":"DuckDuckGo","theme":"Default","save_location":"Downloads","storage":"Locally","newTab":{},"mail":{"address":"","ids":[""]}};
+  store.set('settings', data);
+}
+
+store.set('searchEngines', [
+  {"name": "Google", "url": "https://google.com/search?q=", "icon": "https://seeklogo.net/wp-content/uploads/2015/09/google-favicon-vector.png"},
+	{"name": "DuckDuckGo","url": "https://duckduckgo.com/?q=","icon": "https://duckduckgo.com/assets/icons/meta/DDG-icon_256x256.png"},
+	{"name": "Ecosia","url": "https://www.ecosia.org/search?q=","icon": "https://cdn.iconscout.com/icon/free/png-512/ecosia-2-569348.png"},
+	{"name": "Bing","url": "https://www.bing.com/search?q=","icon": "http://pluspng.com/img-png/bing-logo-png-png-ico-512.png"},
+	{"name": "Yahoo","url": "https://search.yahoo.com/search?p=","icon": "https://i.ibb.co/F4VhWMr/yahoo-2019-logo-social.png"}
+]);
+
+if(!store.get('blocked')) store.set('blocked', []);
+if(!store.get('bookmarks')) store.set('bookmarks', []);
+if(!store.get('flags')) store.set('flags', {});
+if(!store.get('history')) store.set('history', []);
+if(!store.get('permissions')) store.set('permissions', []);
+
+webtab.init(document, store);
+storage.init(store);
+mail.init(store);
 
 // const extensions = require('./js/extensions.js').setup();
 const extensions = null;
@@ -96,8 +111,7 @@ var alertWin, settings, certDialog;
 window.darkMode = nativeTheme.shouldUseDarkColors || false;
 
 /*ipcMain.on('ad-blocked', async function (event, ad) {
-jsonfile.readFile(blocked, async function(err, obj) {
-  if(err) {console.error(err); return;}
+  let obj = store.get('blocked');
 
   var adRequest = { type: ad.type, url: ad.url, sourceHostname: ad.sourceHostname };
 
@@ -105,11 +119,12 @@ jsonfile.readFile(blocked, async function(err, obj) {
 
   let result = obj;
   result.push(adRequest);
-  jsonfile.writeFile(blocked, result, async function (err) {});
-});
+
+  store.set('blocked', result);
 });*/
 
 ipcMain.on('blockstackSignIn', async function(event, token) {
+  console.log('blockstack','signed in');
   if (blockchain.getUserSession().isUserSignedIn()) {
     tabs.close();
   } else {
@@ -123,18 +138,14 @@ ipcMain.on('alert', async function(e, data) {
 });
 
 ipcMain.on('flags.js', async function(e, data) {
-  let fs = require('fs');
-  jsonfile.readFile(flags, async function(err, json) {
-    if(err) return console.error(err);
+  console.log(data);
 
-    if(data.value) {
-      json[data.flag] = true;
-    } else {
-      delete json[data.flag];
-    }
+  let flags = store.get('flags');
 
-    jsonfile.writeFile(flags, json, async function (err) {});
-  });
+  if(data.value) { flags[data.flag] = true; }
+  else           { delete flags[data.flag]; }
+
+  store.set('flags', flags);
 });
 
 ipcMain.on('newTab', async function(e, action, extra) {
@@ -143,7 +154,7 @@ ipcMain.on('newTab', async function(e, action, extra) {
     $('#url').focus();
     $('#url').select();
   } else if (action == 'removeHistoryItem') {
-    store.removeHistoryItem(extra);
+    storage.removeHistoryItem(extra);
   }
   else if(action == 'settings') {
     console.log(extra);
@@ -159,20 +170,19 @@ ipcMain.on('mail', async function(e, action, data) {
       //e.returnValue = 'spikey';
       break;
     case 'setAddress':
-      jsonfile.readFile(settingsFile, async function(err, obj) {
-        obj.mail.address = data;
-        jsonfile.writeFile(settingsFile, obj, async function (err) {});
-      });
+      store.set('settings.mail.address', data);
       break;
     case 'getAddress':
-      jsonfile.readFile(settingsFile, async function(err, obj) {
-        console.log('address', obj.mail.address);
-        e.returnValue = obj.mail.address;
-      });
+      e.returnValue = store.get('settings.mail.address');
       break;
     default:
       break;
   }
+});
+
+ipcMain.on('store', async (e, purpose, name, value) => {
+  if (purpose == 'set') { store.set(name, value); }
+  else { e.returnValue = store.get(name); }
 });
 
 ipcMain.on('signIntoBlockstack', (e, a) => {
@@ -206,10 +216,10 @@ async function keyboardShortcut(shortcut) {
       tabs.openClosedTab();
       break;
     case 'history':
-      store.getHistory().then(console.log);
+      storage.getHistory().then(console.log);
       break;
     case 'clearHistory':
-      store.clearHistory();
+      storage.clearHistory();
       break;
     case 'startVPN':
       startVPN(join(__dirname, 'tor-win32-0.4.1.6/Tor/tor.exe'));
@@ -349,9 +359,7 @@ node.addEventListener(type, function(e) {
 }
 
 async function loadTheme() {
-jsonfile.readFile(settingsFile, async function(err, obj) {
-  if (err) console.error(err);
-  let themeObj = obj.theme.toLowerCase();
+  let themeObj = store.get('settings.theme').toLowerCase();
   let newTheme = themeObj;
 
   if(window.darkMode && themeObj == 'default') newTheme = 'dark';
@@ -411,7 +419,6 @@ jsonfile.readFile(settingsFile, async function(err, obj) {
     }
     console.timeEnd('Theme load time');
   }
-});
 }
 loadTheme();
 
@@ -478,10 +485,7 @@ if(parseInt( $('.etabs-views').css('height') ) === viewHeight - 35){
 }
 
 async function openSettings() {
-  // let url = normalize(`${__dirname}/pages/settings.html`);
-  // window.location.href = url;
-
-  if(settings != undefined && settings != null){ // If Settings Already Exists
+  if(settings){ // If Settings Already Exists
   	settings.focus(); // Focus on it
   } else { // If Settings Doesn't Already Exist
     let bg = (window.theme == 'dark') ? '#292A2D' : '#ffffff';
@@ -502,12 +506,12 @@ async function openSettings() {
   			enableRemoteModule: true
   		},
   		width: 900,
-  		height: 700,
+  		height: 900,
   		icon: join(__dirname, 'images/peacock.ico')
   	}); // Create Settings
 
     // Open Developer Tools:
-    settings.openDevTools();
+    //settings.openDevTools();
 
   	// and load the html of the app.
     let { format } = require('url');
@@ -517,7 +521,7 @@ async function openSettings() {
   		slashes: true
   	}) + '?' + params);
 
-  	settings.on('closed', async () => { settings = null; });
+  	settings.on('closed', async e => { settings = null });
   }
 }
 
@@ -578,19 +582,14 @@ async function showAlert(input) {
 }
 
 async function getSearchEngine(cb) {
-jsonfile.readFile(settingsFile, async function(err, objecteroonie) {
-  if (err) console.error(err);
+  let searchEngine = store.get('settings.search_engine');
+  let engines = store.get('searchEngines');
 
-  let searchEngine = objecteroonie.search_engine;
-
-  jsonfile.readFile(search_engines, async function(err, obj) {
-    for (var i = 0; i < obj.length; i++) {
-      if (obj[i].name == searchEngine) {
-        cb(obj[i]);
-      }
+  for (var i = 0; i < engines.length; i++) {
+    if (engines[i].name == searchEngine) {
+      cb(engines[i]);
     }
-  });
-});
+  }
 }
 
 async function changeAdBlock(enabled) {
@@ -655,42 +654,6 @@ try {
 } catch (e) {}
 }
 
-async function initWebView(tab) {
-  tab = tab || tabs.currentView();
-
-  tab.webview.addEventListener('did-start-loading', async (e) => { web.loadStart(tab, extensions) });
-  tab.webview.addEventListener('did-stop-loading', async (e) => { web.loadStop(tab, extensions) });
-  tab.webview.addEventListener('did-finish-load', async (e) => { finishLoad(e, tab) });
-  tab.webview.addEventListener('did-fail-load', async (e) => {web.failLoad(e, tab.webview); });
-  tab.webview.addEventListener('enter-html-full-screen', async (e) => { web.enterFllscrn() });
-  tab.webview.addEventListener('leave-html-full-screen', async (e) => { web.leaveFllscrn() });
-  tab.webview.addEventListener('update-target-url', async (e) => { web.updateTargetURL(e) });
-  tab.webview.addEventListener('dom-ready', async (e) => { web.domReady(tab, store) });
-  tab.webview.addEventListener('new-window', async (e) => { web.newWindow(e, true, tabs) });
-  tab.webview.addEventListener('page-favicon-updated', async (e) => { web.faviconUpdated(tab, e.favicons) });
-  tab.webview.addEventListener('page-title-updated', async (e) => { web.titleUpdated(e, tab) });
-  tab.webview.addEventListener('did-change-theme-color', async (e) => { web.changeThemeColor(e) });
-  tab.webview.addEventListener('did-navigate', async (e) => { web.didNavigate(e.url, tab.webview, store) });
-  tab.webview.addEventListener('did-navigate-in-page', async (e) => { web.didNavigate(e.url, tab.webview, store) });
-  tab.webview.addEventListener('found-in-page', async (e) => {
-    $('#matches').text(e.result.activeMatchOrdinal.toString() + ' of ' + e.result.matches.toString() + ' matches');
-  });
-  tab.webview.addEventListener('ipc-message', async (e) => {
-  switch (e.channel) {
-    case 'flags.js':
-
-      break;
-    case 'newTab':
-
-    default:
-    break;
-  }
-  if(e.channel == 'flags.js') {
-
-  }
-});
-}
-
 async function showSnackbar(text='', items=[], duration=100, buttons=[], callback=console.log) {
 $('#snackbar p').text(text);
 
@@ -729,28 +692,27 @@ $('#snackbar').css('display', 'none');
 
 
 async function loadFlags() {
-  jsonfile.readFile(flags, async (err, obj) => {
-  	Object.keys(obj).forEach(function (key) {
-  		console.log('Added flag: ' + key);
-  		app.commandLine.appendSwitch(key);
-  	});
-  });
+	Object.keys(store.get('flags')).forEach(function (key) {
+		console.log('Added flag: ' + key);
+		app.commandLine.appendSwitch(key);
+	});
 }
 
 
 async function toggleSiteInfo() {
-if($('#site-info').is(":visible")) {
-  $('#search').removeClass('search-active');
-  $('#site-info').css('display', 'none');
-} else {
-  let url = new URL(tabs.currentView().webContents.getURL());
+  if($('#site-info').is(":visible")) {
+    $('#search').removeClass('search-active');
+    $('#site-info').css('display', 'none');
+  } else {
+    let url = new URL(tabs.currentView().webContents.getURL());
 
-  $('#info-permissions').empty();
-  getPermissions(url.host).then((obj) => {
-    if(!obj) return;
-    console.log(obj);
-    Object.keys(obj).forEach((item, index) => {
-      let allowed = obj[item] ? 'Allow' : 'Block';
+    $('#info-permissions').empty();
+    let perms = getPermissions(url.host);
+    if(!perms) return;
+
+    console.log(perms);
+    Object.keys(perms).forEach((item, index) => {
+      let allowed = perms[item] ? 'Allow' : 'Block';
 
       $('#info-permissions').append(`
         <li id='info-perm'>
@@ -760,29 +722,27 @@ if($('#site-info').is(":visible")) {
         </li>
       `);
     });
-  });
-  $('#search').addClass('search-active');
-  $('#site-info').css('display', 'block');
-}
+
+    $('#search').addClass('search-active');
+    $('#site-info').css('display', 'block');
+  }
 }
 
 async function getPermissions(site) {
-let promisio = new Promise((resolve, reject) => {
-  jsonfile.readFile(permissionsFile, function (err, obj) {
-    if(err) { reject(err); }
-    if(site && site != '') { resolve(obj[site]); }
-    else { resolve(obj); }
+  let promisio = new Promise((resolve, reject) => {
+    let perms = store.get('permissions');
+
+    if(site && site != '') { resolve(perms[site]); }
+    else { resolve(perms); }
   });
-});
-return promisio;
+  return promisio;
 }
 
 async function savePermission(site, permission, allowed) {
-jsonfile.readFile(permissionsFile, async function(err, obj) {
-  if(!obj[site]) { obj[site] = {}; }
-  obj[site][permission] = allowed;
-  jsonfile.writeFile(permissionsFile, obj, async function (err) {});
-});
+  let perms = store.get('permissions');
+  if(!perms[site]) { perms[site] = {}; }
+  perms[site][permission] = allowed;
+  store.set('permissions', perms);
 }
 
 async function cookies(contents, site) {
@@ -801,24 +761,25 @@ if (permission == 'midiSysex') permission = 'midi';
 let allowedPerms = ['fullscreen', 'pointerLock'];
 if(!allowedPerms.includes(permission)) {
   let url = (new URL(webContents.getURL())).hostname;
-  jsonfile.readFile(permissionsFile, async function(err, obj) {
-    let checked;
-    try { checked = obj[url][permission] } catch (e) { checked = undefined }
 
-    if(checked == undefined || checked == null) {
-      showSnackbar(`${url} wants to`, [permission], 100, ['Allow', 'Block'], function (response) {
-        if(response === 'Allow') {
-          callback(true);
-          savePermission(url, permission, true);
-        } else {
-          callback(false);
-          savePermission(url, permission, false);
-        }
-      });
-    } else {
-      callback(checked);
-    }
-  });
+  let perms = store.get('permissions');
+
+  let checked;
+  try { checked = perms[url][permission] } catch (e) { checked = undefined }
+
+  if(checked == undefined || checked == null) {
+    showSnackbar(`${url} wants to`, [permission], 100, ['Allow', 'Block'], function (response) {
+      if(response === 'Allow') {
+        callback(true);
+        savePermission(url, permission, true);
+      } else {
+        callback(false);
+        savePermission(url, permission, false);
+      }
+    });
+  } else {
+    callback(checked);
+  }
 } else {
   callback(true);
 }
@@ -1044,8 +1005,8 @@ if($('.selected').length == 1) {
 })
 
 getSearchEngine(async (e) => {
-$('#url').attr('placeholder', `Search ${e.name} or type a URL`);
-$('#url').attr('data-placeholder', `Search ${e.name} or type a URL`);
+  $('#url').attr('placeholder', `Search ${e.name} or type a URL`);
+  $('#url').attr('data-placeholder', `Search ${e.name} or type a URL`);
 });
 
 $('#url').focus(async (e) => {
@@ -1069,13 +1030,13 @@ $('#star').click(async (e) => {
 let url = tabs.currentView().webContents.getURL();
 let title = tabs.currentView().webContents.getTitle();
 
-store.isBookmarked(url).then((isBookmarked) => {
+storage.isBookmarked(url).then((isBookmarked) => {
   if(isBookmarked) {
     $('#star').attr('src', 'images/bookmark.svg');
-    store.removeBookmark(url);
+    storage.removeBookmark(url);
   } else {
     $('#star').attr('src', 'images/bookmark-saved.svg');
-    store.addBookmark(url, title);
+    storage.addBookmark(url, title);
   }
 });
 });

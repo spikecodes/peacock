@@ -1,9 +1,8 @@
 const blockchain = require('./blockchain.js');
-const jsonfile = require('jsonfile');
 
-const settingsFile = require('path').join(__dirname, "../data/settings.json");
-const bookmarks = require("path").join(__dirname, "../data/bookmarks.json");
-const historyFile = require('path').join(__dirname, "../data/history.json");
+var store;
+
+exports.init = st => { store = st }
 
 async function checkFiles() {
   if (blockchain.getUserSession().isUserSignedIn()) {
@@ -24,23 +23,13 @@ async function checkFiles() {
   }
 }
 
-async function storeLocation() {
-  let promisio = new Promise((resolve, reject) => {
-    jsonfile.readFile(settingsFile, function (err, obj) {
-      if(err) { reject(); }
-      resolve(obj.storage);
-    });
-  });
-  return promisio;
-}
-
 exports.syncHistory = function () {
 
 }
 
 exports.getHistory = async function () {
   await checkFiles();
-  let loc = await storeLocation();
+  let loc = store.get('settings.storage');
 
   if(loc === "Blockstack"){
     if (blockchain.getUserSession().isUserSignedIn()) {
@@ -51,10 +40,7 @@ exports.getHistory = async function () {
     }
   } else if (loc === "Locally") {
     let promisio = new Promise((resolve, reject) => {
-      jsonfile.readFile(historyFile, function (err, obj) {
-        if(err) { reject(); }
-        resolve(obj);
-      });
+      resolve(store.get('history'));
     });
     return promisio;
   } else {
@@ -64,42 +50,26 @@ exports.getHistory = async function () {
 
 exports.removeHistoryItem = async function (url) {
   await checkFiles();
-  let loc = await storeLocation();
+  let loc = store.get('settings.storage');
 
   if(loc === "Blockstack"){
     if (blockchain.getUserSession().isUserSignedIn()) {
       blockchain.getUserSession().getFile("history.json").then(data => {
-        var curr = JSON.parse(data);
-
-        for(var i = curr.length - 1; i >= 0; i--) {
-          if(curr[i].url == url) {
-           curr.splice(i, 1);
-           break;
-          }
-        }
-
+        var curr = JSON.parse(data).filter(item => item.url !== url);
         blockchain.getUserSession().putFile("history.json", JSON.stringify(curr));
       });
     } else {
       console.log("Not signed into Blockstack, Blockstack required to log history.");
     }
   } else {
-    jsonfile.readFile(historyFile, function(err, curr) {
-      for(var i = curr.length - 1; i >= 0; i--) {
-        if(curr[i].url == url) {
-         curr.splice(i, 1);
-         break;
-        }
-      }
-
-      jsonfile.writeFile(historyFile, curr, function(err) {});
-    });
+    let removed = store.get('history').filter(item => item.url !== url);
+    store.set('history', removed);
   }
 }
 
 exports.clearHistory = async function () {
   await checkFiles();
-  let loc = await storeLocation();
+  let loc = store.get('settings.storage');
 
   if(loc === "Blockstack"){
     if (blockchain.getUserSession().isUserSignedIn()) {
@@ -110,9 +80,8 @@ exports.clearHistory = async function () {
     }
   } else if (loc === "Locally") {
     let promisio = new Promise((resolve, reject) => {
-      jsonfile.writeFile(historyFile, [], function(err) {
-        if(err) { reject(); } else { resolve(); }
-      });
+      store.set('history', []);
+      resolve();
     });
     return promisio;
   } else {
@@ -122,12 +91,9 @@ exports.clearHistory = async function () {
 
 exports.logHistory = async function (site, title) {
   await checkFiles();
-  let loc = await storeLocation();
+  let loc = store.get('settings.storage');
 
-  let item = {};
-  item.id = require('uuid/v1');
-  item.url = site;
-  item.title = title;
+  let item = { "url": site, "title": title };
 
   if(loc === "Blockstack"){
     if (blockchain.getUserSession().isUserSignedIn()) {
@@ -143,16 +109,15 @@ exports.logHistory = async function (site, title) {
       console.log("Not signed into Blockstack, Blockstack required to log history.");
     }
   } else {
-    jsonfile.readFile(historyFile, function(err, curr) {
-      curr.push(item);
-      jsonfile.writeFile(historyFile, curr, function(err) {});
-    });
+    let curr = store.get('history');
+    curr.push(item);
+    store.set('history', curr);
   }
 }
 
 async function getBookmarks() {
   await checkFiles();
-  let loc = await storeLocation();
+  let loc = store.get('settings.storage');
 
   if(loc === "Blockstack"){
     if (blockchain.getUserSession().isUserSignedIn()) {
@@ -163,10 +128,7 @@ async function getBookmarks() {
     }
   } else if (loc === "Locally") {
     let promisio = new Promise((resolve, reject) => {
-      jsonfile.readFile(bookmarks, function (err, obj) {
-        if(err) { reject(); }
-        resolve(obj);
-      });
+      resolve(store.get('bookmarks'));
     });
     return promisio;
   } else {
@@ -174,33 +136,11 @@ async function getBookmarks() {
   }
 }
 
-exports.getBookmarks = async function () {
-  await checkFiles();
-  let loc = await storeLocation();
-
-  if(loc === "Blockstack"){
-    if (blockchain.getUserSession().isUserSignedIn()) {
-      let result = await blockchain.getUserSession().getFile("bookmarks.json");
-      return result;
-    } else {
-      console.log("Not signed into Blockstack, Blockstack required to get bookmarks.");
-    }
-  } else if (loc === "Locally") {
-    let promisio = new Promise((resolve, reject) => {
-      jsonfile.readFile(bookmarks, function (err, obj) {
-        if(err) { reject(); }
-        resolve(obj);
-      });
-    });
-    return promisio;
-  } else {
-    console.error("Storage location not set.");
-  }
-}
+exports.getBookmarks = getBookmarks;
 
 exports.isBookmarked = async function (url) {
   await checkFiles();
-  let loc = await storeLocation();
+  let loc = store.get('settings.storage');
 
   if(loc === "Blockstack"){
     if (blockchain.getUserSession().isUserSignedIn()) {
@@ -208,13 +148,9 @@ exports.isBookmarked = async function (url) {
         blockchain.getUserSession().getFile("bookmarks.json").then(data => {
           var exists = false;
           for (var i = 0; i < data.length; i++) {
-            if(data[i].url === url){
-              exists = true;
-              resolve(true);
-            }
+            if(data[i].url === url){ exists = true; break; }
           }
-          if(exists === false){ resolve(false); }
-          else { resolve(true); }
+          resolve(exists);
         });
       });
       return promisio;
@@ -223,15 +159,12 @@ exports.isBookmarked = async function (url) {
     }
   } else {
     let promisio = new Promise((resolve, reject) => {
-      jsonfile.readFile(bookmarks, function(err, data) {
-        var exists = false;
-        for (var i = 0; i < data.length; i++) {
-          if(data[i].url === url){
-            resolve(true);
-          }
-        }
-        if(exists === false){ resolve(false); }
-      });
+      let bookmarks = store.get('bookmarks');
+      var exists = false;
+      for (var i = 0; i < bookmarks.length; i++) {
+        if(bookmarks[i].url === url){ exists = true; break; }
+      }
+      resolve(exists);
     });
     return promisio;
   }
@@ -239,7 +172,7 @@ exports.isBookmarked = async function (url) {
 
 exports.addBookmark = async function (site, title) {
   await checkFiles();
-  let loc = await storeLocation();
+  let loc = store.get('settings.storage');
 
   let item = {};
   item.id = require('uuid/v1');
@@ -258,16 +191,15 @@ exports.addBookmark = async function (site, title) {
       console.log("Not signed into Blockstack, Blockstack required for bookmarks.");
     }
   } else {
-    jsonfile.readFile(bookmarks, function(err, curr) {
-      curr.push(item);
-      jsonfile.writeFile(bookmarks, curr, function(err) {});
-    });
+    let curr = store.get('bookmarks');
+    curr.push(item);
+    store.set('bookmarks', curr);
   }
 }
 
 exports.removeBookmark = async function (url) {
   await checkFiles();
-  let loc = await storeLocation();
+  let loc = store.get('settings.storage');
   let books = await getBookmarks();
 
   if(typeof books === "string") { books = JSON.parse(books); }
@@ -282,10 +214,7 @@ exports.removeBookmark = async function (url) {
     }
   } else if (loc === "Locally") {
     let promisio = new Promise((resolve, reject) => {
-      jsonfile.writeFile(bookmarks, fixed, function (err) {
-        if(err) { reject(); }
-        resolve();
-      });
+      store.set('bookmarks', fixed);
     });
     return promisio;
   } else {

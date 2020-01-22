@@ -20,7 +20,8 @@
 		"appId": "com.codiscite.peacock",
 		"win": {
 			"target": "nsis",
-			"icon": "images/peacock.ico"
+			"icon": "images/peacock.ico",
+			"asarUnpack": "data/*.js"
 		},
 		"mac": {
 			"category": "books",
@@ -41,7 +42,6 @@
 	"author": "Codiscite",
 	"license": "MIT",
 	"devDependencies": {
-		"child_process": "^1.0.2",
 		"electron": "^8.0.0-beta.7",
 		"electron-builder": "^21.2.0"
 	},
@@ -56,12 +56,12 @@
 		"dragula": "^3.7.2",
 		"electron-context-menu": "^0.15.2",
 		"electron-dl": "^2.0.0",
+		"electron-store": "^5.1.0",
 		"express": "^4.17.1",
 		"install": "^0.13.0",
 		"jquery": "^3.4.1",
 		"jquery-ui": "^1.12.1",
 		"jquery-ui-dist": "^1.12.1",
-		"jsonfile": "^5.0.0",
 		"npm": "^6.13.6",
 		"tldts": "^5.6.3",
 		"uuid": "^3.4.0",

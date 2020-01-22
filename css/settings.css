@@ -10,10 +10,6 @@
  *   * Prevent text selection
  */
 
-body {
-  background: transparent !important;
-}
-
 *,
 *::after,
 *::before {
