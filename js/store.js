@@ -125,7 +125,7 @@ exports.logHistory = async function (site, title) {
   let loc = await storeLocation();
 
   let item = {};
-  item.id = require("uuid").v1();
+  item.id = require('uuid/v1');
   item.url = site;
   item.title = title;
 
@@ -242,7 +242,7 @@ exports.addBookmark = async function (site, title) {
   let loc = await storeLocation();
 
   let item = {};
-  item.id = require("uuid").v1();
+  item.id = require('uuid/v1');
   item.url = site;
   item.icon = `https://www.google.com/s2/favicons?domain=${site}`;
   item.title = title;

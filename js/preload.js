@@ -4,7 +4,7 @@ const {	join } = require('path');
 const { format } = require('url');
 
 global.alert = (message) => {
-	ipcRenderer.sendToHost('alert', {
+	ipcRenderer.send('alert', {
 		message: message,
 		type: 'alert',
 		url: window.location.href
@@ -20,16 +20,48 @@ global.confirm = (text) => {
 	return dialog.showMessageBoxSync(dialogOptions);
 }
 
-// setTimeout(async () => {
-//  document.body.requestPointerLock()
-// }, 1000);
+window.addEventListener('DOMContentLoaded', (event) => {
+	setTimeout(function () {
+		document.querySelectorAll('input[type="email"]').forEach((box, i) => {
+			if(box.getAttribute('list')) return;
+
+			let list = document.createElement('datalist');
+			list.id = 'peacock-list';
+			list.innerHTML = '<option value="Create Mail Alias">';
+			document.body.appendChild(list);
+
+			box.setAttribute('list', 'peacock-list');
+
+			box.addEventListener('input', (event) => {
+				if(event.target.value == 'Create Mail Alias') {
+					event.target.value = 'Creating Mail Alias...';
+
+					let r = Math.random().toString(36).substring(7);
+
+					let route = ipcRenderer.sendSync('mail', 'new', { alias: r, name: document.title });
+					if(!route.message.startsWith('error')) {
+						console.log(route.route);
+						event.target.value = r + '@mail.peacock.link';
+					} else {
+						ipcRenderer.send('alert', {
+							message: route.message,
+							type: 'alert',
+							url: 'Peacock'
+						});
+						event.target.value = '';
+					}
+				}
+			});
+		});
+	}, 1000);
+});
 
 let esc_pointer = event => { if (event.keyCode === 27) { document.exitPointerLock(); } };
 let esc_fullscreen = event => { if (event.keyCode === 27) { document.exitFullscreen(); } };
 
 let pointerlockchange = async (e) => {
 	if (document.pointerLockElement) {
-		ipcRenderer.sendToHost('alert', {
+		ipcRenderer.send('alert', {
 			message: 'Press <span>ESC</span> to show your cursor',
 			type: 'message',
 			duration: 5000
@@ -43,7 +75,7 @@ let pointerlockchange = async (e) => {
 let fullscreenchange = async (e) => {
   console.log('fullscreenchange');
 	if (document.fullscreenElement) {
-		ipcRenderer.sendToHost('alert', {
+		ipcRenderer.send('alert', {
 			message: 'Press <span>ESC</span> to exit fullscreen',
 			type: 'message',
 			duration: 5000
@@ -80,11 +112,6 @@ if (window.location.protocol == 'peacock:') {
 		listSites(bookmarks);
 	});
 
-	global.richSendToHost = (channel, purpose, args) => {
-		ipcRenderer.sendToHost(channel, purpose, args);
-	}
-
-	global.sendToHost = (channel, message) => {
-		ipcRenderer.sendToHost(channel, message);
-	}
+	global.sendSync = ipcRenderer.sendSync;
+	global.send = ipcRenderer.send;
 }

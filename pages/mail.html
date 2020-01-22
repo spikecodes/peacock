@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>Peacock Mail</title>
+    <link href="https://fonts.googleapis.com/css?family=Roboto&display=swap" rel="stylesheet">
+    <style>
+      * {
+        font-family: 'Roboto';
+      }
+
+      a {
+        text-decoration: none;
+        color: #63E4FF;
+      }
+
+      .email {
+        position: absolute;
+        left: 50%; top: 10%;
+        transform: translate(-50%, -50%);
+      }
+
+      .email input {
+        width: 485px;
+        padding: 10px;
+        border: none;
+        font-size: 16px;
+        border-radius: 3px;
+        background: #f0f0f0;
+      }
+
+      .email button {
+        padding: 10px 20px;
+        border: none;
+        border-radius: 3px;
+        /* background: none; */
+        background: #FFD563;
+        font-size: 16px;
+        cursor: pointer;
+      }
+
+      .email p {
+        font-size: 15px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="email">
+      <input id="addr" type="text" name="" value="" placeholder="Personal Email Address">
+      <button id="set" type="button" name="button">SET</button>
+      <p id="detail">We will never send you emails, your email is never shared with a third party. <a href="#">Learn More</a></p>
+    </div>
+  </body>
+  <script type="text/javascript">
+    document.getElementById('addr').value = sendSync('mail', 'getAddress');
+
+    document.getElementById('set').addEventListener('click', async e => {
+      send('mail', 'setAddress', document.getElementById('addr').value);
+    });
+  </script>
+</html>
