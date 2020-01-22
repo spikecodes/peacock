@@ -20,8 +20,7 @@
 		"appId": "com.codiscite.peacock",
 		"win": {
 			"target": "nsis",
-			"icon": "images/peacock.ico",
-			"asarUnpack": "data/*.js"
+			"icon": "images/peacock.ico"
 		},
 		"mac": {
 			"category": "books",
@@ -43,7 +42,7 @@
 	"license": "MIT",
 	"devDependencies": {
 		"electron": "^8.0.0-beta.7",
-		"electron-builder": "^21.2.0"
+		"electron-builder": "^20.28.4"
 	},
 	"dependencies": {
 		"@cliqz/adblocker-electron": "^1.4.1",
