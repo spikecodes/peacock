@@ -24,7 +24,7 @@ jobs:
       os: osx
       osx_image: xcode10.1
       script:
-        - npm install electron-builder@22.3.1 -g && npm run dist-all
+        - npm install electron-builder@22.2.0 -g && npm run dist-all
       before_cache:
         - rm -rf $HOME/.cache/electron-builder/wine
     # - stage: Deploy Windows & Mac
