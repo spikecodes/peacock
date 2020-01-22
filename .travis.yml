@@ -1,5 +1,7 @@
+sudo: false
+
 language: node_js
-node_js: "9.11.1"
+node_js: "13.7.0"
 
 # before_install:
 #   - npm install
