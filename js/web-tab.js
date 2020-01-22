@@ -1,5 +1,5 @@
-var id;
 var document;
+var store;
 var firstTime = true;
 
 window.$ = window.jQuery = require('jquery');
@@ -39,7 +39,7 @@ function setSearchIcon(url) {
 }
 exports.setSearchIcon = setSearchIcon;
 
-exports.setDocument = function (input) { document = input; }
+exports.init = function (doc, st) { document = doc; store = st; }
 
 exports.loadStart = function(view, extensions) {
   // tab.tabElements.icon.innerHTML = `<div class='spinner'><svg class='svg' viewBox='22 22 44 44'>
@@ -108,11 +108,11 @@ exports.failLoad = function(event, view, errorCode, errorDescription, validatedU
   }
 }
 
-exports.didNavigate = function (url, view, store) {
+exports.didNavigate = function (url, view, storage) {
   try {
     let protocol = (new URL(url)).protocol;
     if(protocol.startsWith('http')) {
-      //store.logHistory(url, view.webContents.getTitle());
+      //storage.logHistory(url, view.webContents.getTitle());
     }
   } catch (e) {}
   setSearchIcon(url);
@@ -127,12 +127,12 @@ exports.leaveFllscrn = function(view, width, height) {
   view.setBounds({ x: 0, y: 89, width: width, height: height - 89 });
 }
 
-exports.domReady = function (view, store) {
+exports.domReady = function (view, storage) {
   setURLBar(view.webContents.getURL());
 
   view.webContents.insertCSS('input::-webkit-calendar-picker-indicator {display: none;}');
 
-  store.isBookmarked(view.webContents.getURL()).then((result) => {
+  storage.isBookmarked(view.webContents.getURL()).then((result) => {
     document.getElementById('star').style.visibility = 'visible';
     document.getElementById('star').src = result ? 'images/bookmark-saved.svg' : 'images/bookmark.svg';
   });
@@ -173,11 +173,7 @@ exports.domReady = function (view, store) {
 
   switch (view.webContents.getURL()) {
     case 'peacock://flags':
-      let flags = require('path').join(__dirname, '../data/flags.json');
-      require('fs').readFile(flags, {encoding: 'utf-8'}, function(err,data){
-        if (err) { console.error(err); return }
-        view.webContents.send('loadFlags', data);
-      });
+      view.webContents.send('loadFlags', store.get('flags'));
       break;
     case 'peacock://network-error':
       view.webContents.send('setError', window.error);
@@ -188,7 +184,7 @@ exports.domReady = function (view, store) {
       break;
     case 'peacock://newtab':
       let bookmarks = [];
-      store.getHistory().then(obj => {
+      storage.getHistory().then(obj => {
         obj.forEach((item, i) => {
           bookmarks.push(item.url);
         });
@@ -222,8 +218,8 @@ exports.titleUpdated = function (view, event, title) {
   view.tab.title.attr('title', title);
 }
 
-exports.changeTab = function (view, store) {
-  store.isBookmarked(view.webContents.getURL()).then((result) => {
+exports.changeTab = function (view, storage) {
+  storage.isBookmarked(view.webContents.getURL()).then((result) => {
     document.getElementById('star').style.visibility = 'visible';
     document.getElementById('star').src = result ? 'images/bookmark-saved.svg' : 'images/bookmark.svg';
   });

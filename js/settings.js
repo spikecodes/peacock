@@ -1,98 +1,51 @@
-const jsonfile = require('jsonfile');
+const { join } = require('path');
 
-const bookmarks = require("path").join(__dirname, "../data/bookmarks.json");
-const settingsFile = require("path").join(__dirname, "../data/settings.json");
-const searchEngines = require("path").join(__dirname, "../data/search_engines.json");
-const themes = require("path").join(__dirname, "../css/themes");
+const themes = join(__dirname, "../css/themes");
 
-const store = require("../js/store.js");
+const storage = require("../js/store.js");
 
 const { ipcRenderer, remote } = require("electron");
 
-let settingsInfo = JSON.parse(decodeURIComponent(window.location.href.split('?')[1]));
+const store = {};
+
+store.get = name => ipcRenderer.sendSync('store', 'get', name);
+store.set = (name, val) => ipcRenderer.send('store', 'set', name, val);
+
+storage.init(store);
+
+let settingsInfo = JSON.parse(decodeURIComponent(location.search.split('?')[1]));
 
 window.darkMode = settingsInfo.darkMode; loadTheme();
 remote.getCurrentWindow().on('focus', updateProfile);
 
 window.theme = 'light';
 
-//Discord Rich Presence
-try {
-  const { Client } = require('discord-rpc');
-  const clientId = '627363592408137749';
-
-  const rpclient = new Client({ transport: 'ipc'});
-  const startDate = new Date();
-  const startTimestamp = startDate.getTime()
-
-  async function setActivity() {
-    if (!rpclient) {
-      return;
-    }
-  	var details = 'Peacock Browser';
-  	var state = 'Changing Settings';
-    rpclient.setActivity({
-      details: details,
-      state: state,
-      startTimestamp,
-
-      largeImageKey: 'peacockbg_light',
-      largeImageText: `Peacock Browser v2.0.5`,
-      smallImageKey: 'gear',
-      smallImageText: `Settings`,
-      instance: false
-    })
-  };
-
-  rpclient.on('ready', () => {
-    setActivity();
-
-    setInterval(() => {
-      setActivity();
-    }, 15e3);
-  });
-
-  rpclient.login({ clientId }).catch(console.error);
-} catch (e) {
-  console.log("Discord not open.");
-}
-//Discord Rich Presence
-
 function saveSettings(input) {
-  jsonfile.readFile(settingsFile, function (err, data_raw) {
-    if (err) console.error(err);
-    let data = data_raw;
-    for (var key in input){
-      data[key] = input[key];
-    }
-    jsonfile.writeFile(settingsFile, data, function(err) {
-  		if (err) { console.error(err) }
-      else { updateProfile(); console.log("Updated Settings!"); }
-  	});
-  });
+  let data = store.get('settings');
+  for (var key in input){ data[key] = input[key]; }
+
+  store.set('settings', data);
+
+  console.log("Updated Settings!");
+  updateProfile();
 }
 
-jsonfile.readFile(settingsFile, function (err, obj) {
-  if (err) console.error(err);
-  for (var key in obj){
-    $('div[data-key=' + key + ']').find('.dropdown').find(".dropdown-toggle").text(obj[key]);
-  }
-});
+let settings = store.get('settings');
+for (var SKey in settings){ $('div[data-key=' + SKey + ']').find('.dropdown').find(".dropdown-toggle").text(settings[SKey]); }
 
-jsonfile.readFile(searchEngines, function(err, obj) {
-  $(".search-engines-menu").empty();
-  obj.forEach(item => {
-    $(".search-engines-menu").append(`<a class="dropdown-item" href="#"><img class="search-engine-icon"
-      src="${item.icon}"/>${item.name}</a>`);
-    $('.dropdown-item').unbind();
-    $('.dropdown-item').click(function(event) {
-      let text = $(this).text();
-      let key = $(this).parent().parent().parent().attr("data-key");
-    	$(this).parent().siblings(".dropdown-toggle").text(text);
-    	saveSettings({ [key]: text });
-      if(key === "theme") { setTimeout(function () { loadTheme(); }, 1000); }
-    });
-   });
+let engines = store.get('searchEngines');
+$(".search-engines-menu").empty();
+engines.forEach(item => {
+  $(".search-engines-menu").append(`<a class="dropdown-item" href="#"><img class="search-engine-icon"
+    src="${item.icon}"/>${item.name}</a>`);
+  $('.dropdown-item').unbind();
+  $('.dropdown-item').click(function(event) {
+    let text = $(this).text();
+    let key = $(this).parent().parent().parent().attr("data-key");
+  	$(this).parent().siblings(".dropdown-toggle").text(text);
+  	saveSettings({ [key]: text });
+    if(key === "theme") { setTimeout(function () { loadTheme(); }, 1000); }
+  });
 });
 
 // Add slideDown animation to Bootstrap dropdown when expanding.
@@ -115,16 +68,8 @@ $('.dropup').on('hide.bs.dropdown', function() {
   $(this).find('.dropdown-menu').first().stop(true, true).slideDown(100);
 });
 
-$('.dropdown-item').click(function(event) {
-  let text = $(this).text();
-  let key = $(this).parent().parent().parent().attr("data-key");
-	$(this).parent().siblings(".dropdown-toggle").text(text);
-	saveSettings({ [key]: text });
-  if(key === "theme") { setTimeout(function () { loadTheme(); }, 1000); }
-});
-
 $('.clearHistory').click(function () {
-  store.clearHistory().then(loadHistory);
+  storage.clearHistory().then(loadHistory);
 });
 
 require('fs').readdir(themes, (err, files) => {
@@ -133,43 +78,50 @@ require('fs').readdir(themes, (err, files) => {
      let plain = file.replace(".css", "");
      let spicy = plain[0].toUpperCase() + plain.slice(1);
      $('.theme-dropdown-menu').append(`<a class="dropdown-item" href="#">${spicy}</a>`);
+
+     let elem = $('.theme-dropdown-menu').children().last();
+     elem.attr('locale-key', spicy.toLowerCase());
+     elem.click(function(event) {
+       let text = $(this).text();
+       let key = $(this).parent().parent().parent().attr("data-key");
+     	$(this).parent().siblings(".dropdown-toggle").text(text);
+     	saveSettings({ [key]: text });
+       if(key === "theme") { loadTheme(); }
+     });
    }
   });
 });
 
 function loadTheme() {
-	jsonfile.readFile(settingsFile, function (err, obj) {
-    if (err) { alert(err); return; }
-    let theme = obj.theme.toLowerCase();
-    let newTheme = theme;
+  let theme = store.get('settings.theme').toLowerCase();
+  let newTheme = theme;
 
-    if(window.darkMode && theme == 'default') newTheme = 'dark';
+  if(window.darkMode && theme == 'default') newTheme = 'dark';
 
-    if (window.theme != newTheme) {
-      if (theme === "light") {
+  if (window.theme != newTheme) {
+    if (theme === "light") {
+      window.theme = 'light';
+			if($('head link[href*="../css/themes"]').length > 0){
+				$('head link[href*="../css/themes"]').remove();
+			}
+    } else if (theme === "default") {
+      if (window.darkMode) {
+        // If Dark Mode
+        window.theme = 'dark';
+        $("head").append('<link rel="stylesheet" href="../css/themes/dark.css">');
+      } else {
+        // If Light Mode
         window.theme = 'light';
-  			if($('head link[href*="../css/themes"]').length > 0){
+        if($('head link[href*="../css/themes"]').length > 0){
   				$('head link[href*="../css/themes"]').remove();
   			}
-      } else if (theme === "default") {
-        if (window.darkMode) {
-          // If Dark Mode
-          window.theme = 'dark';
-          $("head").append('<link rel="stylesheet" href="../css/themes/dark.css">');
-        } else {
-          // If Light Mode
-          window.theme = 'light';
-          if($('head link[href*="../css/themes"]').length > 0){
-    				$('head link[href*="../css/themes"]').remove();
-    			}
-        }
-      } else {
-        window.theme = 'dark';
-        $("head").append('<link rel="stylesheet" href="../css/themes/' + theme + '.css">');
       }
+    } else {
+      window.theme = 'dark';
+      $("head").append('<link rel="stylesheet" href="../css/themes/' + theme + '.css">');
     }
-    document.body.style.display = 'block';
-	});
+  }
+  document.body.style.display = 'block';
 }
 
 function signOutOfBlockstack() {
@@ -179,7 +131,7 @@ function signOutOfBlockstack() {
 }
 
 function resetProfile() {
-  $("#profile").attr("src", require("path").join(__dirname, "../images/blockstack.png"));
+  $("#profile").attr("src", join(__dirname, "../images/blockstack.png"));
   $("#name").text("Blockstack");
   $("#signedIn").text("Signed Out");
   $("#signOut").text("SIGN IN");
@@ -189,7 +141,7 @@ function resetProfile() {
 
 function loadHistory() {
   $(".group-history").empty(); // Clear any previous history logs before loading current ones.
-  store.getHistory().then(items => {
+  storage.getHistory().then(items => {
     if (!items) {
       $(".group-history a").unbind("click");
       $(".group-history").empty();
@@ -221,7 +173,7 @@ function loadHistory() {
 
 function loadBookmarks() {
   $(".group-bookmarks").empty(); // Clear any previous bookmarks before loading current ones.
-  store.getBookmarks().then(obj => { // Grab the bookmarks from "bookmarks.json":
+  storage.getBookmarks().then(obj => { // Grab the bookmarks from "bookmarks.json":
     if (!obj) {
       $(".group-bookmarks a").unbind("click");
       $(".group-bookmarks").empty();
@@ -238,7 +190,7 @@ function loadBookmarks() {
 
         let icon;
         if(obj[i].icon === "blank favicon"){
-          icon = require("path").join(__dirname, "../images/se");
+          icon = join(__dirname, "../images/se");
         } else { icon = obj[i].icon ;}
 
         let book = '<a href="#" data-url="' + obj[i].url + '" class="list-group-item list-group-item-action item-bookmarks">'
@@ -257,7 +209,7 @@ function loadBookmarks() {
         $(this).children().last().click(function (e) {
           e.preventDefault();// Don't refresh the page which is what would normally happen.
           event.stopPropagation();
-          store.removeBookmark($(this).parent().attr("data-url")).then(e => updateProfile());
+          storage.removeBookmark($(this).parent().attr("data-url")).then(e => updateProfile());
         })
       }, function () {
         $(this).children().last().remove();
@@ -286,6 +238,14 @@ function updateProfile() {
     resetProfile();
   }
 }
+
+$('.dropdown-item').click(function(event) {
+  let text = $(this).text();
+  let key = $(this).parent().parent().parent().attr("data-key");
+	$(this).parent().siblings(".dropdown-toggle").text(text);
+	saveSettings({ [key]: text });
+  if(key === "theme") { loadTheme(); }
+});
 
 $(document).ready(function () {
   updateProfile();

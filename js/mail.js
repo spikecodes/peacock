@@ -1,42 +1,41 @@
 const request = require('request');
-const jsonfile = require('jsonfile');
+
+var store;
+
+exports.init = st => { store = st }
 
 exports.new = async function(alias, cb, name='Route', email) {
   if(!email) {
     let settings = require('path').join(__dirname, '../data/settings.json');
-    jsonfile.readFile(settings, async function(err, obj) {
-      if(obj.mail.address && obj.mail.address != '') {
-        email = obj.mail.address;
-
-        var options = {
-          url: 'https://peacock-mail.now.sh/route',
-          headers: {
-            'alias': alias,
-            'email': email,
-            'description': name
-          }
-        };
-
-        function callback(error, response, body) {
-          if (!error && response.statusCode == 200) {
-            let data = JSON.parse(body);
-
-            if(data.route) {
-              jsonfile.readFile(settings, async function(err, obj) {
-                obj.mail.ids.push(data.route.id);
-                jsonfile.writeFile(settings, obj, async function (err) {});
-              });
-            }
-
-            cb(data);
-          }
+    let address = store.get('settings.mail.address');
+    if(address && address != '') {
+      var options = {
+        url: 'https://peacock-mail.now.sh/route',
+        headers: {
+          'alias': alias,
+          'email': address,
+          'description': name
         }
+      };
 
-        request(options, callback);
-      } else {
-        cb({ message: 'error: email not specified, set yours at peacock://mail'});
+      function callback(error, response, body) {
+        if (!error && response.statusCode == 200) {
+          let data = JSON.parse(body);
+
+          if(data.route) {
+            let ids = store.get('settings.mail.ids');
+            ids.push(data.route.id);
+            store.set('settings.mail.ids', ids);
+          }
+
+          cb(data);
+        }
       }
-    });
+
+      request(options, callback);
+    } else {
+      cb({ message: 'error: email not specified, set yours at peacock://mail'});
+    }
   } else {
     var options = {
       url: 'https://peacock-mail.now.sh/route',
@@ -52,10 +51,9 @@ exports.new = async function(alias, cb, name='Route', email) {
         let data = JSON.parse(body);
 
         if(data.route) {
-          jsonfile.readFile(settings, async function(err, obj) {
-            obj.mail.ids.push(data.route.id);
-            jsonfile.writeFile(settings, obj, async function (err) {});
-          });
+          let ids = store.get('settings.mail.ids');
+          ids.push(data.route.id);
+          store.set('settings.mail.ids', ids);
         }
 
         cb(data);
@@ -81,10 +79,9 @@ exports.list = async function(id, cb) {
       let data = JSON.parse(body);
 
       if(data.route) {
-        jsonfile.readFile(settings, async function(err, obj) {
-          obj.mail.ids.push(data.route.id);
-          jsonfile.writeFile(settings, obj, async function (err) {});
-        });
+        let ids = store.get('settings.mail.ids');
+        ids.push(data.route.id);
+        store.set('settings.mail.ids', ids);
       }
 
       cb(data);

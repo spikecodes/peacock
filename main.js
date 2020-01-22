@@ -18,7 +18,7 @@ server.on('message', async (m) => {
 	authCallback(m.authResponse);
 });
 
-require('jsonfile').readFile(settingsFile, async (err, obj) => {
+/*require('jsonfile').readFile(settingsFile, async (err, obj) => {
 	let dl = require('electron-dl');
 	if(obj.save_location === 'Use Save As Window'){
 		dl({saveAs: true});
@@ -27,7 +27,8 @@ require('jsonfile').readFile(settingsFile, async (err, obj) => {
 	} else {
 		console.error('ERROR');
 	}
-});
+});*/
+
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
 let mainWindow;
