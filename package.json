@@ -20,8 +20,7 @@
 		"appId": "com.codiscite.peacock",
 		"win": {
 			"target": "nsis",
-			"icon": "images/peacock.ico",
-			"asarUnpack": "data/*.js"
+			"icon": "images/peacock.ico"
 		},
 		"mac": {
 			"category": "books",
@@ -37,7 +36,7 @@
 		"start": "electron .",
 		"pack": "electron-builder --dir",
 		"release": "electron-builder --publish=always",
-		"dist-all": "electron-builder -mwl --publish=always -c.snap.publish=github"
+		"dist-all": "electron-builder -mwl --publish=always"
 	},
 	"author": "Codiscite",
 	"license": "MIT",
