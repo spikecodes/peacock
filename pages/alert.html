@@ -33,7 +33,12 @@
       case 'alert':
         document.body.style.color = (alertInfo.bg == 'dark') ? 'white' : 'black';
         document.body.style.backgroundColor = (alertInfo.bg == 'dark') ? '#292A2D' : 'white';
-        let url = (new URL(alertInfo.url)).hostname;
+        let url;
+        try {
+          url = (new URL(alertInfo.url)).hostname;
+        } catch (e) {
+          url = alertInfo.url;
+        }
         document.getElementById('url').innerHTML = url + ' says';
         document.getElementById('message').innerText = alertInfo.message;
 

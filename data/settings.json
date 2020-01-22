@@ -3,7 +3,9 @@
 	"theme": "Default",
 	"save_location": "Downloads",
 	"storage": "Locally",
-	"newTab": {
-
+	"newTab": {},
+	"mail": {
+		"address": "",
+		"ids": [""]
 	}
 }
