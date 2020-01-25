@@ -6,9 +6,9 @@
   <a href="https://peacock.link/"><s>Website (old)</s></a> |
   <a href="https://github.com/Codiscite/peacock/releases/latest">Download</a>
   <br><br>
-  <a href="https://travis-ci.com/Codiscite/peacock"><img src="https://travis-ci.com/Codiscite/peacock.svg?branch=master"></a>
+  <a href="https://github.com/Codiscite/peacock/releases/latest"><img src="https://img.shields.io/github/release/Codiscite/peacock.svg"/></a>
   <a href="https://github.com/Codiscite/peacock/blob/master/LICENSE"><img alt="GitHub license" src="https://img.shields.io/github/license/Codiscite/peacock"></a>
-  <a href="https://invite.gg/peacock"><img src="https://discordapp.com/api/guilds/630199884229771314/widget.png?style=shield" alt="Discord"></a>
+  <a href="https://invite.gg/peacock"><img src="https://discordapp.com/api/guilds/630199884229771314/widget.png" alt="Discord"></a>
 </p><br>
 
 ### Features
