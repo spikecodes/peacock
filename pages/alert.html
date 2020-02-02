@@ -4,12 +4,8 @@
     <meta charset="utf-8">
     <title></title>
     <link href='https://fonts.google.com/specimen/Roboto?selection.family=Roboto:400,500' rel='stylesheet'>
-  </head>
-  <body style="font-family: Roboto; font-size: 16px;">
-    <main style="padding: 5px 10px;">
-      <p style="font-size: 16px; line-height: 10px; font-family: Roboto; font-weight: 500;" id="url">www.google.com says</h2>
-      <p style="opacity: 0.75; line-height: 10px; font-family: Roboto;" id="message">noodle</p>
-      <button style="
+    <style>
+      #ok-btn {
         position: fixed;
         right: 20px;
         bottom: 20px;
@@ -18,34 +14,145 @@
         background: #FFD563;
         font-family: Roboto;
         font-weight: 500;
-        padding: 10px 25px;"
-        type="button" name="button" id="btn" autofocus>OK</button>
+        padding: 10px 25px;
+      }
+
+      #cancel-btn {
+        position: fixed;
+        right: 100px;
+        color: white;
+        bottom: 20px;
+        border: 0;
+        border-radius: 5px;
+        background: rgba(1,1,1,0.5);
+        font-family: Roboto;
+        font-weight: 500;
+        padding: 10px 25px;
+      }
+
+      #message {
+        opacity: 0.75;
+        line-height: 20px;
+        font-family: Roboto;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      #url {
+        font-size: 16px;
+        line-height: 10px;
+        font-family: Roboto;
+        font-weight: 500;
+      }
+
+      main {
+        padding: 5px 10px;
+      }
+
+      body {
+        font-family: Roboto;
+        font-size: 16px;
+      }
+
+      input {
+        background: transparent;
+        border: #FFD563 2px solid;
+        border-radius: 5px;
+        padding: 7px;
+        position: absolute;
+        left: 0px;
+        right: 0px;
+        bottom: 85px;
+        width: 92%;
+        color: white;
+        box-sizing: border-box;
+        margin: auto;
+      }
+    </style>
+  </head>
+  <body>
+    <main id="main">
+      <p id="url">www.google.com says</h2>
+      <p id="message">noodle</p>
+      <button id="ok-btn" type="button" id="btn" autofocus>OK</button>
     </main>
   </body>
 
   <script type="text/javascript">
-    let { remote } = require('electron');
-    let alertInfo = JSON.parse(decodeURIComponent(window.location.href.split('?')[1]));
+    let { remote, ipcRenderer } = require('electron');
 
-    document.getElementById('btn').onclick = () => { remote.getCurrentWindow().hide(); }
+    ipcRenderer.on('load', (e, alertInfo) => {
+      let url;
 
-    switch (alertInfo.type) {
-      case 'alert':
-        document.body.style.color = (alertInfo.bg == 'dark') ? 'white' : 'black';
-        document.body.style.backgroundColor = (alertInfo.bg == 'dark') ? '#292A2D' : 'white';
-        let url;
-        try {
-          url = (new URL(alertInfo.url)).hostname;
-        } catch (e) {
-          url = alertInfo.url;
-        }
-        document.getElementById('url').innerHTML = url + ' says';
-        document.getElementById('message').innerText = alertInfo.message;
+      document.body.innerHTML = `<main id="main">
+        <p id="url">www.google.com says</h2>
+        <p id="message">noodle</p>
+        <button id="ok-btn" type="button" id="btn" autofocus>OK</button>
+      </main>`;
 
-        document.title = 'Alert';
-        break;
-      default:
-        break;
-    }
+      document.body.style.color = (alertInfo.bg == 'dark') ? 'white' : 'black';
+      document.body.style.backgroundColor = (alertInfo.bg == 'dark') ? '#292A2D' : 'white';
+
+      try {
+        url = (new URL(alertInfo.url)).hostname;
+      } catch (e) {
+        url = alertInfo.url;
+      }
+      document.getElementById('url').innerHTML = url + ' says';
+      document.getElementById('message').innerText = alertInfo.message;
+      document.getElementById('message').title = alertInfo.message;
+
+      switch (alertInfo.type) {
+        case 'alert':
+          document.title = 'Alert';
+          document.getElementById('ok-btn').onclick = () => { remote.getCurrentWindow().hide(); }
+          break;
+        case 'confirm':
+          document.getElementById('main').innerHTML += '<button id="cancel-btn" type="button" id="btn">Cancel</button>';
+
+          document.title = 'Confirm';
+
+          document.getElementById('ok-btn').onclick = () => {
+            ipcRenderer.send('alert-reply', true);
+            remote.getCurrentWindow().hide();
+          }
+
+          document.getElementById('cancel-btn').onclick = () => {
+            ipcRenderer.send('alert-reply', false);
+            remote.getCurrentWindow().hide();
+          }
+          break;
+        case 'prompt':
+          document.getElementById('main').innerHTML += '<button id="cancel-btn" type="button" id="btn">Cancel</button>';
+
+          let input = document.createElement('input');
+          document.getElementById('message').after(input);
+
+          document.title = 'Prompt';
+
+          document.getElementById('ok-btn').onclick = () => {
+            ipcRenderer.send('alert-reply', input.value);
+            remote.getCurrentWindow().hide();
+          }
+
+          input.addEventListener("keyup", function(event) {
+            event.preventDefault();
+            if (event.keyCode === 13) {
+              document.getElementById("ok-btn").click();
+            }
+          });
+
+          document.getElementById('cancel-btn').onclick = () => {
+            ipcRenderer.send('alert-reply', null);
+            remote.getCurrentWindow().hide();
+          }
+
+          input.focus();
+          break;
+        default:
+          break;
+      }
+    });
   </script>
 </html>

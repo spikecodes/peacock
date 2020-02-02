@@ -24,7 +24,10 @@ const Store = require('electron-store');
 const store = new Store();
 
 if(!store.get('settings')) {
-  let data = {"search_engine":"DuckDuckGo","theme":"Default","save_location":"Downloads","storage":"Locally","newTab":{},"mail":{"address":"","ids":[""]}};
+  let data = {
+    "search_engine":"DuckDuckGo", "theme":"Default", "save_location":"Downloads",
+    "storage":"Locally", "newTab":{ "items": ["","","","",""] }, "mail":{ "address":"", "ids":[] }, "rich_presence": "Enabled"
+  };
   store.set('settings', data);
 }
 
@@ -32,7 +35,7 @@ store.set('searchEngines', [
   {"name": "Google", "url": "https://google.com/search?q=", "icon": "https://seeklogo.net/wp-content/uploads/2015/09/google-favicon-vector.png"},
 	{"name": "DuckDuckGo","url": "https://duckduckgo.com/?q=","icon": "https://duckduckgo.com/assets/icons/meta/DDG-icon_256x256.png"},
 	{"name": "Ecosia","url": "https://www.ecosia.org/search?q=","icon": "https://cdn.iconscout.com/icon/free/png-512/ecosia-2-569348.png"},
-	{"name": "Bing","url": "https://www.bing.com/search?q=","icon": "http://pluspng.com/img-png/bing-logo-png-png-ico-512.png"},
+	{"name": "Bing","url": "https://www.bing.com/search?q=","icon": "https://pluspng.com/img-png/bing-logo-png-png-ico-512.png"},
 	{"name": "Yahoo","url": "https://search.yahoo.com/search?p=","icon": "https://i.ibb.co/F4VhWMr/yahoo-2019-logo-social.png"}
 ]);
 
@@ -40,7 +43,7 @@ if(!store.get('blocked')) store.set('blocked', []);
 if(!store.get('bookmarks')) store.set('bookmarks', []);
 if(!store.get('flags')) store.set('flags', {});
 if(!store.get('history')) store.set('history', []);
-if(!store.get('permissions')) store.set('permissions', []);
+if(!store.get('permissions')) store.set('permissions', {});
 
 webtab.init(document, store);
 storage.init(store);
@@ -57,7 +60,7 @@ var userAgent = remote.getCurrentWebContents().userAgent.split(' ');
 userAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:73.0) Gecko/20100101 Firefox/73.0';
 
 //Discord Rich Presence
-try {
+if (store.get('settings.rich_presence') == 'Enabled') {
   const { Client } = require('discord-rpc');
   const clientId = '627363592408137749';
 
@@ -94,15 +97,12 @@ try {
 
   rpclient
     .login({clientId})
-    .catch(console.log('Discord not open.'));
-  } catch (e) {
-    console.log('Discord not open.');
-  }
+    .catch(console.error);
+}
 //Discord Rich Presence
 
-exports.getTabCount = function() {
-  return tabs.length();
-}
+exports.getTabCount = function() { return tabs.length(); }
+exports.showAlert = showAlert;
 
 window.theme = 'light';
 
@@ -134,7 +134,7 @@ ipcMain.on('blockstackSignIn', async function(event, token) {
 });
 
 ipcMain.on('alert', async function(e, data) {
-  showAlert(data);
+  showAlert(data, r => { e.returnValue = r });
 });
 
 ipcMain.on('flags.js', async function(e, data) {
@@ -148,15 +148,23 @@ ipcMain.on('flags.js', async function(e, data) {
   store.set('flags', flags);
 });
 
+ipcMain.on('getBookmarks', async e => { storage.getBookmarks().then(r => e.returnValue = r) });
+ipcMain.on('getHistory', async e => { storage.getHistory().then(r => e.returnValue = r) });
+ipcMain.on('clearHistory', async e => { storage.clearHistory() });
+ipcMain.on('removeHistoryItem', async (e, id) => { storage.removeHistoryItem(id) });
+
 ipcMain.on('newTab', async function(e, action, extra) {
   if(action == 'focusSearchbar') {
     $('#url').val('');
     $('#url').focus();
     $('#url').select();
-  } else if (action == 'removeHistoryItem') {
-    storage.removeHistoryItem(extra);
-  }
-  else if(action == 'settings') {
+  } else if (action == 'saveItem') {
+    let items = store.get('settings.newTab.items');
+    items[extra.id] = extra.domain;
+    store.set('settings.newTab.items', items);
+  } else if (action == 'loadItems') {
+    e.returnValue = store.get('settings.newTab.items');
+  } else if (action == 'settings') {
     console.log(extra);
   }
 });
@@ -185,9 +193,43 @@ ipcMain.on('store', async (e, purpose, name, value) => {
   else { e.returnValue = store.get(name); }
 });
 
+ipcMain.on('siteInfo', async (e, action) => {
+  switch (action) {
+    case 'Certificate':
+      let host = new URL(tabs.currentView().webContents.getURL()).host;
+
+      let https = require('https');
+      let options = {
+        host: host,
+        port: 443,
+        method: 'GET'
+      };
+
+      let req = https.request(options, function(res) {
+        let cert = res.connection.getPeerCertificate();
+        showCertificateDialog(cert);
+      });
+
+      req.end();
+      break;
+    case 'Cookies':
+      cookies().then((cookies) => {
+        console.log(cookies);
+      }).catch(console.error);
+      break;
+    case 'Site Settings':
+
+      break;
+    default:
+
+  }
+});
+
 ipcMain.on('signIntoBlockstack', (e, a) => {
 	tabs.newView(blockchain.signIntoBlockstack());
 });
+
+ipcMain.on('getTheme', async e => { e.returnValue = window.theme; });
 
 let nav;
 let viewHeight = $('.etabs-views').height();
@@ -198,7 +240,7 @@ async function keyboardShortcut(shortcut) {
       openSettings();
       break;
     case 'devTools':
-      tabs.currentView().webContents.openDevTools({ mode: 'right' });;
+      tabs.currentView().webContents.openDevTools({ mode: 'right' });
       break;
     case 'nextTab':
       tabs.nextTab();
@@ -255,9 +297,6 @@ async function keyboardShortcut(shortcut) {
     case 'forceReload':
       tabs.currentView().webContents.reloadIgnoringCache();
       break;
-    case 'getMetrics':
-      //showSnackbar('Allow <b>duckduckgo.com</b> to access <b>location</b>?', 100, ['YES', 'NO']);
-      break;
     case 'toggleCustomization':
       if(!nav){ nav = require('dragula')([$('#navigation')], {}); }
       else { nav.destroy(); nav = undefined; }
@@ -270,21 +309,11 @@ async function keyboardShortcut(shortcut) {
   }
 }
 
-let popup;
-remote.getCurrentWindow().on('focus', async function(event, args) { if(popup){ popup.close(); popup = null; } loadTheme(); });
-remote.getCurrentWindow().on('maximize', async function(event, args) {
-  console.log('max');
-  let view = remote.getCurrentWindow().getBrowserView();
-  if(!view) return;
-  let bounds = view.getBounds();
-
-  winBounds = remote.getCurrentWindow().getBounds();
-  view.setBounds({ x: bounds.x, y: bounds.y, width: window.outerWidth, height: winBounds.height - 89 });
-});
-
 ipcMain.on('loadPage', async function(event, args) { tabs.currentView().webContents.loadURL(args); });
 
 ipcMain.on('openPage', async function(event, args) { tabs.newView(args); });
+
+ipcMain.on('loadTheme', async function(event, args) { loadTheme(); });
 
 // Adblock
 async function enableAdBlocking() {
@@ -347,17 +376,6 @@ async function disableAdBlocking() {
 	}
 }
 
-// Single-use event listener
-async function onetime(node, type, callback) {
-// create event
-node.addEventListener(type, function(e) {
-	// remove event
-	e.target.removeEventListener(e.type, arguments.callee);
-	// call handler
-	return callback(e);
-});
-}
-
 async function loadTheme() {
   let themeObj = store.get('settings.theme').toLowerCase();
   let newTheme = themeObj;
@@ -367,7 +385,7 @@ async function loadTheme() {
   let src = $('#shieldIMG').attr('src');
 
   if (window.theme != newTheme) {
-    console.time('Theme load time');
+    //console.time('Theme load time');
     if (themeObj === 'light') {
       window.theme = 'light';
 
@@ -417,7 +435,7 @@ async function loadTheme() {
         $('#shieldIMG').attr('src', 'images/Peacock Shield White Empty.svg');
       }
     }
-    console.timeEnd('Theme load time');
+    //console.timeEnd('Theme load time');
   }
 }
 loadTheme();
@@ -489,7 +507,7 @@ async function openSettings() {
   	settings.focus(); // Focus on it
   } else { // If Settings Doesn't Already Exist
     let bg = (window.theme == 'dark') ? '#292A2D' : '#ffffff';
-    let params = encodeURIComponent(JSON.stringify({ darkMode: (window.theme == 'dark') }));
+    let params = encodeURIComponent(JSON.stringify({ darkMode: window.darkMode }));
 
   	settings = new BrowserWindow({
   		frame: false,
@@ -499,19 +517,16 @@ async function openSettings() {
   		backgroundColor: bg,
   		webPreferences: {
   			nodeIntegration: true,
-  			plugins: true,
-        contextIsolation: false,
-        enableBlinkFeatures: 'OverlayScrollbars',
-        webviewTag: false,
   			enableRemoteModule: true
   		},
   		width: 900,
   		height: 900,
+      parent: remote.getCurrentWindow(),
   		icon: join(__dirname, 'images/peacock.ico')
   	}); // Create Settings
 
     // Open Developer Tools:
-    //settings.openDevTools();
+    settings.openDevTools();
 
   	// and load the html of the app.
     let { format } = require('url');
@@ -543,42 +558,53 @@ async function initAlert() {
       nodeIntegration: true,
       enableRemoteModule: true
     },
+    parent: remote.getCurrentWindow(),
     alwaysOnTop: true,
     icon: join(__dirname, 'images/peacock.ico')
   };
 
   alertWin = new BrowserWindow(args);
 
-  alertWin.on('blur', async () => { alertWin.hide(); });
+  let address = require('url').format({
+    pathname: join(__dirname, 'pages/alert.html'),
+    protocol: 'file:',
+    slashes: true
+  });
+
+  alertWin.loadURL(address);
+
   alertWin.on('page-title-updated', async () => { alertWin.show(); });
 }
 
-async function showAlert(input) {
-  switch (input.type) {
-    case 'alert':
-      console.log(input);
+async function showAlert(data, callback) {
+  let params = {...data, bg: window.theme};
 
-      let defaultParams = { bg: window.theme };
-      let params = encodeURIComponent(JSON.stringify({...input, ...defaultParams}));
+  alertWin.webContents.send('load', params);
+  alertWin.show();
 
-      let address = require('url').format({
-        pathname: join(__dirname, 'pages/alert.html'),
-        protocol: 'file:',
-        slashes: true
-      }) + '?' + params;
-
-      alertWin.loadURL(address);
-      alerted = false;
+  switch (data.type) {
+    case 'prompt':
+      alertWin.setBounds({ height: 200 });
+      ipcMain.once('alert-reply', (e, r) => {
+        callback(r);
+        alertWin.setBounds({ height: 130 });
+      });
       break;
-    case 'message':
-      $(document.body).prepend(`<center class="messageBox"><div class="message"><p>${input.message}</p></div></center>`);
-      setTimeout(function () {
-        $(document.body).children(":first").remove();
-      }, input.duration);
+    case 'confirm':
+      ipcMain.once('alert-reply', (e, r) => { callback(r) });
       break;
     default:
       break;
   }
+
+  alertWin.focus();
+  alerted = false;
+  // case 'message':
+  //   $(document.body).prepend(`<center class="messageBox"><div class="message"><p>${data.message}</p></div></center>`);
+  //   setTimeout(function () {
+  //     $(document.body).children(":first").remove();
+  //   }, data.duration);
+  //   break;
 }
 
 async function getSearchEngine(cb) {
@@ -654,36 +680,41 @@ try {
 } catch (e) {}
 }
 
-async function showSnackbar(text='', items=[], duration=100, buttons=[], callback=console.log) {
-$('#snackbar p').text(text);
-
-$('#snackbar ul').empty();
-if(items != []){
-  items.forEach((item, index) => {
-    $('#snackbar ul').append(`<li>Access your ${item}</li>`);
+async function showSnackbar(text='', items=[], buttons=[], callback=console.log) {
+  let snackbar = new BrowserWindow({
+    frame: false,
+    transparent: true,
+    width: 320,
+    height: 130,
+    x: 228,
+    y: 81,
+    parent: remote.getCurrentWindow(),
+    webPreferences: {
+      nodeIntegration: true,
+      enableRemoteModule: true
+    }
   });
-}
 
-$('#snackbar div').empty();
-if(buttons != []){
-  buttons.forEach((button, index) => {
-    $('#snackbar div').append(`<button type="button" name="button">${button}</button>`);
-    $('#snackbar div button:last').click(async () => {
-      callback(button);
+  snackbar.webContents.once('dom-ready', async e => {
+    snackbar.webContents.send('permission-request', text, items, buttons);
+
+    ipcMain.once('permission-reply', (event, reply) => {
       $('#search').removeClass('search-active');
-      $('#snackbar').css('display', 'none');
+      snackbar.close();
+      callback(reply);
+
+      remote.getCurrentWindow().focus();
+      remote.getCurrentWindow().focus();
     });
   });
-}
 
-$('#snackbar button').click(async () => {
-  callback('close');
-  $('#search').removeClass('search-active');
-  $('#snackbar').css('display', 'none');
-});
+  snackbar.loadURL(require('url').format({
+    pathname: join(__dirname, 'pages/snackbar.html'),
+    protocol: 'file:',
+    slashes: true
+  }));
 
-$('#search').addClass('search-active');
-$('#snackbar').css('display', 'block');
+  $('#search').addClass('search-active');
 }
 
 async function hideSnackbar() {
@@ -698,50 +729,65 @@ async function loadFlags() {
 	});
 }
 
-
+let siteInfo;
 async function toggleSiteInfo() {
-  if($('#site-info').is(":visible")) {
-    $('#search').removeClass('search-active');
-    $('#site-info').css('display', 'none');
-  } else {
-    let url = new URL(tabs.currentView().webContents.getURL());
-
-    $('#info-permissions').empty();
-    let perms = getPermissions(url.host);
-    if(!perms) return;
-
-    console.log(perms);
-    Object.keys(perms).forEach((item, index) => {
-      let allowed = perms[item] ? 'Allow' : 'Block';
-
-      $('#info-permissions').append(`
-        <li id='info-perm'>
-          <img src='images/earth.svg' id='perm-icon'>
-          <p id='perm-text'>${item}</p>
-          <button id='perm-allow'>${allowed}</button>
-        </li>
-      `);
+  if(!siteInfo) {
+    $('#search').addClass('search-active');
+    siteInfo = new BrowserWindow({
+      frame: false,
+      transparent: true,
+      width: 320,
+      height: 330,
+      x: 228,
+      y: 81,
+      parent: remote.getCurrentWindow(),
+      webPreferences: {
+        nodeIntegration: true,
+        enableRemoteModule: true
+      }
     });
 
-    $('#search').addClass('search-active');
-    $('#site-info').css('display', 'block');
+    siteInfo.loadURL(require('url').format({
+      pathname: join(__dirname, 'pages/info.html'),
+      protocol: 'file:',
+      slashes: true
+    }));
+
+    siteInfo.on('close', e => {
+      siteInfo = null; $('#search').removeClass('search-active');
+      remote.getCurrentWindow().focus();
+      remote.getCurrentWindow().focus();
+    });
+
+    let url = new URL(tabs.currentView().webContents.getURL());
+
+    let perms = store.get('permissions')[url.hostname];
+
+    siteInfo.webContents.once('dom-ready', async e => {
+      cookies().then(c => { siteInfo.webContents.send('cookies', c.length) }).catch(console.error);
+
+      if(!perms) return;
+
+      Object.keys(perms).forEach((item, index) => {
+        let allowed = perms[item] ? 'Allow' : 'Block';
+
+        siteInfo.webContents.send('perm', `
+          <li id='info-perm'>
+            <img src='../images/earth.svg' id='perm-icon'>
+            <p id='perm-text'>${item}</p>
+            <button id='perm-allow'>${allowed}</button>
+          </li>
+        `);
+      });
+    });
   }
-}
-
-async function getPermissions(site) {
-  let promisio = new Promise((resolve, reject) => {
-    let perms = store.get('permissions');
-
-    if(site && site != '') { resolve(perms[site]); }
-    else { resolve(perms); }
-  });
-  return promisio;
 }
 
 async function savePermission(site, permission, allowed) {
   let perms = store.get('permissions');
   if(!perms[site]) { perms[site] = {}; }
   perms[site][permission] = allowed;
+
   store.set('permissions', perms);
 }
 
@@ -751,38 +797,42 @@ site = site || contents.getURL();
 return contents.session.cookies.get({ url: site });
 }
 
+ipcMain.on('viewAdded', async e => {
+  tabs.currentView().webContents.session.setPermissionRequestHandler(handlePermission);
+});
+
 async function handlePermission (webContents, permission, callback, details) {
-if (details.mediaTypes) {
-  let mediaType = (details.mediaTypes[0] == 'audio') ? 'microphone' : 'camera';
-}
-if (permission == 'geolocation') permission = 'location';
-if (permission == 'midiSysex') permission = 'midi';
-
-let allowedPerms = ['fullscreen', 'pointerLock'];
-if(!allowedPerms.includes(permission)) {
-  let url = (new URL(webContents.getURL())).hostname;
-
-  let perms = store.get('permissions');
-
-  let checked;
-  try { checked = perms[url][permission] } catch (e) { checked = undefined }
-
-  if(checked == undefined || checked == null) {
-    showSnackbar(`${url} wants to`, [permission], 100, ['Allow', 'Block'], function (response) {
-      if(response === 'Allow') {
-        callback(true);
-        savePermission(url, permission, true);
-      } else {
-        callback(false);
-        savePermission(url, permission, false);
-      }
-    });
-  } else {
-    callback(checked);
+  if (details.mediaTypes) {
+    let mediaType = (details.mediaTypes[0] == 'audio') ? 'microphone' : 'camera';
   }
-} else {
-  callback(true);
-}
+  if (permission == 'geolocation') permission = 'location';
+  if (permission == 'midiSysex') permission = 'midi';
+
+  let allowedPerms = ['fullscreen', 'pointerLock'];
+  if(!allowedPerms.includes(permission)) {
+    let url = (new URL(webContents.getURL())).hostname;
+
+    let perms = store.get('permissions');
+
+    let checked;
+    try { checked = perms[url][permission] } catch (e) { checked = undefined }
+
+    if(checked == undefined || checked == null) {
+      showSnackbar(`${url} wants to`, [permission], ['Allow', 'Block'], function (response) {
+        if(response === 'Allow') {
+          callback(true);
+          savePermission(url, permission, true);
+        } else {
+          callback(false);
+          savePermission(url, permission, false);
+        }
+      });
+    } else {
+      callback(checked);
+    }
+  } else {
+    callback(true);
+  }
 }
 
 function validURL(str) {
@@ -962,6 +1012,7 @@ function showAutocomplete() {
   getSearchEngine(async (engine) => {
     $('#search').css('filter', 'invert(0)');
     $('#search').attr('src', engine.icon);
+    $('#search').css('filter', 'invert(0)');
   });
 }
 
@@ -1064,6 +1115,7 @@ certDialog = new BrowserWindow({
     enableRemoteModule: true
   },
   show: false,
+  parent: remote.getCurrentWindow(),
   icon: join(__dirname, 'images/peacock.ico')
 });
 
@@ -1084,42 +1136,16 @@ certDialog.loadURL(format({
 }
 
 $('#search').click(async (e) => {
-if($('#search').attr('src') == 'images/lock.svg') {
-  cookies().then((c) => { $('#cookies label').text('(' + c.length + ' in use)') })
-    .catch(console.error);
-  toggleSiteInfo();
-}
+  // if($('#search').attr('src') == 'images/lock.svg') {
+    // cookies().then((c) => { $('#cookies label').text('(' + c.length + ' in use)') })
+    //   .catch(console.error);
+    toggleSiteInfo();
+  // }
 });
 
-$('#info-close').click(toggleSiteInfo);
 $('#info-header h4').click(async (e) => {
-toggleSiteInfo();
-tabs.newView('https://support.google.com/chrome/answer/95617');
-});
-$('#cookies').click(async (e) => {
-toggleSiteInfo();
-cookies().then((cookies) => {
-  console.log(cookies);
-  showAlert({ type: 'message', message: cookies });
-}).catch(console.error);
-});
-$('#certificate').click(async (e) => {
-toggleSiteInfo();
-let host = new URL(tabs.currentView().webContents.getURL()).host;
-
-let https = require('https');
-let options = {
-  host: host,
-  port: 443,
-  method: 'GET'
-};
-
-let req = https.request(options, function(res) {
-  let cert = res.connection.getPeerCertificate();
-  showCertificateDialog(cert);
-});
-
-req.end();
+  toggleSiteInfo();
+  tabs.newView('https://support.google.com/chrome/answer/95617');
 });
 
 $('#star').on('mouseover mouseout', function(e) {
@@ -1226,10 +1252,8 @@ initAlert();
 
 loadFlags();
 
-remote.getCurrentWindow().on('closed', async () => {
-  certDialog.close();
-  alertWin.close();
-  if(settings) settings.close();
+remote.getCurrentWindow().on('closed', async e => {
+  remote.getCurrentWindow().getChildWindows().forEach(win => { win.close() });
 });
 
 const menuTemplate = [
@@ -1247,7 +1271,7 @@ const menuTemplate = [
 					label: 'Open DevTools',
 					accelerator: 'CmdOrCtrl+Alt+I',
 					click: async () => {
-						remote.getCurrentWindow().openDevTools({ mode: 'detach' });;
+						remote.getCurrentWindow().openDevTools({ mode: 'detach' });
 					}
 				},
 				{
@@ -1453,55 +1477,4 @@ Menu.setApplicationMenu(Menu.buildFromTemplate(menuTemplate));
   showInspectElement: true
 });*/
 
-/*extensions.forEach(function (item, index) {
-let badge = $('#omnibox').after(item.badge).next();
-badge.mousedown(function(event) {
-  switch (event.which) {
-    case 1:
-      if(!item.hasAction) break;
-      if(popup) { popup.focus(); break; }
-      var viewportOffset = badge.get(0).getBoundingClientRect();
-
-      var top = viewportOffset.top;
-      var left = viewportOffset.left;
-
-      popup = new BrowserWindow({
-        title: item.action_title,
-        frame: false,
-        backgroundColor: '#FFF',
-        webPreferences: {
-          nodeIntegration: false,
-          allowRunningInsecureContent: true
-        },
-        resizable: false,
-        focusable: true,
-        movable: false,
-        skipTaskbar: true,
-        width: 350,
-        height: 275,
-        x: left - 350 + badge.width(),
-        y: top + 10 + badge.height(),
-        icon: item.action_icon
-      });
-
-      popup.focus();
-      popup.openDevTools({ mode: 'detach' });
-
-      let { format } = require('url');
-      popup.loadURL(format({
-        pathname: item.action_popup,
-        protocol: 'file:',
-        slashes: true
-      }));
-      break;
-    case 2:
-      tabs.new('Options', 'file://' + item.options);
-    case 3:
-      tabs.currentView().webContents.loadURL('file://' + item.options);
-      break;
-    default:
-      console.log('You have a strange Mouse!');
-  }
-});
-});
-*/
+tabs.newView();

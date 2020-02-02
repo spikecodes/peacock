@@ -49,6 +49,9 @@ exports.loadStart = function(view, extensions) {
   document.getElementById('star').style.visibility = 'hidden';
   document.getElementById('refresh').children[0].src = 'images/close.svg';
 
+  let url = new URL(view.webContents.getURL());
+  view.tab.setIcon(`https://www.google.com/s2/favicons?domain=${url.origin}`);
+
   if(!extensions) return;
 
   extensions.forEach(function (item, index) {
@@ -66,9 +69,6 @@ exports.loadStart = function(view, extensions) {
 
 exports.loadStop = function(view, extensions) {
   document.getElementById('refresh').children[0].src = 'images/refresh.svg';
-
-  let url = new URL(view.webContents.getURL());
-  view.tab.setIcon(`https://www.google.com/s2/favicons?domain=${url.origin}`);
 
   if(!extensions) return;
 
@@ -112,7 +112,7 @@ exports.didNavigate = function (url, view, storage) {
   try {
     let protocol = (new URL(url)).protocol;
     if(protocol.startsWith('http')) {
-      //storage.logHistory(url, view.webContents.getTitle());
+      storage.logHistory(url, view.webContents.getTitle());
     }
   } catch (e) {}
   setSearchIcon(url);
@@ -181,15 +181,6 @@ exports.domReady = function (view, storage) {
       break;
     case 'peacock://version':
       view.webContents.send('setVersions', process.versions);
-      break;
-    case 'peacock://newtab':
-      let bookmarks = [];
-      storage.getHistory().then(obj => {
-        obj.forEach((item, i) => {
-          bookmarks.push(item.url);
-        });
-        view.webContents.send('sendBookmarks', bookmarks);
-      });
       break;
     default:
       break;

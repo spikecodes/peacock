@@ -3,9 +3,11 @@
 // All of the Node.js APIs are available in this process.
 const remote = require('electron').remote;
 
-let tabCount;
-exports.setTabCount = function (input) {
-  tabCount = input;
+var tabCount;
+var showAlert;
+exports.setData = function (tc, sa) {
+  tabCount = tc;
+  showAlert = sa;
 }
 
 // When document has loaded, initialise
@@ -66,11 +68,8 @@ function init() {
         }
 
         if(tc && tc > 1) {
-          if (confirm('You are about to close ' + tc + ' tabs. Are you sure you want to continue?')) {
-            closeWindow();
-          } else {
-            // Do nothing!
-          }
+          let input = { message: 'You are about to close ' + tc + ' tabs. Are you sure you want to continue?', type: 'confirm',	url: 'Peacock' };
+          showAlert(input, r => { if(r) {closeWindow()} });
         } else {
           closeWindow();
         }

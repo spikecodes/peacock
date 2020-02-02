@@ -18,8 +18,6 @@ let settingsInfo = JSON.parse(decodeURIComponent(location.search.split('?')[1]))
 window.darkMode = settingsInfo.darkMode; loadTheme();
 remote.getCurrentWindow().on('focus', updateProfile);
 
-window.theme = 'light';
-
 function saveSettings(input) {
   let data = store.get('settings');
   for (var key in input){ data[key] = input[key]; }
@@ -44,7 +42,7 @@ engines.forEach(item => {
     let key = $(this).parent().parent().parent().attr("data-key");
   	$(this).parent().siblings(".dropdown-toggle").text(text);
   	saveSettings({ [key]: text });
-    if(key === "theme") { setTimeout(function () { loadTheme(); }, 1000); }
+    if(key === "theme") { loadTheme(); ipcRenderer.send('loadTheme'); }
   });
 });
 
@@ -68,10 +66,6 @@ $('.dropup').on('hide.bs.dropdown', function() {
   $(this).find('.dropdown-menu').first().stop(true, true).slideDown(100);
 });
 
-$('.clearHistory').click(function () {
-  storage.clearHistory().then(loadHistory);
-});
-
 require('fs').readdir(themes, (err, files) => {
  files.forEach(file => {
    if(file.endsWith(".css")){
@@ -86,7 +80,7 @@ require('fs').readdir(themes, (err, files) => {
        let key = $(this).parent().parent().parent().attr("data-key");
      	$(this).parent().siblings(".dropdown-toggle").text(text);
      	saveSettings({ [key]: text });
-       if(key === "theme") { loadTheme(); }
+       if(key === "theme") { loadTheme(); ipcRenderer.send('loadTheme'); }
      });
    }
   });
@@ -139,91 +133,7 @@ function resetProfile() {
   $("#signOut").click(function () { ipcRenderer.send('signIntoBlockstack','');updateProfile(); });
 }
 
-function loadHistory() {
-  $(".group-history").empty(); // Clear any previous history logs before loading current ones.
-  storage.getHistory().then(items => {
-    if (!items) {
-      $(".group-history a").unbind("click");
-      $(".group-history").empty();
-      $(".group-history").append(`<a href="#" class="list-group-item list-group-item-action item-history default-item">
-        Sign in with Blockstack via the Profile tab to access history.</a>`);
-      return;
-    }
-
-    if(typeof items === "string") { items = JSON.parse(items); }
-
-    if(items.length > 0) {
-      for (var i = 0; i < items.length; i++) { // For each item in history log:
-        let item = '<a href="#" data-url="' + items[i].url + '" class="list-group-item list-group-item-action item-history default-item">'
-          + '<img class="history-icon" src="https://www.google.com/s2/favicons?domain=' + items[i].url + '"><span class="history-title">' + items[i].title +
-          '</span><br><span class="history-url">' + items[i].url + '</span></a>';
-         $(".group-history").append(item); // Display the item in the bookmarks list.
-      }
-
-      $(".item-history").click(function (e) { // When a history item is clicked:
-        e.preventDefault(); // Don't refresh the page which is what would normally happen.
-        ipcRenderer.send('openPage', $(this).attr("data-url")); // Open the URL of the history item in new tab.
-      });
-    } else { // If there are no history logs:
-      $(".group-history").append(`<a href="#" class="list-group-item list-group-item-action item-history default-item">
-        📃 No history logged. Visit a page to get started.</a>`); // Display a "no history" message.
-    }
-  });
-}
-
-function loadBookmarks() {
-  $(".group-bookmarks").empty(); // Clear any previous bookmarks before loading current ones.
-  storage.getBookmarks().then(obj => { // Grab the bookmarks from "bookmarks.json":
-    if (!obj) {
-      $(".group-bookmarks a").unbind("click");
-      $(".group-bookmarks").empty();
-      $(".group-bookmarks").append(`<a href="#" class="list-group-item list-group-item-action item-bookmarks">
-        Sign in with Blockstack via the Profile tab to access bookmarks.</a>`);
-      return;
-    }
-
-    if(typeof obj === "string") { obj = JSON.parse(obj); }
-
-    if (obj.length !== 0) { // If there are any bookmarks:
-      for (var i = 0; i < obj.length; i++) { // For each stored bookmark:
-        // Values: obj[i].icon, obj[i].id, obj[i].url, obj[i].title
-
-        let icon;
-        if(obj[i].icon === "blank favicon"){
-          icon = join(__dirname, "../images/se");
-        } else { icon = obj[i].icon ;}
-
-        let book = '<a href="#" data-url="' + obj[i].url + '" class="list-group-item list-group-item-action item-bookmarks">'
-          + '<img class="bookmark-icon" src="' + icon + '"><span class="bookmark-title">' + obj[i].title +
-          '</span><br><span class="bookmark-url">' + obj[i].url + '</span></a>';
-        let item = $(".group-bookmarks").append(book); // Display the bookmark in the bookmarks list.
-      }
-
-      $(".item-bookmarks").click(function (e) { // When a bookmark is clicked:
-        e.preventDefault(); // Don't refresh the page which is what would normally happen.
-        ipcRenderer.send('openPage',$(this).attr("data-url")); // Open the URL of the bookmark in new tab.
-      });
-
-      $(".item-bookmarks").hover(function () {
-        $(this).append('<button class="delete-bookmark">✖</button>');
-        $(this).children().last().click(function (e) {
-          e.preventDefault();// Don't refresh the page which is what would normally happen.
-          event.stopPropagation();
-          storage.removeBookmark($(this).parent().attr("data-url")).then(e => updateProfile());
-        })
-      }, function () {
-        $(this).children().last().remove();
-      });
-    } else { // If there are no bookmarks:
-      $(".group-bookmarks").append(`<a href="#" class="list-group-item list-group-item-action item-bookmarks default-item">
-        🔖 No bookmarks stored. Bookmark a page to get started.</a>`); // Display a "no bookmarks" message.
-    }
-  });
-}
-
 function updateProfile() {
-  loadHistory();
-  loadBookmarks();
   if(require('./blockchain.js').getUserSession().isUserSignedIn()){
     let profile = require('./blockchain.js').getUserSession().loadUserData().profile;
     let username = profile.name;
@@ -244,7 +154,7 @@ $('.dropdown-item').click(function(event) {
   let key = $(this).parent().parent().parent().attr("data-key");
 	$(this).parent().siblings(".dropdown-toggle").text(text);
 	saveSettings({ [key]: text });
-  if(key === "theme") { loadTheme(); }
+  if(key === "theme") { loadTheme(); ipcRenderer.send('loadTheme'); }
 });
 
 $(document).ready(function () {
