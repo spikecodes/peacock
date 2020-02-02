@@ -91,46 +91,13 @@ Has access to this site">
     <label id="matches"></label>
     <button id="close-find">×</button>
   </footer>
-  <div id="snackbar">
-    <button id="close-snackbar">×</button>
-    <p>duckduckgo.com wants to</p>
-    <ul></ul>
-    <div></div>
-  </div>
-  <div id="site-info">
-    <button id="info-close">×</button>
-    <div id="info-header">
-      <h2>Connection is secure</h2>
-      <h3>Your information (for example, passwords or credit card numbers) is private when it is sent to this site.</h3>
-      <h4>Learn more</h4>
-    </div>
-    <ul id="info-permissions"></ul>
-    <div id="info-buttons">
-      <button id="certificate" title="Show certificate">
-        <img src="images/license.svg">
-        <p>Certificate</p>
-        <label>(Valid)</label>
-      </button>
-
-      <button id="cookies" title="Show cookies">
-        <img src="images/cookie.svg">
-        <p>Cookies</p>
-        <label>(10 in use)</label>
-      </button>
-
-      <button id="site-settings" title="Open site settings">
-        <img src="images/settings.svg">
-        <p>Site Settings</p>
-      </button>
-    </div>
-  </div>
   <div id="autocomplete"></div>
   <script>
     // You can also require other files to run in this process
     let renderer = require('./renderer.js');
     let titlebar = require('./titlebar.js');
 
-    titlebar.setTabCount(renderer.getTabCount);
+    titlebar.setData(renderer.getTabCount, renderer.showAlert);
   </script>
 
 </html>

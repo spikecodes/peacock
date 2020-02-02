@@ -1,4 +1,4 @@
-const { remote } = require('electron');
+const { remote, ipcRenderer } = require('electron');
 
 const web = require('./web-tab');
 const store = require('./store');
@@ -9,16 +9,6 @@ var tabGroup;
 var closedTabs = [];
 
 var activeTab;
-
-async function onetime(node, type, callback) {
-  // create event
-  node.on(type, function(e) {
-  	// remove event
-  	node.off(e.type, arguments.callee);
-  	// call handler
-  	return callback(e);
-  });
-}
 
 $.fn.fadeSlideLeft = function(speed,fn) {
   return $(this).animate({
@@ -101,7 +91,7 @@ exports.makeTabGroup = function (newTab_title, newTab_url, callback=()=>{}) {
       });
 
       $('.etabs-tab-button-new').replaceWith($('.etabs-tab-button-new').clone());
-      $('.etabs-tab-button-new').click(async () => { newTab(newTab_title, newTab_url); });
+      $('.etabs-tab-button-new').click(async e => { newTab(newTab_title, newTab_url); });
       $('.etabs-tab-button-new').attr('title', 'New tab');
 
       callback(tabGroup);
@@ -149,8 +139,8 @@ exports.initBrowserView = async (view) => {
   view.webContents.on('page-favicon-updated', async (e) => { web.faviconUpdated(view, e.favicons) });
   view.webContents.on('page-title-updated', async (e, t) => { web.titleUpdated(view, e, t) });
   view.webContents.on('did-change-theme-color', async (e) => { web.changeThemeColor(e) });
-  view.webContents.on('did-navigate', async (e) => { web.didNavigate(e.url, view, store) });
-  view.webContents.on('did-navigate-in-page', async (e) => { web.didNavigate(e.url, view, store) });
+  view.webContents.on('did-navigate', async (e, url) => { web.didNavigate(url, view, store) });
+  view.webContents.on('did-navigate-in-page', async (e, url) => { web.didNavigate(url, view, store) });
   view.webContents.on('preload-error', async (e, path, err) => { console.error("PRELOAD ERROR", err); });
   view.webContents.on('certificate-error', async (e, url, err, cert, callback) => {
     e.preventDefault();
@@ -226,7 +216,6 @@ exports.close = function (view) {
       $(tab).css('transition', 'all 0.0s !important');
     }, 200);
   });
-
 }
 
 exports.newView = function (url='peacock://newtab', active=true) {
@@ -244,12 +233,13 @@ exports.newView = function (url='peacock://newtab', active=true) {
 
   let winBounds = remote.getCurrentWindow().getBounds();
 
-  view.setBounds({ x: 0, y: 89, width: window.outerWidth, height: winBounds.height - 89 });
+  view.setBounds({ x: 0, y: 89, width: window.outerWidth, height: winBounds.height - 104 });
+  view.setAutoResize({ height: true, horizontal: true });
 
   window.onresize = async () => {
     let bounds = view.getBounds();
     winBounds = remote.getCurrentWindow().getBounds();
-    view.setBounds({ x: bounds.x, y: bounds.y, width: window.outerWidth, height: winBounds.height - 89 });
+    //view.setBounds({ x: bounds.x, y: bounds.y, width: window.outerWidth, height: winBounds.height - 104 });
   };
 
   tabSession.webRequest.onBeforeSendHeaders(async (details, callback) => {
@@ -398,7 +388,7 @@ exports.backTab = async () => {
 }
 
 exports.viewActivated = function (view) { web.changeTab(view, store); }
-exports.viewAdded = function (view) { this.tabs.push(view); }
+exports.viewAdded = function (view) { this.tabs.push(view); ipcRenderer.send('viewAdded'); }
 exports.viewClosed = function (view, tabs=this.tabs) {
   const index = this.tabs.indexOf(view);
   if (index > -1) this.tabs.splice(index, 1);
@@ -428,5 +418,3 @@ remote.app.on('certificate-error', (event, webContents, url, error, certificate,
   event.preventDefault();
   callback(true);
 });
-
-this.newView();

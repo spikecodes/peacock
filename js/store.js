@@ -5,21 +5,23 @@ var store;
 exports.init = st => { store = st }
 
 async function checkFiles() {
-  if (blockchain.getUserSession().isUserSignedIn()) {
-    blockchain.getUserSession().getFile("history.json").then(data => {
-      if(data === null) {
-        console.log("Creating History");
-        blockchain.getUserSession().putFile("history.json", "[]");
-      }
-    });
-    blockchain.getUserSession().getFile("bookmarks.json").then(data => {
-      if(data === null) {
-        console.log("Creating Bookmarks");
-        blockchain.getUserSession().putFile("bookmarks.json", "[]");
-      }
-    });
-  } else {
-    console.log("Not signed into Blockstack, Blockstack required for history.");
+  if (store.get('settings.storage') == 'Blockstack') {
+    if (blockchain.getUserSession().isUserSignedIn()) {
+      blockchain.getUserSession().getFile("history.json").then(data => {
+        if(data === null) {
+          console.log("Creating History");
+          blockchain.getUserSession().putFile("history.json", "[]");
+        }
+      });
+      blockchain.getUserSession().getFile("bookmarks.json").then(data => {
+        if(data === null) {
+          console.log("Creating Bookmarks");
+          blockchain.getUserSession().putFile("bookmarks.json", "[]");
+        }
+      });
+    } else {
+      console.log("Not signed into Blockstack, Blockstack required for history.");
+    }
   }
 }
 
@@ -48,21 +50,21 @@ exports.getHistory = async function () {
   }
 }
 
-exports.removeHistoryItem = async function (url) {
+exports.removeHistoryItem = async function (id) {
   await checkFiles();
   let loc = store.get('settings.storage');
 
   if(loc === "Blockstack"){
     if (blockchain.getUserSession().isUserSignedIn()) {
       blockchain.getUserSession().getFile("history.json").then(data => {
-        var curr = JSON.parse(data).filter(item => item.url !== url);
+        var curr = JSON.parse(data).filter(item => item.id !== id);
         blockchain.getUserSession().putFile("history.json", JSON.stringify(curr));
       });
     } else {
       console.log("Not signed into Blockstack, Blockstack required to log history.");
     }
   } else {
-    let removed = store.get('history').filter(item => item.url !== url);
+    let removed = store.get('history').filter(item => item.id !== id);
     store.set('history', removed);
   }
 }
@@ -93,7 +95,9 @@ exports.logHistory = async function (site, title) {
   await checkFiles();
   let loc = store.get('settings.storage');
 
-  let item = { "url": site, "title": title };
+  let id = require('uuid/v1')();
+  let time = + new Date();
+  let item = { "url": site, "title": title, "id": id, "time": time };
 
   if(loc === "Blockstack"){
     if (blockchain.getUserSession().isUserSignedIn()) {
@@ -174,11 +178,8 @@ exports.addBookmark = async function (site, title) {
   await checkFiles();
   let loc = store.get('settings.storage');
 
-  let item = {};
-  item.id = require('uuid/v1');
-  item.url = site;
-  item.icon = `https://www.google.com/s2/favicons?domain=${site}`;
-  item.title = title;
+  let id = require('uuid/v1')();
+  let item = { "url": site, "title": title, "id": id };
 
   if(loc === "Blockstack"){
     if (blockchain.getUserSession().isUserSignedIn()) {

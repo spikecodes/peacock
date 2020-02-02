@@ -55,12 +55,6 @@
           <a locale-key="customization_tab" class="nav-link active" id="pills-customization-tab" data-toggle="pill" href="#pills-customization" role="tab" aria-controls="pills-customization" aria-selected="true">Customization</a>
         </li>
         <li class="nav-item">
-          <a locale-key="history_tab" class="nav-link" id="pills-history-tab" data-toggle="pill" href="#pills-history" role="tab" aria-controls="pills-history" aria-selected="false">History</a>
-        </li>
-        <li class="nav-item">
-          <a locale-key="bookmarks_tab" class="nav-link" id="pills-bookmarks-tab" data-toggle="pill" href="#pills-bookmarks" role="tab" aria-controls="pills-bookmarks" aria-selected="false">Bookmarks</a>
-        </li>
-        <li class="nav-item">
           <a locale-key="profile_tab" class="nav-link" id="pills-profile-tab" data-toggle="pill" href="#pills-profile" role="tab" aria-controls="pills-profile" aria-selected="false">Profile</a>
         </li>
       </ul>
@@ -130,6 +124,27 @@
                 </div>
               </div>
             </div>
+            <div class="heading-element" data-key="rich_presence">
+              <p locale-key="rich_presence_heading" class="label">Discord Rich Presence</p>
+              <div class="dropdown">
+                <button
+                  locale-key="locally_item"
+                  class="btn btn-secondary dropdown-toggle"
+                  data-toggle="dropdown"
+                  type="button"
+                  id="dropdownMenuButton"
+                  data-toggle="dropdown"
+                  aria-haspopup="true"
+                  aria-expanded="false"
+                >
+                  Disabled
+                </button>
+                <div class="dropdown-menu rich_presence-dropdown-menu" aria-labelledby="dropdownMenuButton">
+                  <a locale-key="enabled_item" class="dropdown-item" href="#">Enabled</a>
+                  <a locale-key="disabled_item" class="dropdown-item" href="#">Disabled</a>
+                </div>
+              </div>
+            </div>
           </section>
           <section class="heading">
             <h2 class="heading-title">Downloads</h2>
@@ -155,17 +170,6 @@
               <p class="note"><b>Note:</b> Requires browser relaunch.</p>
             </div>
           </section>
-        </div>
-        <div class="tab-pane fade" id="pills-history" role="tabpanel" aria-labelledby="pills-history-tab">
-          <button type="button" class="btn btn-secondary clearHistory">Clear History</button><br>
-          <div class="list-group group-history">
-            <a href="#" class="list-group-item list-group-item-action item-history default-item">Loading history...</a>
-          </div>
-        </div>
-        <div class="tab-pane fade" id="pills-bookmarks" role="tabpanel" aria-labelledby="pills-bookmarks-tab">
-          <div class="list-group group-bookmarks">
-            <a href="#" class="list-group-item list-group-item-action item-bookmarks default-item">Loading bookmarks...</a>
-          </div>
         </div>
         <div class="tab-pane fade" id="pills-profile" role="tabpanel" aria-labelledby="pills-profile-tab">
           <div id="profile-jumbo" class="jumbotron jumbotron-fluid">

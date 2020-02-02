@@ -62,11 +62,9 @@ async function createWindow() {
 		frame: false,
 		minWidth: 500,
     minHeight: 450,
-		titleBarStyle: 'hiddenInset',
 		backgroundColor: '#FFF',
 		webPreferences: {
 			nodeIntegration: true,
-      contextIsolation: false,
 			allowRunningInsecureContent: true,
 			enableRemoteModule: true
 		},

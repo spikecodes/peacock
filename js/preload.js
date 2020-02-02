@@ -3,7 +3,7 @@ const {	dialog,	BrowserWindow } = require('electron').remote;
 const {	join } = require('path');
 const { format } = require('url');
 
-global.alert = (message) => {
+global.alert = window.alert = (message) => {
 	let url = (window.location.href.startsWith('peacock')) ? 'Peacock' : window.location.href;
 
 	ipcRenderer.send('alert', {
@@ -13,13 +13,24 @@ global.alert = (message) => {
 	});
 }
 
-global.confirm = (text) => {
-	const dialogOptions = {
-		type: 'info',
-		buttons: ['OK', 'Cancel'],
-		message: text
-	};
-	return dialog.showMessageBoxSync(dialogOptions);
+global.confirm = window.confirm = (message) => {
+	let url = (window.location.href.startsWith('peacock')) ? 'Peacock' : window.location.href;
+
+	return ipcRenderer.sendSync('alert', {
+		message: message,
+		type: 'confirm',
+		url: url
+	});
+}
+
+global.prompt = window.prompt = (message) => {
+	let url = (window.location.href.startsWith('peacock')) ? 'Peacock' : window.location.href;
+
+	return ipcRenderer.sendSync('alert', {
+		message: message,
+		type: 'prompt',
+		url: url
+	});
 }
 
 window.addEventListener('DOMContentLoaded', (event) => {
@@ -108,10 +119,6 @@ if (window.location.protocol == 'peacock:') {
 
 	ipcRenderer.once('setVersions', (event, versions) => {
 		setVersions(versions);
-	});
-
-	ipcRenderer.once('sendBookmarks', (event, bookmarks) => {
-		listSites(bookmarks);
 	});
 
 	global.sendSync = ipcRenderer.sendSync;
