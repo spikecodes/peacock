@@ -5187,7 +5187,7 @@
           payload['flag'] = item.children[0].innerHTML;
           payload['value'] = item.classList.contains('table-warning');
 
-          send('flags.js', payload);
+          send('flags.js', 'set', payload);
         });
       });
 
@@ -5250,5 +5250,7 @@
         buildHtmlTable(flags);
       }
     });
+
+    setEnabled(sendSync('flags.js', 'get'));
   </script>
 </html>

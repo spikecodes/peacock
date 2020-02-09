@@ -43,12 +43,11 @@
 	"author": "Codiscite",
 	"license": "MIT",
 	"devDependencies": {
-		"electron": "^8.0.0-beta.7",
-		"electron-builder": "^22.3.1"
+		"electron": "^8.0.0",
+		"electron-builder": "^22.3.2"
 	},
 	"dependencies": {
-		"@cliqz/adblocker-electron": "^1.4.1",
-		"async": "^3.1.0",
+		"@cliqz/adblocker-electron": "^1.5.0",
 		"blockstack": "^19.3.0",
 		"child_process": "^1.0.2",
 		"cors": "^2.8.5",
@@ -59,12 +58,9 @@
 		"electron-dl": "^2.0.0",
 		"electron-store": "^5.1.0",
 		"express": "^4.17.1",
-		"install": "^0.13.0",
 		"jquery": "^3.4.1",
 		"jquery-ui": "^1.12.1",
 		"jquery-ui-dist": "^1.12.1",
-		"npm": "^6.13.6",
-		"tldts": "^5.6.3",
 		"uuid": "^3.4.0",
 		"v8-compile-cache": "^2.1.0"
 	}

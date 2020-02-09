@@ -23,7 +23,10 @@
       }
 
       li p {
-        margin-left: 15px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        margin: 15px;
       }
 
       li svg {
@@ -77,6 +80,7 @@
 
       let text = document.createElement('p');
       text.innerHTML = bookmark.title;
+      text.title = bookmark.title;
 
       let icon = document.createElement('img');
       icon.src = `https://www.google.com/s2/favicons?domain=${bookmark.url}`;

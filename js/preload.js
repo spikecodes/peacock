@@ -106,13 +106,6 @@ document.addEventListener('fullscreenchange', fullscreenchange);
 document.addEventListener('webkitfullscreenchange', fullscreenchange);
 
 if (window.location.protocol == 'peacock:') {
-
-	ipcRenderer.once('loadFlags', (event, data) => {
-		let keys = Object.keys(data);
-		var filtered = keys.filter(key => { return data[key] });
-		setEnabled(filtered);
-	});
-
 	ipcRenderer.once('setError', (event, details) => {
 		setError(details);
 	});

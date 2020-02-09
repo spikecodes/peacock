@@ -1,6 +1,6 @@
 const { remote, ipcRenderer } = require('electron');
 
-const web = require('./web-tab');
+const web = require('./web');
 const store = require('./store');
 
 exports.tabs = [];
@@ -66,7 +66,7 @@ exports.new = function (docTitle, url, callback=()=>{}, background=false) {
   return tab;
 }
 
-exports.currentView = function () {
+exports.current = function () {
   return activeTab;
 }
 
@@ -190,7 +190,7 @@ exports.activate = function (view) {
 }
 
 exports.close = function (view) {
-  view = view || this.currentView();
+  view = view || this.current();
 
   if(activeTab == view) {
     let id = this.tabs.indexOf(view);

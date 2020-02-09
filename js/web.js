@@ -1,5 +1,4 @@
 var document;
-var store;
 var firstTime = true;
 
 window.$ = window.jQuery = require('jquery');
@@ -39,7 +38,7 @@ function setSearchIcon(url) {
 }
 exports.setSearchIcon = setSearchIcon;
 
-exports.init = function (doc, st) { document = doc; store = st; }
+exports.init = function (doc) { document = doc }
 
 exports.loadStart = function(view, extensions) {
   // tab.tabElements.icon.innerHTML = `<div class='spinner'><svg class='svg' viewBox='22 22 44 44'>
@@ -172,9 +171,6 @@ exports.domReady = function (view, storage) {
     });
 
   switch (view.webContents.getURL()) {
-    case 'peacock://flags':
-      view.webContents.send('loadFlags', store.get('flags'));
-      break;
     case 'peacock://network-error':
       view.webContents.send('setError', window.error);
       window.error = {errorCode: '-300', validatedURL: 'peacock://network-error', darkMode: window.darkMode};

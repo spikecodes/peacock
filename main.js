@@ -7,17 +7,6 @@ const { join, normalize } = require('path');
 const settingsFile = join(__dirname, 'data/settings.json');
 const flags = join(__dirname, 'data/flags.json');
 
-const server = require('child_process').fork(__dirname + '/server.js');
-
-// Quit server process if main app will quit
-app.on('will-quit', async () => {
-	server.send('quit');
-});
-
-server.on('message', async (m) => {
-	authCallback(m.authResponse);
-});
-
 /*require('jsonfile').readFile(settingsFile, async (err, obj) => {
 	let dl = require('electron-dl');
 	if(obj.save_location === 'Use Save As Window'){
@@ -43,15 +32,6 @@ async function sendToRenderer(channel, message) {
 	try { mainWindow.webContents.send(channel, message); }
 	catch (e) { console.log(e); }
 }
-
-async function authCallback(authResponse) {
-	// Bring app window to front
-	mainWindow.focus();
-
-	let { decodeToken } = require('blockstack');
-	const token = decodeToken(authResponse);
-	sendToRenderer('blockstackSignIn', authResponse);
-};
 
 async function createWindow() {
 	// Create the browser window.
