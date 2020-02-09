@@ -320,8 +320,12 @@ webview {
   background-color: #F1F3F4;
   margin: -5.5px 10px 0px 10px;
   cursor: text;
-  padding-left: 40px;
+  padding: 0px 40px;
   transition: all 0.01s;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 #url::placeholder {

@@ -398,10 +398,13 @@
 
     try { send('newTab', 'focusSearchbar'); } catch (e) {}
 
-    let backgrounds = ['https://images.unsplash.com/photo-1574270981993-f1df213562b3?w=1950',
-                       'https://images.unsplash.com/photo-1575761344173-aa186491c120?w=1950',
-                       'https://images.unsplash.com/photo-1575138312433-d42e9f176f6b?w=1950',
-                       'https://images.unsplash.com/photo-1573614071230-c814e95ae3d1?w=2049']
+    let backgrounds = ['https://images.unsplash.com/photo-1574270981993-f1df213562b3?w=1920',
+                       'https://images.unsplash.com/photo-1575761344173-aa186491c120?w=1920',
+                       'https://images.unsplash.com/photo-1575138312433-d42e9f176f6b?w=1920',
+                       'https://images.unsplash.com/photo-1573614071230-c814e95ae3d1?w=1920',
+                       'https://images.unsplash.com/photo-1579765955778-3c78ba1d9481?w=1920',
+                       'https://images.unsplash.com/photo-1579801067857-8d4753d835b1?w=1920',
+                       'https://images.unsplash.com/photo-1577143224858-74381c3feb0e?w=1920']
 
     let random_bg = backgrounds[Math.floor(Math.random() * backgrounds.length)];
     setBackground(random_bg);

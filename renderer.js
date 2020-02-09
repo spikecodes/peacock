@@ -11,14 +11,16 @@ const { join, normalize } = require('path');
 
 const { ElectronBlocker } = require('@cliqz/adblocker-electron');
 
-const { existsSync, readFile, writeFile } = require('fs');
+const { writeFile } = require('fs');
 
 const mail = require('./js/mail.js');
 const tabs = require('./js/tabs.js');
 const blockchain = require('./js/blockchain.js');
 const storage = require('./js/store.js');
 
-const webtab = require('./js/web-tab.js');
+var blockstackTab;
+
+const web = require('./js/web.js');
 
 const Store = require('electron-store');
 const store = new Store();
@@ -32,31 +34,28 @@ if(!store.get('settings')) {
 }
 
 store.set('searchEngines', [
-  {"name": "Google", "url": "https://google.com/search?q=", "icon": "https://seeklogo.net/wp-content/uploads/2015/09/google-favicon-vector.png"},
-	{"name": "DuckDuckGo","url": "https://duckduckgo.com/?q=","icon": "https://duckduckgo.com/assets/icons/meta/DDG-icon_256x256.png"},
-	{"name": "Ecosia","url": "https://www.ecosia.org/search?q=","icon": "https://cdn.iconscout.com/icon/free/png-512/ecosia-2-569348.png"},
-	{"name": "Bing","url": "https://www.bing.com/search?q=","icon": "https://pluspng.com/img-png/bing-logo-png-png-ico-512.png"},
-	{"name": "Yahoo","url": "https://search.yahoo.com/search?p=","icon": "https://i.ibb.co/F4VhWMr/yahoo-2019-logo-social.png"}
+  {"name": "Google", "url": "https://google.com/search?q="},
+	{"name": "DuckDuckGo","url": "https://duckduckgo.com/?q="},
+	{"name": "Ecosia","url": "https://www.ecosia.org/search?q="},
+	{"name": "Bing","url": "https://www.bing.com/search?q="},
+	{"name": "Yahoo","url": "https://search.yahoo.com/search?p="}
 ]);
 
 if(!store.get('blocked')) store.set('blocked', []);
 if(!store.get('bookmarks')) store.set('bookmarks', []);
-if(!store.get('flags')) store.set('flags', {});
+if(!store.get('flags')) store.set('flags', []);
 if(!store.get('history')) store.set('history', []);
 if(!store.get('permissions')) store.set('permissions', {});
 
-webtab.init(document, store);
+web.init(document);
 storage.init(store);
 mail.init(store);
 
-// const extensions = require('./js/extensions.js').setup();
 const extensions = null;
 
 const { version } = require('./package.json');
 
 var userAgent = remote.getCurrentWebContents().userAgent.split(' ');
-// userAgent = userAgent.map(function (part) { return (part.startsWith('Peacock') || part.startsWith('Electron')) ? '' : part });
-// userAgent = userAgent.join(' ').replace(/ +(?= )/g,'');
 userAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:73.0) Gecko/20100101 Firefox/73.0';
 
 //Discord Rich Presence
@@ -110,42 +109,21 @@ var alertWin, settings, certDialog;
 
 window.darkMode = nativeTheme.shouldUseDarkColors || false;
 
-/*ipcMain.on('ad-blocked', async function (event, ad) {
-  let obj = store.get('blocked');
-
-  var adRequest = { type: ad.type, url: ad.url, sourceHostname: ad.sourceHostname };
-
-  console.log(adRequest);
-
-  let result = obj;
-  result.push(adRequest);
-
-  store.set('blocked', result);
-});*/
-
-ipcMain.on('blockstackSignIn', async function(event, token) {
-  console.log('blockstack','signed in');
-  if (blockchain.getUserSession().isUserSignedIn()) {
-    tabs.close();
-  } else {
-    blockchain.getUserSession().handlePendingSignIn(token);
-    tabs.close();
-  }
-});
-
 ipcMain.on('alert', async function(e, data) {
   showAlert(data, r => { e.returnValue = r });
 });
 
-ipcMain.on('flags.js', async function(e, data) {
-  console.log(data);
-
+ipcMain.on('flags.js', async function(e, action, data) {
   let flags = store.get('flags');
 
-  if(data.value) { flags[data.flag] = true; }
-  else           { delete flags[data.flag]; }
+  if (action == 'set') {
+    if(data.value) { flags.push(data.flag) }
+    else           { flags.splice(flags.indexOf(data.flag), 1) }
 
-  store.set('flags', flags);
+    store.set('flags', flags);
+  } else {
+    e.returnValue = flags;
+  }
 });
 
 ipcMain.on('getBookmarks', async e => { storage.getBookmarks().then(r => e.returnValue = r) });
@@ -196,7 +174,7 @@ ipcMain.on('store', async (e, purpose, name, value) => {
 ipcMain.on('siteInfo', async (e, action) => {
   switch (action) {
     case 'Certificate':
-      let host = new URL(tabs.currentView().webContents.getURL()).host;
+      let host = new URL(tabs.current().webContents.getURL()).host;
 
       let https = require('https');
       let options = {
@@ -226,21 +204,48 @@ ipcMain.on('siteInfo', async (e, action) => {
 });
 
 ipcMain.on('signIntoBlockstack', (e, a) => {
-	tabs.newView(blockchain.signIntoBlockstack());
+	blockstackTab = tabs.newView(blockchain.signIntoBlockstack());
+});
+
+ipcMain.on('blockchain', async (e, a) => {
+  switch (a) {
+    case 'isUserSignedIn':
+      e.returnValue = blockchain.getUserSession().isUserSignedIn();
+      break;
+    case 'signOut':
+      blockchain.getUserSession().signUserOut();
+      break;
+    case 'profile':
+      e.returnValue = blockchain.getUserSession().loadUserData().profile;
+      break;
+    default:
+
+  }
+});
+
+ipcMain.on('getThemes', async (e) => {
+  require('fs').readdir('css/themes', (err, files) => {
+    let result = [];
+    files.forEach(file => {
+      if(file.endsWith(".css")){
+        let theme = file.replace(".css", "");
+        result.push(theme[0].toUpperCase() + theme.slice(1));
+      }
+    });
+    e.returnValue = result;
+  });
 });
 
 ipcMain.on('getTheme', async e => { e.returnValue = window.theme; });
+ipcMain.on('getDarkmode', async e => { e.returnValue = window.darkMode; });
 
 let nav;
 let viewHeight = $('.etabs-views').height();
 async function keyboardShortcut(shortcut) {
   let { startVPN, stopVPN } = require('./js/vpn.js');
   switch (shortcut) {
-    case 'settings':
-      openSettings();
-      break;
     case 'devTools':
-      tabs.currentView().webContents.openDevTools({ mode: 'right' });
+      tabs.current().webContents.openDevTools({ mode: 'right' });
       break;
     case 'nextTab':
       tabs.nextTab();
@@ -270,32 +275,32 @@ async function keyboardShortcut(shortcut) {
       stopVPN();
       break;
     case 'zoomIn':
-      tabs.currentView().webContents.zoomFactor += 0.1;
+      tabs.current().webContents.zoomFactor += 0.1;
       break;
     case 'zoomOut':
-      tabs.currentView().webContents.zoomFactor -= 0.1;
+      tabs.current().webContents.zoomFactor -= 0.1;
       break;
     case 'resetZoom':
-      tabs.currentView().webContents.zoomFactor = 1;
+      tabs.current().webContents.zoomFactor = 1;
       break;
     case 'focusSearchbar':
       $('#url').focus();
       $('#url').select();
       break;
     case 'backPage':
-      tabs.currentView().webContents.goBack();
+      tabs.current().webContents.goBack();
       break;
     case 'forwardPage':
-      tabs.currentView().webContents.goForward();
+      tabs.current().webContents.goForward();
       break;
     case 'savePage':
-      tabs.savePage(tabs.currentView().webContents);
+      tabs.savePage(tabs.current().webContents);
       break;
     case 'refreshPage':
-      tabs.currentView().webContents.reload();
+      tabs.current().webContents.reload();
       break;
     case 'forceReload':
-      tabs.currentView().webContents.reloadIgnoringCache();
+      tabs.current().webContents.reloadIgnoringCache();
       break;
     case 'toggleCustomization':
       if(!nav){ nav = require('dragula')([$('#navigation')], {}); }
@@ -309,71 +314,37 @@ async function keyboardShortcut(shortcut) {
   }
 }
 
-ipcMain.on('loadPage', async function(event, args) { tabs.currentView().webContents.loadURL(args); });
+ipcMain.on('loadPage', async function(event, args) { tabs.current().webContents.loadURL(args); });
 
 ipcMain.on('openPage', async function(event, args) { tabs.newView(args); });
 
 ipcMain.on('loadTheme', async function(event, args) { loadTheme(); });
 
 // Adblock
-async function enableAdBlocking() {
-	console.time('Adblocker load time');
+var { fetch } = require('cross-fetch');
 
-  let session = remote.session.fromPartition('persist:peacock');
+async function enableAdBlocking(session) {
+  session = session || tabs.current().webContents.session;
 
-	if (existsSync(join(__dirname, 'data/blocker.txt'))) {
-		readFile(join(__dirname, 'data/blocker.txt'), async (err, contents) => {
-			if (err) throw err;
+  ElectronBlocker.fromPrebuiltAdsAndTracking(fetch).then((blocker) => {
+    blocker.enableBlockingInSession(session);
+    blocker.on('request-blocked', async (ad) => {
+      let obj = store.get('blocked');
+      obj.push({ type: ad.type, url: ad.url, sourceHostname: ad.sourceHostname });
+      store.set('blocked', obj);
+    });
 
-			let data;
-			if(typeof contents === 'string') { data = Buffer.from(contents); } else if (Buffer.isBuffer(contents)) { data = contents; }
-			else { console.log(typeof contents); }
-
-			const blocker = ElectronBlocker.deserialize(data);
-
-			blocker.enableBlockingInSession(session);
-			blocker.on('request-blocked', async (request) => {
-				sendToRenderer('ad-blocked', request);
-		  });
-
-			console.timeEnd('Adblocker load time');
-		});
-	} else {
-		ElectronBlocker.fromPrebuiltAdsAndTracking(fetch).then((blocker) => {
-			blocker.enableBlockingInSession(session);
-			blocker.on('request-blocked', async (request) => {
-		    sendToRenderer('ad-blocked', request);
-		  });
-			const buffer = blocker.serialize();
-			writeFile(join(__dirname, 'data/blocker.txt'), buffer, async (err) => {
-				if (err) throw err; console.log('Peacock Shield serialized.'); console.timeEnd('Adblocker load time'); });
-		});
-	}
+    console.log('Adblock enabled!');
+  });
 }
 
-async function disableAdBlocking() {
-  let session = remote.session.fromPartition('persist:peacock');
+async function disableAdBlocking(session) {
+  session = session || tabs.current().webContents.session;
 
-	if (existsSync(join(__dirname, 'data/blocker.txt'))) {
-		readFile(join(__dirname, 'data/blocker.txt'), async (err, contents) => {
-			if (err) throw err;
-
-			let data;
-			if(typeof contents === 'string') { data = Buffer.from(contents); } else if (Buffer.isBuffer(contents)) { data = contents; }
-			else { console.log(typeof contents); }
-
-			const blocker = ElectronBlocker.deserialize(data);
-
-			blocker.disableBlockingInSession(session);
-		});
-	} else {
-		ElectronBlocker.fromPrebuiltAdsAndTracking(fetch).then((blocker) => {
-			blocker.disableBlockingInSession(session);
-			const buffer = blocker.serialize();
-			writeFile(join(__dirname, 'data/blocker.txt'), buffer, async (err) => {
-				if (err) throw err; console.log('Peacock Shield serialized.'); });
-		});
-	}
+  ElectronBlocker.fromPrebuiltAdsAndTracking(fetch).then((blocker) => {
+    blocker.disableBlockingInSession(session);
+    console.log('Adblock disabled!');
+  });
 }
 
 async function loadTheme() {
@@ -468,7 +439,7 @@ if(parseInt( $('.etabs-views').css('height') ) === viewHeight - 35){
 
       if (e.which == 13 && e.shiftKey) {
         if(val.length > 0){
-          tabs.currentView().webContents.findInPage(val, {
+          tabs.current().webContents.findInPage(val, {
             findNext: true,
             forward: false,
             matchCase: $('#match-case').hasClass('down')
@@ -476,7 +447,7 @@ if(parseInt( $('.etabs-views').css('height') ) === viewHeight - 35){
         }
       } else if (e.which == 13) {
         if(val.length > 0){
-          tabs.currentView().webContents.findInPage(val, {
+          tabs.current().webContents.findInPage(val, {
             findNext: true,
             matchCase: $('#match-case').hasClass('down')
           });
@@ -487,57 +458,19 @@ if(parseInt( $('.etabs-views').css('height') ) === viewHeight - 35){
     $('#find input').on('input', function () {
       val = $('#find input').val();
       if(val.length > 0) {
-        tabs.currentView().webContents.findInPage(val, {
+        tabs.current().webContents.findInPage(val, {
           findNext: false,
           matchCase: $('#match-case').hasClass('down')
         });
       } else {
         try {
-          tabs.currentView().webContents.stopFindInPage('clearSelection');
+          tabs.current().webContents.stopFindInPage('clearSelection');
         } catch (e) { }
         $('#matches').text('');
       }
     });
   });
 }
-}
-
-async function openSettings() {
-  if(settings){ // If Settings Already Exists
-  	settings.focus(); // Focus on it
-  } else { // If Settings Doesn't Already Exist
-    let bg = (window.theme == 'dark') ? '#292A2D' : '#ffffff';
-    let params = encodeURIComponent(JSON.stringify({ darkMode: window.darkMode }));
-
-  	settings = new BrowserWindow({
-  		frame: false,
-  		minWidth: 700,
-      minHeight: 550,
-  		titleBarStyle: 'hiddenInset',
-  		backgroundColor: bg,
-  		webPreferences: {
-  			nodeIntegration: true,
-  			enableRemoteModule: true
-  		},
-  		width: 900,
-  		height: 900,
-      parent: remote.getCurrentWindow(),
-  		icon: join(__dirname, 'images/peacock.ico')
-  	}); // Create Settings
-
-    // Open Developer Tools:
-    settings.openDevTools();
-
-  	// and load the html of the app.
-    let { format } = require('url');
-  	settings.loadURL(format({
-  		pathname: join(__dirname, 'pages/settings.html'),
-  		protocol: 'file:',
-  		slashes: true
-  	}) + '?' + params);
-
-  	settings.on('closed', async e => { settings = null });
-  }
 }
 
 async function initAlert() {
@@ -619,7 +552,7 @@ async function getSearchEngine(cb) {
 }
 
 async function changeAdBlock(enabled) {
-  let session = tabs.currentView().webContents.session;
+  let session = tabs.current().webContents.session;
 
   if (enabled) { enableAdBlocking(session); }
   else { disableAdBlocking(session); }
@@ -628,9 +561,9 @@ async function changeAdBlock(enabled) {
   $('#shieldIMG').attr('src', 'images/loading-' + tone + '.gif');
 
   setTimeout(async function() {
-    tabs.currentView().webContents.reload();
+    tabs.current().webContents.reload();
     let suffix = (window.theme === 'dark') ? ' White' : '';
-    suffix += (toWhat) ? '' : ' Empty';
+    suffix += (enabled) ? '' : ' Empty';
 
     $('#shieldIMG').attr('src', 'images/Peacock Shield' + suffix + '.svg');
   }, 3000);
@@ -638,7 +571,7 @@ async function changeAdBlock(enabled) {
 
 async function toggleAdblock() {
   let src = $('#shieldIMG').attr('src');
-  if (sr.startsWith('images/Peacock Shield') && !src.endsWith('Empty.svg')) {
+  if (src.startsWith('images/Peacock Shield') && !src.endsWith('Empty.svg')) {
     //If On
     changeAdBlock(false);
   } else if (src.endsWith('Empty.svg')) {
@@ -654,18 +587,18 @@ $('#url').blur();
 
 try {
   new URL(val);
-  tabs.currentView().webContents.loadURL(val);
+  tabs.current().webContents.loadURL(val);
 } catch (e) {
   if (val.includes('.') && !val.includes(' ')) {
     $('#url').val(val);
-    tabs.currentView().webContents.loadURL('https://' + val);
+    tabs.current().webContents.loadURL('https://' + val);
   } else if (val.includes('://') || val.startsWith('data:') || val.startsWith('localhost:') && !val.includes(' ')) {
     $('#url').val(val);
-    tabs.currentView().webContents.loadURL(val);
+    tabs.current().webContents.loadURL(val);
   } else {
     getSearchEngine(async function(engine) {
       $('#url').val(engine.url + val);
-      tabs.currentView().webContents.loadURL(engine.url + val);
+      tabs.current().webContents.loadURL(engine.url + val);
     });
   }
 }
@@ -723,9 +656,9 @@ $('#snackbar').css('display', 'none');
 
 
 async function loadFlags() {
-	Object.keys(store.get('flags')).forEach(function (key) {
-		console.log('Added flag: ' + key);
-		app.commandLine.appendSwitch(key);
+  store.get('flags').forEach(function (flag) {
+		console.log('Added flag: ' + flag);
+		app.commandLine.appendSwitch(flag);
 	});
 }
 
@@ -759,7 +692,7 @@ async function toggleSiteInfo() {
       remote.getCurrentWindow().focus();
     });
 
-    let url = new URL(tabs.currentView().webContents.getURL());
+    let url = new URL(tabs.current().webContents.getURL());
 
     let perms = store.get('permissions')[url.hostname];
 
@@ -792,13 +725,14 @@ async function savePermission(site, permission, allowed) {
 }
 
 async function cookies(contents, site) {
-contents = contents || tabs.currentView().webContents;
+contents = contents || tabs.current().webContents;
 site = site || contents.getURL();
 return contents.session.cookies.get({ url: site });
 }
 
 ipcMain.on('viewAdded', async e => {
-  tabs.currentView().webContents.session.setPermissionRequestHandler(handlePermission);
+  enableAdBlocking();
+  tabs.current().webContents.session.setPermissionRequestHandler(handlePermission);
 });
 
 async function handlePermission (webContents, permission, callback, details) {
@@ -908,20 +842,20 @@ if(tabs.length() === 0) { remote.app.quit(); }
 });*/
 
 $('#shield').click(toggleAdblock);
-$('#back').click(async (e) => { tabs.currentView().webContents.goBack() });
-$('#forward').click(async (e) => { tabs.currentView().webContents.goForward() });
+$('#back').click(async (e) => { tabs.current().webContents.goBack() });
+$('#forward').click(async (e) => { tabs.current().webContents.goForward() });
 $('#refresh').mousedown(async (e) => {
 switch(e.which)
 {
   case 1:
     if($('#refresh').children().first().attr('src') == 'images/refresh.svg') {
-      tabs.currentView().webContents.reload()
+      tabs.current().webContents.reload()
     } else {
-      tabs.currentView().webContents.stop();
+      tabs.current().webContents.stop();
     }
   break;
   case 2:
-    let url = tabs.currentView().webContents.getURL();
+    let url = tabs.current().webContents.getURL();
     tabs.newView(url);
   break;
   case 3:
@@ -1010,8 +944,10 @@ function showAutocomplete() {
   $('#url').css('height', '44px');
 
   getSearchEngine(async (engine) => {
+    let icon = 'https://www.google.com/s2/favicons?domain=' + new URL(engine.url).host;
+
     $('#search').css('filter', 'invert(0)');
-    $('#search').attr('src', engine.icon);
+    $('#search').attr('src', icon);
     $('#search').css('filter', 'invert(0)');
   });
 }
@@ -1026,7 +962,7 @@ function hideAutocomplete() {
   $('#url').css('margin', '-5.5px 10px 0px 10px');
   $('#url').css('height', '34px');
 
-  webtab.setSearchIcon(tabs.currentView().webContents.getURL());
+  web.setSearchIcon(tabs.current().webContents.getURL());
 }
 
 $('#url').keypress(async (e) => {
@@ -1078,8 +1014,8 @@ setTimeout(function () {
 }, 75);
 });
 $('#star').click(async (e) => {
-let url = tabs.currentView().webContents.getURL();
-let title = tabs.currentView().webContents.getTitle();
+let url = tabs.current().webContents.getURL();
+let title = tabs.current().webContents.getTitle();
 
 storage.isBookmarked(url).then((isBookmarked) => {
   if(isBookmarked) {
@@ -1091,9 +1027,8 @@ storage.isBookmarked(url).then((isBookmarked) => {
   }
 });
 });
-$('#settings').click(openSettings);
 $('#pip').click(async (e) => {
-tabs.currentView().webContents.executeJavaScript(`
+tabs.current().webContents.executeJavaScript(`
   if(!!document.pictureInPictureElement){ // Is PiP
     document.exitPictureInPicture();
   } else { // Not PiP
@@ -1166,33 +1101,33 @@ url: 'https://api.github.com/repos/Codiscite/peacock/releases',
 headers: { 'User-Agent': userAgent }
 };
 require('request').get(options, async function (error, response, body) {
-if (error) console.error(error);
+  if (error) console.error(error);
 
-let newestVersion = JSON.parse(body)[0].tag_name.split('.').join('').replace('v', '').substr(0, 3);
-let currentVersion = version.split('.').join('').replace('v', '').substr(0, 3);
-if (Number(newestVersion) > Number(currentVersion)) {
-  const { dialog } = remote;
+  let newestVersion = JSON.parse(body)[0].tag_name.split('.').join('').replace('v', '').substr(0, 3);
+  let currentVersion = version.split('.').join('').replace('v', '').substr(0, 3);
+  if (Number(newestVersion) > Number(currentVersion)) {
+    const { dialog } = remote;
 
-  const optionso = {
-    type: 'question',
-    buttons: ['Cancel', 'Update', 'No, thanks'],
-    defaultId: 2,
-    title: 'Peacock',
-    message: 'Update available!',
-    detail: JSON.parse(body)[0].tag_name + ' > ' + version,
-    checkboxLabel: 'Do Not Show Again',
-    checkboxChecked: false,
-  };
+    const optionso = {
+      type: 'question',
+      buttons: ['Cancel', 'Update', 'No, thanks'],
+      defaultId: 2,
+      title: 'Peacock',
+      message: 'Update available!',
+      detail: JSON.parse(body)[0].tag_name + ' > ' + version,
+      checkboxLabel: 'Do Not Show Again',
+      checkboxChecked: false,
+    };
 
-  dialog.showMessageBox(null, optionso).then(data => {
-    if(data.response === 1){
-      tabs.newView('https://github.com/Codiscite/peacock/releases/latest');
-    }
-    console.log(data.checkboxChecked);
-  });
-} else {
-  console.log(`Using newest version! v${version}`);
-}
+    dialog.showMessageBox(null, optionso).then(data => {
+      if(data.response === 1){
+        tabs.newView('https://github.com/Codiscite/peacock/releases/latest');
+      }
+      console.log(data.checkboxChecked);
+    });
+  } else {
+    console.log(`Using newest version! v${version}`);
+  }
 }, 'jsonp');
 
 /*let firstTab;
@@ -1476,5 +1411,29 @@ Menu.setApplicationMenu(Menu.buildFromTemplate(menuTemplate));
   showSaveImageAs: true,
   showInspectElement: true
 });*/
+
+const server = require('child_process').fork(__dirname + '/server.js');
+
+// Quit server process if main app will quit
+app.on('will-quit', async () => {
+	server.send('quit');
+});
+
+server.on('message', async (m) => {
+	let { decodeToken } = require('blockstack');
+	const token = decodeToken(m.authResponse);
+
+  console.log('blockstack','signed in');
+  if (blockchain.getUserSession().isUserSignedIn()) {
+    if(!blockstackTab) return;
+    tabs.close(blockstackTab);
+    blockstackTab = null;
+  } else {
+    blockchain.getUserSession().handlePendingSignIn(m.authResponse);
+    if(!blockstackTab) return;
+    tabs.close(blockstackTab);
+    blockstackTab = null;
+  }
+});
 
 tabs.newView();

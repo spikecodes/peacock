@@ -3,51 +3,277 @@
   <head>
     <meta charset="utf-8" />
     <title>Peacock Settings</title>
-    <link
-      href="https://fonts.googleapis.com/css?family=Roboto&display=swap"
-      rel="stylesheet"
-    />
-    <link href="../css/fonts/Nexa/Nexa.css" rel="stylesheet" />
 
-    <script>
-      window.$ = window.jQuery = require("jquery");
-    </script>
+    <style>
+      @import url('https://fonts.googleapis.com/css?family=Roboto:300,400,500,700,900&display=swap');
 
-    <link rel="stylesheet" href="../css/settings.css" />
-    <link rel="stylesheet" href="../css/titlebar.css" />
-    <link
-      rel="stylesheet"
-      href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
-      integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
-      crossorigin="anonymous"/>
-    <script src="../js/jquery-3.3.1.slim.min.js"></script>
-    <script src="../js/popper.min.js"></script>
-    <script src="../js/bootstrap.min.js"></script>
+      h1,
+      h2,
+      h3,
+      h4,
+      h5,
+      h6,
+      p {
+        font-family: "Roboto", sans-serif;
+      }
+
+      #content {
+        padding-top: 100px;
+        padding-left: 100px;
+        padding-right: 75px;
+        margin-top: 0px;
+      }
+
+      #title {
+        margin-top: 50px;
+        font-size: 40px;
+        color: #313a43;
+        font-weight: 700;
+      }
+
+      #titlebar {
+        top: 0;
+      }
+
+      #header-icon {
+        width: 35px;
+        height: auto;
+      }
+
+      #header-text {
+        margin: 0;
+        margin-top: 7px;
+        font-size: 22px;
+        font-family: "Nexa";
+        font-weight: 700;
+        color: #313a43;
+      }
+
+      .heading {
+        margin-top: 35px;
+        font-size: 19px;
+      }
+
+      .heading-title {
+        font-weight: 500;
+        color: #313a43;
+        margin-bottom: 20px;
+      }
+
+      .heading-element {
+        justify-content: left;
+        align-items: center;
+        padding-left: 50px;
+        height: 50px;
+        width: 500px;
+      }
+
+      .dropdown, .dropup {
+        float: right;
+      }
+
+      .dropdown-toggle {
+        font-family: roboto;
+        font-size: 17px;
+        font-weight: 400;
+      }
+
+      .dropdown-toggle:focus:not(.dropup > .dropdown-toggle) {
+        border-radius: 4px 4px 0px 0px;
+      }
+
+      .dropup > .dropdown-toggle:focus {
+        border-radius: 0px 0px 4px 4px;
+      }
+
+      .btn {
+        border-radius: 4px;
+        border: none;
+        background-color: rgba(0, 0, 0, 0.05);
+        color: #313a43;
+        transition: all 0.1s;
+        background-color: white;
+        border: 2px solid #313a43;
+        /* box-shadow: -4px 4px 0px 0px rgba(49,58,67,1);
+        transform: translate(4px, -4px); */
+        font-weight: 700;
+      }
+
+      .btn:hover {
+        background-color: #313a43 !important;
+        color: white !important;
+        transform: translate(0px, -3.5px);
+        border: 2px solid #313a43;
+        box-shadow: 0px 3.5px 0px 0px #5f6973;
+      }
+
+      .btn:focus {
+        background-color: #313a43 !important;
+        color: white !important;
+        transform: translate(0px, 0px);
+        border: 2px solid #313a43;
+        box-shadow: unset !important;
+      }
+
+      .dropdown-toggle::after {
+        cursor: inherit !important;
+      }
+
+      .label {
+        display: inline-block;
+        font-size: 22px;
+      }
+
+      #pills-profile {
+        top: 100px;
+        right: 100px;
+        line-height: 5px;
+      }
+
+      #profile {
+        width: 100px;
+        height: 100px;
+        border-radius: 15px;
+        background: #eee;
+      }
+
+      #name {
+        margin-top: 25px;
+        margin-bottom: 10px;
+        font-size: 24px;
+        white-space: nowrap;
+        font-weight: 700;
+        font-family: "Roboto";
+      }
+
+      #signedIn {
+        font-size: 20px;
+        white-space: nowrap;
+        color: #cacad2;
+        font-weight: 500;
+        font-family: "Roboto";
+      }
+
+      #signOut {
+        font-family: "Roboto";
+        font-weight: 700;
+        font-size: 15px;
+        white-space: nowrap;
+        margin-left: auto;
+        margin-right:0;
+        height: 50px;
+        width: 100px;
+        color: #313a43;
+        transition: all 0.1s;
+        background: none;
+      }
+
+      #profile-text {
+        margin-left: 20px;
+        line-height: 15px;
+      }
+
+      #profile-jumbo {
+        background-color: #fff;
+        border: 2px solid #313a43;
+        border-radius: 4px;
+        padding: 25px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        transition: all 0.1s;
+      }
+
+      #profile-jumbo:hover {
+        background: #fff9ea;
+      }
+
+      #profile-container {
+        display: inline-flex;
+        align-items: center;
+        padding: 0px;
+      }
+
+      .nav-item:first-child > .nav-link {
+        border-radius: 5px 0px 0px 5px !important;
+      }
+
+      .nav-item:last-child > .nav-link {
+        border-radius: 0px 5px 5px 0px !important;
+      }
+
+      .nav-link {
+        background-color: #f7f7f9;
+        color: #313a43;
+        border-radius: 0px !important;
+        padding-top: 10px;
+        font-family: "Roboto";
+        font-weight: 700;
+        transition: all 0.1s;
+      }
+
+      .nav-link:hover {
+        color: #fbb700;
+        cursor: pointer;
+      }
+
+      .nav-link.active {
+        background-color: #fbd263 !important;
+      }
+
+      .nav-pills {
+        margin-top: 20px;
+      }
+
+      .list-group {
+        margin-bottom: 35px;
+      }
+
+      .search-engine-icon {
+        width: 23px;
+        height: 23px;
+        float: left;
+        transition: all 0.1s;
+        transform: translateY(4%);
+        margin-right: 10px;
+      }
+
+      .note {
+        font-size: 16px;
+        text-align: right;
+        white-space: nowrap;
+      }
+
+      .dropdown-menu {
+        border: 2px solid #313a43;
+        border-radius: 0px 4px 4px 4px;
+        margin-top: -2px;
+      }
+
+      .dropup > .dropdown-menu {
+        border: 2px solid #313a43;
+        border-radius: 4px 4px 4px 0px;
+        margin-top: 0px;
+        margin-bottom: -2px;
+      }
+
+      .dropdown-item {
+        padding: .25rem 1rem;
+        font-weight: 500;
+      }
+
+      .dropdown-item:hover {
+        cursor: pointer;
+        background-color: rgba(0, 0, 0, 0.05);
+      }
+    </style>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
   </head>
-  <body style="display: none;">
-    <header id="titlebar">
-      <div id="drag-region">
-        <div id="window-controls">
-          <div class="button" id="min-button">
-            <span>&#xE921;</span>
-          </div>
-          <div class="button" id="max-button">
-            <span>&#xE922;</span>
-          </div>
-          <div class="button" id="restore-button">
-            <span>&#xE923;</span>
-          </div>
-          <div class="button" id="close-button">
-            <span>&#xE8BB;</span>
-          </div>
-        </div>
-      </div>
-    </header>
+  <body>
     <div id="content">
-      <div>
-        <img id="header-icon" src="../images/Peacock2.0.png" />
-        <p id="header-text">Peacock</p>
-      </div>
       <h1 locale-key="settings_title" id="title">Settings</h1>
 
       <ul class="nav nav-pills mb-3 nav-fill" id="pills-tab" role="tablist">
@@ -190,7 +416,130 @@
     </aside>
   </body>
   <script>
-    require("../js/settings.js");
-    require("../titlebar.js");
+    const store = {
+      get: name => sendSync('store', 'get', name),
+      set: (name, val) => send('store', 'set', name, val)
+    };
+
+    window.darkMode = sendSync('getDarkmode'); loadTheme();
+    window.addEventListener("focus", updateProfile, false);
+
+    function saveSettings(input) {
+      let data = store.get('settings');
+      for (var key in input){ data[key] = input[key]; }
+
+      store.set('settings', data);
+
+      console.log("Updated Settings!");
+      updateProfile();
+    }
+
+    let settings = store.get('settings');
+    for (var SKey in settings){ $('div[data-key=' + SKey + ']').find('.dropdown').find(".dropdown-toggle").text(settings[SKey]); }
+
+    let engines = store.get('searchEngines');
+    $(".search-engines-menu").empty();
+    engines.forEach(item => {
+      let icon = 'https://www.google.com/s2/favicons?domain=' + new URL(item.url).host;
+      $(".search-engines-menu").append(`<a class="dropdown-item" href="#"><img class="search-engine-icon"
+        src="${icon}"/>${item.name}</a>`);
+    });
+
+    $('.dropdown').on('show.bs.dropdown', function() {
+      $(this).find('.dropdown-menu').first().stop(true, true).slideDown(100);
+    });
+
+    $('.dropdown').on('hide.bs.dropdown', function() {
+      $(this).find('.dropdown-menu').first().stop(true, true).slideUp(100);
+    });
+
+    $('.dropup').on('show.bs.dropdown', function() {
+      $(this).find('.dropdown-menu').first().stop(true, true).slideUp(100);
+    });
+
+    $('.dropup').on('hide.bs.dropdown', function() {
+      $(this).find('.dropdown-menu').first().stop(true, true).slideDown(100);
+    });
+
+    sendSync('getThemes').forEach(theme => {
+     $('.theme-dropdown-menu').append(`<a class="dropdown-item" href="#">${theme}</a>`);
+
+     let elem = $('.theme-dropdown-menu').children().last();
+     elem.attr('locale-key', theme.toLowerCase());
+    });
+
+    function loadTheme() {
+      let theme = store.get('settings.theme').toLowerCase();
+      let newTheme = theme;
+
+      if(window.darkMode && theme == 'default') newTheme = 'dark';
+
+      if (window.theme != newTheme) {
+        if (theme === "light") {
+          window.theme = 'light';
+          if($('head link[href*="https://raw.githack.com/Codiscite/peacock/master/css/themes"]').length > 0){
+            $('head link[href*="https://raw.githack.com/Codiscite/peacock/master/css/themes"]').remove();
+          }
+        } else if (theme === "default") {
+          if (window.darkMode) {
+            // If Dark Mode
+            window.theme = 'dark';
+            $("head").append('<link rel="stylesheet" href="https://raw.githack.com/Codiscite/peacock/master/css/themes/dark.css">');
+          } else {
+            // If Light Mode
+            window.theme = 'light';
+            if($('head link[href*="https://raw.githack.com/Codiscite/peacock/master/css/themes"]').length > 0){
+      				$('head link[href*="https://raw.githack.com/Codiscite/peacock/master/css/themes"]').remove();
+      			}
+          }
+        } else {
+          window.theme = 'dark';
+          $("head").append('<link rel="stylesheet" href="https://raw.githack.com/Codiscite/peacock/master/css/themes/' + theme + '.css">');
+        }
+      }
+    }
+
+    function signOutOfBlockstack() {
+      send('blockchain', 'signOut');
+      resetProfile();
+      updateProfile();
+    }
+
+    function resetProfile() {
+      $("#profile").attr("src", '../images/blockstack.png');
+      $("#name").text("Blockstack");
+      $("#signedIn").text("Signed Out");
+      $("#signOut").text("SIGN IN");
+      $("#signOut").unbind("click");
+      $("#signOut").click(function () { send('signIntoBlockstack','');updateProfile(); });
+    }
+
+    function updateProfile() {
+      if(sendSync('blockchain', 'isUserSignedIn')){
+        let profile = sendSync('blockchain', 'profile');
+        let username = profile.name;
+        let profilePic = profile.image[0].contentUrl;
+        $("#profile").attr("src",profilePic);
+        $("#name").text(username);
+        $("#signedIn").text("Signed In");
+        $("#signOut").text("SIGN OUT");
+        $("#signOut").unbind("click");
+        $("#signOut").click(signOutOfBlockstack);
+      } else {
+        resetProfile();
+      }
+    }
+
+    $('.dropdown-item').click(function(event) {
+      let text = $(this).text();
+      let key = $(this).parent().parent().parent().attr("data-key");
+    	$(this).parent().siblings(".dropdown-toggle").text(text);
+    	saveSettings({ [key]: text });
+      if(key === "theme") { loadTheme(); send('loadTheme'); }
+    });
+
+    $(document).ready(function () {
+      updateProfile();
+    });
   </script>
 </html>
