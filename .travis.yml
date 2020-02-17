@@ -1,12 +1,12 @@
-language: node_js
-node_js: "12"
+sudo: false
 
-before_install:
-  - npm install
+language: node_js
+node_js: "9.11.1"
 
 cache:
   directories:
     - node_modules
+    - app/node_modules
     - $HOME/.cache/electron
     - $HOME/.cache/electron-builder
     - $HOME/.npm/_prebuilds
@@ -18,24 +18,17 @@ env:
 
 jobs:
   include:
-    - stage: Deploy Windows, Mac and Linux
+    - stage: Deploy Windows & Mac
+      if: tag IS present
       os: osx
       osx_image: xcode10.1
       script:
-        - npm run dist-all
+        - npm run release -- --mac --win
       before_cache:
         - rm -rf $HOME/.cache/electron-builder/wine
-    # - stage: Deploy Windows & Mac
-    #   if: tag IS present
-    #   os: osx
-    #   osx_image: xcode10.1
-    #   script:
-    #     - npm run release -- --mac --win
-    #   before_cache:
-    #     - rm -rf $HOME/.cache/electron-builder/wine
-    # - stage: Deploy linux
-    #   if: tag IS present
-    #   os: linux
-    #   dist: trusty
-    #   script:
-    #     - npm run release
+    - stage: Deploy linux
+      if: tag IS present
+      os: linux
+      dist: trusty
+      script:
+        - npm run release

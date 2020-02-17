@@ -20,13 +20,18 @@
 		"appId": "com.codiscite.peacock",
 		"win": {
 			"target": "nsis",
-			"icon": "images/peacock.ico"
+			"icon": "images/peacock.png"
 		},
 		"mac": {
 			"category": "books",
 			"target": [
 				"dmg"
-			]
+			],
+			"icon": "images/peacock.png"
+		},
+		"linux": {
+			"target": ["AppImage"],
+			"icon": "images/peacock.png"
 		},
 		"nsis": {
 			"oneClick": "false",
