@@ -1,11 +1,7 @@
-// This file is required by the index.html file and will
-// be executed in the renderer process for that window.
-// All of the Node.js APIs are available in this process.
-require('v8-compile-cache');
-
 const { remote, webFrame, nativeImage } = require('electron');
 const { BrowserView, BrowserWindow, screen, dialog, nativeTheme, ipcMain, app, Menu } = remote;
 require('electron').ipcMain = ipcMain;
+
 
 const { join, normalize } = require('path');
 
@@ -18,6 +14,8 @@ const tabs = require('./js/tabs.js');
 const blockchain = require('./js/blockchain.js');
 const storage = require('./js/store.js');
 
+window.tabs = tabs;
+
 var blockstackTab;
 
 const web = require('./js/web.js');
@@ -27,8 +25,8 @@ const store = new Store();
 
 if(!store.get('settings')) {
   let data = {
-    "search_engine":"DuckDuckGo", "theme":"Default", "save_location":"Downloads",
-    "storage":"Locally", "newTab":{ "items": ["","","","",""] }, "mail":{ "address":"", "ids":[] }, "rich_presence": "Enabled"
+    "search_engine":"DuckDuckGo", "theme":"Default", "save_location":"Downloads", "storage":"Locally",
+    "newTab":{ "backgroundTheme": "nature", "items": ["","","","",""] }, "mail":{ "address":"", "ids":[] }, "rich_presence": "Enabled"
   };
   store.set('settings', data);
 }
@@ -126,6 +124,7 @@ ipcMain.on('flags.js', async function(e, action, data) {
   }
 });
 
+
 ipcMain.on('getBookmarks', async e => { storage.getBookmarks().then(r => e.returnValue = r) });
 ipcMain.on('getHistory', async e => { storage.getHistory().then(r => e.returnValue = r) });
 ipcMain.on('clearHistory', async e => { storage.clearHistory() });
@@ -142,8 +141,10 @@ ipcMain.on('newTab', async function(e, action, extra) {
     store.set('settings.newTab.items', items);
   } else if (action == 'loadItems') {
     e.returnValue = store.get('settings.newTab.items');
-  } else if (action == 'settings') {
-    console.log(extra);
+  } else if (action == 'getBackgroundTheme') {
+    e.returnValue = store.get('settings.newTab.backgroundTheme');
+  } else if (action == 'setBackgroundTheme') {
+    store.set('settings.newTab.backgroundTheme', extra);
   }
 });
 
@@ -183,9 +184,13 @@ ipcMain.on('siteInfo', async (e, action) => {
         method: 'GET'
       };
 
-      let req = https.request(options, function(res) {
+      let req = https.request(options, (res) => {
         let cert = res.connection.getPeerCertificate();
         showCertificateDialog(cert);
+      });
+
+      req.on('error', (e) => {
+       showAlert({ type: "alert", message: "Site doesn't have an SSL Certificate.", url: "Peacock" });
       });
 
       req.end();
@@ -202,6 +207,8 @@ ipcMain.on('siteInfo', async (e, action) => {
 
   }
 });
+
+ipcMain.on('shield-toggle', async (e, val) => { changeAdBlock(val) });
 
 ipcMain.on('signIntoBlockstack', (e, a) => {
 	blockstackTab = tabs.newView(blockchain.signIntoBlockstack());
@@ -222,6 +229,10 @@ ipcMain.on('blockchain', async (e, a) => {
 
   }
 });
+
+ipcMain.on('getBlockCount', async e => { e.returnValue = tabs.current().webContents.session.ads_blocked })
+
+ipcMain.on('getVersions', async e => { e.returnValue = {...process.versions, peacock: version} });
 
 ipcMain.on('getThemes', async (e) => {
   require('fs').readdir('css/themes', (err, files) => {
@@ -289,9 +300,33 @@ async function keyboardShortcut(shortcut) {
       break;
     case 'backPage':
       tabs.current().webContents.goBack();
+
+      if(tabs.current().webContents.canGoBack()) {
+        $('#back').removeClass('disabled');
+      } else {
+        $('#back').addClass('disabled');
+      }
+
+      if(tabs.current().webContents.canGoForward()) {
+        $('#forward').removeClass('disabled');
+      } else {
+        $('#forward').addClass('disabled');
+      }
       break;
     case 'forwardPage':
       tabs.current().webContents.goForward();
+
+      if(tabs.current().webContents.canGoBack()) {
+        $('#back').removeClass('disabled');
+      } else {
+        $('#back').addClass('disabled');
+      }
+
+      if(tabs.current().webContents.canGoForward()) {
+        $('#forward').removeClass('disabled');
+      } else {
+        $('#forward').addClass('disabled');
+      }
       break;
     case 'savePage':
       tabs.savePage(tabs.current().webContents);
@@ -332,9 +367,10 @@ async function enableAdBlocking(session) {
       let obj = store.get('blocked');
       obj.push({ type: ad.type, url: ad.url, sourceHostname: ad.sourceHostname });
       store.set('blocked', obj);
-    });
 
-    console.log('Adblock enabled!');
+      if(!session.ads_blocked) session.ads_blocked = 0;
+      session.ads_blocked++;
+    });
   });
 }
 
@@ -343,7 +379,6 @@ async function disableAdBlocking(session) {
 
   ElectronBlocker.fromPrebuiltAdsAndTracking(fetch).then((blocker) => {
     blocker.disableBlockingInSession(session);
-    console.log('Adblock disabled!');
   });
 }
 
@@ -435,8 +470,6 @@ if(parseInt( $('.etabs-views').css('height') ) === viewHeight - 35){
     $('#find input').on('keypress', async (e) => {
       val = $('#find input').val();
 
-      console.log;
-
       if (e.which == 13 && e.shiftKey) {
         if(val.length > 0){
           tabs.current().webContents.findInPage(val, {
@@ -499,7 +532,7 @@ async function initAlert() {
   alertWin = new BrowserWindow(args);
 
   let address = require('url').format({
-    pathname: join(__dirname, 'pages/alert.html'),
+    pathname: join(__dirname, 'pages/dialogs/alert.html'),
     protocol: 'file:',
     slashes: true
   });
@@ -570,16 +603,51 @@ async function changeAdBlock(enabled) {
 }
 
 async function toggleAdblock() {
-  let src = $('#shieldIMG').attr('src');
-  if (src.startsWith('images/Peacock Shield') && !src.endsWith('Empty.svg')) {
-    //If On
-    changeAdBlock(false);
-  } else if (src.endsWith('Empty.svg')) {
-    //If Off
-    changeAdBlock(true);
-  } else {
-    console.log(src);
-  }
+  let adblock = new BrowserWindow({
+    frame: false,
+    resizable: false,
+    skipTaskbar: true,
+    x: $('#shield')[0].offsetLeft - 190,
+    y: 80,
+    width: 220,
+    height: 60,
+    webPreferences: {
+      nodeIntegration: true,
+      zoomFactor: 0.5
+    },
+    transparent: true,
+    parent: remote.getCurrentWindow(),
+    alwaysOnTop: true,
+    icon: join(__dirname, 'images/peacock.ico')
+  });
+
+  let address = require('url').format({
+    pathname: join(__dirname, 'pages/dialogs/shield.html'),
+    protocol: 'file:',
+    slashes: true
+  });
+
+  adblock.focus();
+
+  adblock.webContents.once('dom-ready', async e => {
+    let enabled = !$('#shieldIMG').attr('src').endsWith('Empty.svg');
+    adblock.webContents.send('count', tabs.current().webContents.session.ads_blocked, enabled);
+  });
+
+  adblock.on('blur', async () => { adblock.close() });
+
+  adblock.loadURL(address);
+
+  // let src = $('#shieldIMG').attr('src');
+  // if (src.startsWith('images/Peacock Shield') && !src.endsWith('Empty.svg')) {
+  //   //If On
+  //   changeAdBlock(false);
+  // } else if (src.endsWith('Empty.svg')) {
+  //   //If Off
+  //   changeAdBlock(true);
+  // } else {
+  //   console.log(src);
+  // }
 }
 
 async function loadPage(val) {
@@ -642,7 +710,7 @@ async function showSnackbar(text='', items=[], buttons=[], callback=console.log)
   });
 
   snackbar.loadURL(require('url').format({
-    pathname: join(__dirname, 'pages/snackbar.html'),
+    pathname: join(__dirname, 'pages/dialogs/snackbar.html'),
     protocol: 'file:',
     slashes: true
   }));
@@ -671,8 +739,8 @@ async function toggleSiteInfo() {
       transparent: true,
       width: 320,
       height: 330,
-      x: 228,
-      y: 81,
+      x: 220,
+      y: 67,
       parent: remote.getCurrentWindow(),
       webPreferences: {
         nodeIntegration: true,
@@ -681,7 +749,7 @@ async function toggleSiteInfo() {
     });
 
     siteInfo.loadURL(require('url').format({
-      pathname: join(__dirname, 'pages/info.html'),
+      pathname: join(__dirname, 'pages/dialogs/info.html'),
       protocol: 'file:',
       slashes: true
     }));
@@ -706,7 +774,7 @@ async function toggleSiteInfo() {
 
         siteInfo.webContents.send('perm', `
           <li id='info-perm'>
-            <img src='../images/earth.svg' id='perm-icon'>
+            <img src='../../images/earth.svg' id='perm-icon'>
             <p id='perm-text'>${item}</p>
             <button id='perm-allow'>${allowed}</button>
           </li>
@@ -842,8 +910,8 @@ if(tabs.length() === 0) { remote.app.quit(); }
 });*/
 
 $('#shield').click(toggleAdblock);
-$('#back').click(async (e) => { tabs.current().webContents.goBack() });
-$('#forward').click(async (e) => { tabs.current().webContents.goForward() });
+$('#back').click(async (e) => { keyboardShortcut('backPage') });
+$('#forward').click(async (e) => { keyboardShortcut('forwardPage') });
 $('#refresh').mousedown(async (e) => {
 switch(e.which)
 {
@@ -936,15 +1004,8 @@ function showAutocomplete() {
   $('#autocomplete').css('display', 'block');
   $('#autocomplete > div').first().addClass('selected');
 
-  $('#url').css('border', '');
-  $('#url').css('box-shadow', '0px 0px 27px -12px rgba(0, 0, 0, 0.75)');
-  $('#url').css('background-color', '#3C4043');
-  $('#url').css('border-radius','4px 4px 0px 0px');
-  $('#url').css('margin', '-10.5px 10px 0px 10px');
-  $('#url').css('height', '44px');
-
   getSearchEngine(async (engine) => {
-    let icon = 'https://www.google.com/s2/favicons?domain=' + new URL(engine.url).host;
+    let icon = new URL(engine.url).origin + '/favicon.ico';
 
     $('#search').css('filter', 'invert(0)');
     $('#search').attr('src', icon);
@@ -955,12 +1016,6 @@ function showAutocomplete() {
 function hideAutocomplete() {
   $('#autocomplete').empty();
   $('#autocomplete').css('display', 'none');
-
-  $('#url').css('box-shadow', '');
-  $('#url').css('background-color', '');
-  $('#url').css('border-radius','4px');
-  $('#url').css('margin', '-5.5px 10px 0px 10px');
-  $('#url').css('height', '34px');
 
   web.setSearchIcon(tabs.current().webContents.getURL());
 }
@@ -1003,15 +1058,15 @@ $('#url').css('border', '2px solid #736d4f');
 });
 
 $('#url').blur(async (e) => {
-$('#url').css('border', '');
-$('#url').removeClass('url-hover');
-$('#url').attr('placeholder', $('#url').attr('data-placeholder'));
-setTimeout(function () {
-  $('#url').css('border-radius','4px');
-  $('#url').css('margin', '-5.5px 10px 0px 10px');
-  $('#url').css('height', '34px');
-  hideAutocomplete();
-}, 75);
+  $('#url').css('border', '');
+  $('#url').removeClass('url-hover');
+  $('#url').attr('placeholder', $('#url').attr('data-placeholder'));
+  setTimeout(function () {
+    $('#url').css('border-radius','4px');
+    $('#url').css('margin', '-3px 10px 0px 10px');
+    $('#url').css('height', '28px');
+    hideAutocomplete();
+  }, 75);
 });
 $('#star').click(async (e) => {
 let url = tabs.current().webContents.getURL();
@@ -1064,7 +1119,7 @@ let params = encodeURIComponent(JSON.stringify(certificate));
 
 let { format } = require('url');
 certDialog.loadURL(format({
-  pathname: join(__dirname, 'pages/certificate.html'),
+  pathname: join(__dirname, 'pages/dialogs/certificate.html'),
   protocol: 'file:',
   slashes: true
 }) + '?' + params);
@@ -1412,7 +1467,7 @@ Menu.setApplicationMenu(Menu.buildFromTemplate(menuTemplate));
   showInspectElement: true
 });*/
 
-const server = require('child_process').fork(__dirname + '/server.js');
+const server = require('child_process').fork(__dirname + '/js/server.js');
 
 // Quit server process if main app will quit
 app.on('will-quit', async () => {

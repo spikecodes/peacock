@@ -1,5 +1,4 @@
-const {	ipcRenderer } = require('electron');
-const {	dialog,	BrowserWindow } = require('electron').remote;
+const {	ipcRenderer, dialog, BrowserWindow } = require('electron');
 const {	join } = require('path');
 const { format } = require('url');
 
@@ -108,10 +107,6 @@ document.addEventListener('webkitfullscreenchange', fullscreenchange);
 if (window.location.protocol == 'peacock:') {
 	ipcRenderer.once('setError', (event, details) => {
 		setError(details);
-	});
-
-	ipcRenderer.once('setVersions', (event, versions) => {
-		setVersions(versions);
 	});
 
 	global.sendSync = ipcRenderer.sendSync;

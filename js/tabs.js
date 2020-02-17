@@ -3,12 +3,17 @@ const { remote, ipcRenderer } = require('electron');
 const web = require('./web');
 const store = require('./store');
 
+const { BrowserView, BrowserWindow, ipcMain } = remote;
+const { join } = require('path');
+
 exports.tabs = [];
 
 var tabGroup;
 var closedTabs = [];
 
 var activeTab;
+
+var downloadWindow;
 
 $.fn.fadeSlideLeft = function(speed,fn) {
   return $(this).animate({
@@ -22,9 +27,75 @@ $.fn.fadeSlideLeft = function(speed,fn) {
 $.fn.fadeSlideRight = function(speed,fn) {
   return $(this).animate({
     'opacity' : 1,
-    'width' : '262px'
+    'width' : '225px'
   },speed || 400,function() {
     $.isFunction(fn) && fn.call(this);
+  });
+}
+
+exports.initDownloads = async () => {
+  downloadWindow = new BrowserWindow({
+    frame: false,
+    width: window.outerWidth,
+    height: 66,
+    x: 0,
+    y: window.outerHeight - 66,
+    parent: remote.getCurrentWindow(),
+    show: false,
+    hasShadow: false,
+    webPreferences: {
+      nodeIntegration: true,
+      enableRemoteModule: true
+    }
+  });
+
+  downloadWindow.loadURL(require('url').format({
+    pathname: join(__dirname, '../pages/dialogs/download.html'),
+    protocol: 'file:',
+    slashes: true
+  }));
+
+  //downloadWindow.openDevTools({ mode: "detach" });
+
+  ipcMain.on('startDrag', async (e, file) => {
+    file = file.replace(/\\/g, "/");
+    let image = join(__dirname, '../images/blank.png');
+
+    console.log(file);
+
+    downloadWindow.webContents.startDrag({ file: file, icon: image });
+  });
+}
+
+exports.handleDownload = async (e, item, webContents) => {
+  var savePath;
+
+  downloadWindow.show();
+
+  let id = Math.random().toString(36).replace(/[^a-z]+/g, '').substr(0, 5);
+  downloadWindow.webContents.send('newDownload', id, item.getFilename(), item.getURL());
+
+  item.on('updated', (event, state) => {
+    if (state === 'interrupted') {
+      downloadWindow.webContents.send('stoppedDownload', id, state);
+    } else if (state === 'progressing') {
+      savePath = item.savePath;
+      if (item.isPaused()) {
+        downloadWindow.webContents.send('stoppedDownload', id, 'paused');
+      } else {
+        let percentage = ~~((item.getReceivedBytes() / item.getTotalBytes()) * 100);
+        downloadWindow.webContents.send('updateDownload', id, percentage);
+      }
+    }
+  });
+
+  item.once('done', (event, state) => {
+    if (state === 'completed') {
+      console.log(savePath);
+      downloadWindow.webContents.send('completeDownload', id, savePath);
+    } else {
+      downloadWindow.webContents.send('failedDownload', id);
+    }
   });
 }
 
@@ -136,12 +207,13 @@ exports.initBrowserView = async (view) => {
         break;
     }
   });
-  view.webContents.on('page-favicon-updated', async (e) => { web.faviconUpdated(view, e.favicons) });
+  // view.webContents.on('page-favicon-updated', async (e) => { web.faviconUpdated(view, e.favicons) });
   view.webContents.on('page-title-updated', async (e, t) => { web.titleUpdated(view, e, t) });
   view.webContents.on('did-change-theme-color', async (e) => { web.changeThemeColor(e) });
   view.webContents.on('did-navigate', async (e, url) => { web.didNavigate(url, view, store) });
   view.webContents.on('did-navigate-in-page', async (e, url) => { web.didNavigate(url, view, store) });
   view.webContents.on('preload-error', async (e, path, err) => { console.error("PRELOAD ERROR", err); });
+  view.webContents.session.on('will-download', this.handleDownload);
   view.webContents.on('certificate-error', async (e, url, err, cert, callback) => {
     e.preventDefault();
     console.log(err);
@@ -219,8 +291,7 @@ exports.close = function (view) {
 }
 
 exports.newView = function (url='peacock://newtab', active=true) {
-  const { BrowserView } = remote;
-  const { join } = require('path');
+  if($('.etabs-tabs').children().length >= 7) return;
 
   let userAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:73.0) Gecko/20100101 Firefox/73.0';
 
@@ -233,13 +304,13 @@ exports.newView = function (url='peacock://newtab', active=true) {
 
   let winBounds = remote.getCurrentWindow().getBounds();
 
-  view.setBounds({ x: 0, y: 89, width: window.outerWidth, height: winBounds.height - 104 });
+  view.setBounds({ x: 0, y: 68, width: window.outerWidth, height: winBounds.height - 83 });
   view.setAutoResize({ height: true, horizontal: true });
 
   window.onresize = async () => {
     let bounds = view.getBounds();
     winBounds = remote.getCurrentWindow().getBounds();
-    //view.setBounds({ x: bounds.x, y: bounds.y, width: window.outerWidth, height: winBounds.height - 104 });
+    //view.setBounds({ x: bounds.x, y: bounds.y, width: window.outerWidth, height: winBounds.height - 83 });
   };
 
   tabSession.webRequest.onBeforeSendHeaders(async (details, callback) => {
@@ -316,9 +387,9 @@ exports.newView = function (url='peacock://newtab', active=true) {
     showInspectElement: true
   });
 
-  $('.etabs-tabs').append(`<div class="etabs-tab visible" style="opacity: 1; width: 262px; transition: all 0.1s ease 0s;">
+  $('.etabs-tabs').append(`<div class="etabs-tab visible" style="opacity: 1; width: 225px; transition: all 0.1s ease 0s;">
       <span class="etabs-tab-icon">
-        <img src="https://www.google.com/s2/favicons?domain=null">
+        <img src="./images/earth_white.svg">
       </span>
 
       <span class="etabs-tab-title" title="New Tab">New Tab</span>
@@ -330,7 +401,11 @@ exports.newView = function (url='peacock://newtab', active=true) {
 
   view.tab = {
     element: $('.etabs-tabs').children().last(),
-    setIcon: async (icon) => { view.tab.icon.attr('src', icon); },
+    setIcon: async (icon) => {
+      view.tab.icon.html('<img src="./images/earth_white.svg">');
+      view.tab.icon.children().first().on("error", () => { view.tab.icon.children().first().attr('src', `./images/earth_white.svg`) });
+      view.tab.icon.children().first().attr('src', icon);
+    },
     setTitle: async (title) => { view.tab.title.text(title); },
     close: async () => { view.tab.element.remove(); }
   };
@@ -340,7 +415,7 @@ exports.newView = function (url='peacock://newtab', active=true) {
   view.tab.element.css('transition', 'all 0.1s');
   view.tab.element.fadeSlideRight(100);
 
-  view.tab.icon = view.tab.element.children().eq(0).children().first();
+  view.tab.icon = view.tab.element.children().eq(0);
   view.tab.title = view.tab.element.children().eq(1);
   view.tab.button = view.tab.element.children().eq(2).children().first();
 
@@ -418,3 +493,5 @@ remote.app.on('certificate-error', (event, webContents, url, error, certificate,
   event.preventDefault();
   callback(true);
 });
+
+this.initDownloads();

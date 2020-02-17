@@ -1,7 +1,7 @@
 .etabs-tabgroup {
   display: inline-flex !important;
   padding-top: 4px;
-  padding-left: 10px;
+  padding-left: 4px;
   position: fixed;
   width: auto;
   -webkit-app-region: no-drag;
@@ -20,7 +20,7 @@
   display: none;
   position: relative;
   color: #333;
-  height: 26px;
+  height: 16px;
   padding: 8px 10px 4px 5px;
   border-bottom: none;
   border-left: none;
@@ -50,8 +50,8 @@
 }
 
 .etabs-tab.gu-mirror {
-  height: 26px !important;
-  width: 262px !important;
+  height: 16px !important;
+  width: 225px !important;
   border-radius: 4px !important;
 }
 
@@ -97,13 +97,13 @@
 
 .etabs-buttons button {
   margin-left: 5px;
-  margin-top: 2px;
+  margin-top: 1px;
   color: #333;
   background: none;
   border: none;
   border-radius: 4px;
-  width: 30px;
-  height: 30px;
+  width: 22px;
+  height: 22px;
   position: relative;
   transition: all 0.05s;
 }
@@ -136,31 +136,33 @@
 .etabs-tab-icon {
   display: inline-block;
   height: 16px;
-  margin-left: 10px;
+  width: 16px;
+  margin-left: 5px;
 }
 
 .etabs-tab-icon img {
   position: absolute;
-  max-width: 19px;
-  max-height: 19px;
+  max-width: 16px;
+  max-height: 16px;
   top: 0;
   bottom: 0;
   margin: auto;
 }
 
 .etabs-tab-title {
-  letter-spacing: -0.25px;
   width: 200px;
   white-space: nowrap;
   overflow: hidden;
-  margin-top: 4px;
+  margin-top: 1px;
   display: inline-block;
-  margin-left: 30px;
+  margin-left: 10px;
+  font-size: 12px;
 }
 
 .etabs-tab-buttons {
   display: inline-block;
   margin-top: -7.5px;
+  margin-right: 15px;
   z-index: 6;
 }
 
@@ -192,9 +194,9 @@
 }
 
 .etabs-views {
-  height: calc(100% - 89px);
+  height: calc(100% - 66px);
   width: 100%;
   position: fixed;
-  margin-top: 89px;
+  margin-top: 66px;
   background: transparent;
 }

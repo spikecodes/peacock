@@ -3,19 +3,10 @@
   <head>
     <meta charset="utf-8" />
     <title>Peacock Settings</title>
+    <link href="https://peacock.link/fonts/circular_std.css" rel="stylesheet" type="text/css">
 
     <style>
-      @import url('https://fonts.googleapis.com/css?family=Roboto:300,400,500,700,900&display=swap');
-
-      h1,
-      h2,
-      h3,
-      h4,
-      h5,
-      h6,
-      p {
-        font-family: "Roboto", sans-serif;
-      }
+      * { font-family: 'Circular Std'; }
 
       #content {
         padding-top: 100px;
@@ -73,7 +64,6 @@
       }
 
       .dropdown-toggle {
-        font-family: roboto;
         font-size: 17px;
         font-weight: 400;
       }
@@ -122,6 +112,7 @@
       .label {
         display: inline-block;
         font-size: 22px;
+        opacity: 0.9;
       }
 
       #pills-profile {
@@ -143,7 +134,6 @@
         font-size: 24px;
         white-space: nowrap;
         font-weight: 700;
-        font-family: "Roboto";
       }
 
       #signedIn {
@@ -151,11 +141,9 @@
         white-space: nowrap;
         color: #cacad2;
         font-weight: 500;
-        font-family: "Roboto";
       }
 
       #signOut {
-        font-family: "Roboto";
         font-weight: 700;
         font-size: 15px;
         white-space: nowrap;
@@ -207,7 +195,6 @@
         color: #313a43;
         border-radius: 0px !important;
         padding-top: 10px;
-        font-family: "Roboto";
         font-weight: 700;
         transition: all 0.1s;
       }
@@ -266,13 +253,24 @@
         cursor: pointer;
         background-color: rgba(0, 0, 0, 0.05);
       }
+
+      footer {
+        position: absolute;
+        right: 20px;
+        bottom: 20px;
+      }
+
+      footer #version {
+        color: white;
+        margin: 0px;
+      }
     </style>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
     <script src="https://code.jquery.com/jquery-3.4.1.min.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
   </head>
-  <body>
+  <body style="display: none;">
     <div id="content">
       <h1 locale-key="settings_title" id="title">Settings</h1>
 
@@ -400,12 +398,12 @@
         <div class="tab-pane fade" id="pills-profile" role="tabpanel" aria-labelledby="pills-profile-tab">
           <div id="profile-jumbo" class="jumbotron jumbotron-fluid">
             <div id="profile-container" class="container">
-              <img id="profile" src="https://gaia.blockstack.org/hub/1EwPnfDgkSBM3GR3CALFRkXrN3tqiFp1Qa//avatar-0">
+              <img id="profile">
               <div id="profile-text">
-                <p id="name">Spike Raxstone</p>
-                <p id="signedIn">Signed In</p>
+                <p id="name">Blockstack</p>
+                <p id="signedIn">Signed Out</p>
               </div>
-              <button id="signOut" type="button" class="btn btn-secondary">SIGN OUT</button>
+              <button id="signOut" type="button" class="btn btn-secondary">SIGN IN</button>
             </div>
           </div>
         </div>
@@ -414,12 +412,17 @@
     <aside id="user">
 
     </aside>
+    <footer>
+      <p id="version">Peacock</p>
+    </footer>
   </body>
   <script>
     const store = {
       get: name => sendSync('store', 'get', name),
       set: (name, val) => send('store', 'set', name, val)
     };
+
+    $('#version').text('Peacock v' + sendSync('getVersions').peacock);
 
     window.darkMode = sendSync('getDarkmode'); loadTheme();
     window.addEventListener("focus", updateProfile, false);
@@ -496,6 +499,7 @@
           window.theme = 'dark';
           $("head").append('<link rel="stylesheet" href="https://raw.githack.com/Codiscite/peacock/master/css/themes/' + theme + '.css">');
         }
+        $('body').css('display', 'block');
       }
     }
 

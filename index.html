@@ -7,7 +7,6 @@
   <title>Peacock Main Window</title>
 
   <script>window.$ = window.jQuery = require('jquery');</script>
-  <link href="css/fonts/Nexa/Nexa.css" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css?family=Roboto&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="css/main.css">
@@ -95,9 +94,8 @@ Has access to this site">
   <script>
     // You can also require other files to run in this process
     let renderer = require('./renderer.js');
-    let titlebar = require('./titlebar.js');
+    let titlebar = require('./js/titlebar.js');
 
     titlebar.setData(renderer.getTabCount, renderer.showAlert);
   </script>
-
 </html>

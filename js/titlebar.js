@@ -68,7 +68,7 @@ function init() {
         }
 
         if(tc && tc > 1) {
-          let input = { message: 'You are about to close ' + tc + ' tabs. Are you sure you want to continue?', type: 'confirm',	url: 'Peacock' };
+          let input = { message: 'Are you sure you want to close ' + tc + ' tabs?', type: 'confirm',	url: 'Peacock' };
           showAlert(input, r => { if(r) {closeWindow()} });
         } else {
           closeWindow();
