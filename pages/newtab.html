@@ -5,6 +5,7 @@
     <title>New Tab</title>
     <link rel="stylesheet" href="https://storage.googleapis.com/non-spec-apps/mio-icons/latest/round.css">
     <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+    <link href="https://peacock.link/fonts/circular_std.css" rel="stylesheet" type="text/css">
     <style>
 
       html {
@@ -15,14 +16,7 @@
         --peacock-color: #FFD563;
       }
 
-      @font-face {
-        font-family: 'Product Sans';
-        font-style: normal;
-        font-weight: 400;
-        src: url(https://fonts.gstatic.com/s/productsans/v5/HYvgU2fE2nRJvZ5JFAumwegdm0LZdjqr5-oayXSOefg.woff2) format('woff2');
-      }
-
-      * { font-family: "Product Sans" !important; box-sizing: border-box; z-index: 2; }
+      * { font-family: 'Circular Std' !important; box-sizing: border-box; z-index: 2; letter-spacing: -1px; }
 
       body {
         position: relative;
@@ -53,8 +47,6 @@
       }
 
       footer {
-        display: none;
-
         position: absolute;
         bottom: 60px;
         right: 70px;
@@ -105,10 +97,13 @@
         background-repeat: no-repeat !important;
         background-size: contain !important;
         filter: contrast(4) invert(1);
-        opacity: 0.5;
+        opacity: 0.75;
       }
 
       .icon-container {
+        background: transparent;
+        border: none;
+
         margin-left: 10px;
         padding: 5px 5px 2px 5px;
         border-radius: 5px;
@@ -139,6 +134,8 @@
         margin-left: 20px;
         border-radius: 5px;
         transition: all 0.1s;
+
+        backdrop-filter: blur(2px);
 
         display: flex;
         justify-content: center;
@@ -231,6 +228,28 @@
         transform: scale(1.2);
       }
 
+      aside {
+        display: none;
+
+        position: absolute;
+        bottom: 50px;
+        left: 50px;
+        padding: 20px;
+        background: rgba(0,0,0,0.75);
+        border-radius: 5px;
+      }
+
+      aside > * { font-size: 20px; color: white; }
+      aside label { margin-right: 10px; }
+      aside input {
+        border-radius: 5px;
+        border: none;
+        padding: 5px;
+        background: rgba(255,255,255,0.15);
+      }
+
+      aside button { color: black; padding: 5px 10px; border: none; border-radius: 5px; }
+
       @keyframes a-ltr-after{
         0% {transform: translateX(-100%)}
         100% {transform: translateX(101%)}
@@ -266,32 +285,54 @@
       <h2 id="recently-visited">Speed Dial</h2>
 
       <div class="item">
-        <i class="material-icons-new round-add icon"></i>
+        <img class="icon">
       </div>
       <div class="item">
-        <i class="material-icons-new round-add icon"></i>
+        <img class="icon">
       </div>
       <div class="item">
-        <i class="material-icons-new round-add icon"></i>
+        <img class="icon">
       </div>
       <div class="item">
-        <i class="material-icons-new round-add icon"></i>
+        <img class="icon">
       </div>
       <div class="item">
-        <i class="material-icons-new round-add icon"></i>
+        <img class="icon">
       </div>
     </div>
 
+    <aside>
+      <label>Background Theme:</label>
+      <input type="text" name="" value="">
+
+      <button type="button" name="button">Save</button>
+    </aside>
+
     <footer>
-      <a href="peacock://bookmarks" class="icon-container">
+      <button id="tune-btn" class="icon-container">
+        <i class="material-icons-new round-tune icon"></i>
+      </button>
+      <button id="bookmarks-btn" class="icon-container">
         <i class="material-icons-new round-bookmarks icon"></i>
-      </a>
-      <a href="peacock://settings" class="icon-container">
+      </button>
+      <button id="settings-btn" class="icon-container">
         <i class="material-icons-new round-settings icon"></i>
-      </a>
+      </button>
     </footer>
   </body>
   <script>
+    let add = `data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGAAAABgBAMAAAAQtmoLAAAALVBMVEUAAAAzMzMyMjIzMzMtLS0yMjIzMzMzMzMyMjIzMzMyMjIrKysyMjIyMjIzMzPeer//
+      AAAAD3RSTlMAGbLsEeX/5p6g5Biz6uttk6wuAAAAe0lEQVR4Ae3WMQ2AQBSD4TKz4AEHeCA4aYAZDSghzBjBCSJAwHXoSK7f/ic3XJqHGkRE0w8dHCO5wbGTCxwnucLBT4IECf4dND0FsVEjpU1skbSI
+      LZJWPzCfNKNkonSgpL0pPFc+X4LKggT2gbWTMxwTecDR3s+FCkTEC1p3psfZCEyjAAAAAElFTkSuQmCC`;
+
+    let earth = `data:image/svg+xml,<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+      "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1"
+      width="24" height="24" fill="white" viewBox="0 0 24 24"><path d="M17.9,17.39C17.64,16.59 16.89,16 16,16H15V13A1,1 0 0,0 14,12H8V10H10A1,1 0 0,0 11,9V7H13A2,2 0 0,0
+      15,5V4.59C17.93,5.77 20,8.64 20,12C20,14.08 19.2,15.97 17.9,17.39M11,19.93C7.05,19.44 4,16.08 4,12C4,11.38 4.08,10.78 4.21,10.21L9,15V16A2,2 0 0,0 11,18M12,2A10,10
+      0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z" /></svg>`;
+
+    let backgroundTheme = sendSync('newTab', 'getBackgroundTheme') || "robots";
+
     function startTime() {
       var today = new Date();
       var h = today.getHours();
@@ -306,6 +347,7 @@
     }
 
     $('.item').each(function(index, item) {
+      $(this).children().first().attr('src', add);
       $(this).click(async (e) => {
         if($(this).attr('data-url')) {
           window.location = $(this).attr('data-url');
@@ -334,14 +376,17 @@
 
       let icon = item.children().first();
       item.attr('data-url', domain);
+      item.attr('title', domain);
       icon.attr('class', 'icon favicon');
 
       try {
-        let host = (new URL(domain)).host;
-        icon.css('background', `url(https://favicons.githubusercontent.com/${host})`);
+        let origin = (new URL(domain)).origin;
+        icon.attr('src', `${origin}/favicon.ico`);
       } catch (e) {
-        icon.css('background', `url(https://favicons.githubusercontent.com/${domain})`);
+        icon.attr('src', earth);
       }
+
+      icon.on("error", () => { icon.attr('src', earth); });
 
       let element = item[0];
       let index = Array.from(element.parentNode.children).indexOf(element) - 1;
@@ -356,9 +401,10 @@
     }
 
     function clearItem(item) {
-      if(item.attr('data-url')) item.removeAttr('data-url');
+      if(item.attr('data-url')) { item.removeAttr('data-url'); item.removeAttr('title'); }
       if(item.children().first().attr('style')) item.children().first().removeAttr('style');
-      item.children().first().attr('class', 'material-icons-new round-add icon');
+      item.children().first().attr('class', 'icon');
+      item.children().first().attr('src', add);
 
       if(item.children().length > 1) item.children().eq(1).remove();
     }
@@ -396,18 +442,25 @@
       }
     }
 
+    $('#tune-btn').click(async e => { $('aside').toggle() });
+    $('#bookmarks-btn').click(async e => { location.href = 'peacock://bookmarks'; });
+    $('#settings-btn').click(async e => { location.href = 'peacock://settings'; });
+
+    $('aside input').val(backgroundTheme);
+
+    $('aside button').click(async e => {
+      let val = $('aside input').val();
+
+      send('newTab', 'setBackgroundTheme', val);
+      backgroundTheme = val;
+      setBackground('https://source.unsplash.com/featured/1920x1080/?' + backgroundTheme);
+
+      $('aside').toggle();
+    });
+
     try { send('newTab', 'focusSearchbar'); } catch (e) {}
 
-    let backgrounds = ['https://images.unsplash.com/photo-1574270981993-f1df213562b3?w=1920',
-                       'https://images.unsplash.com/photo-1575761344173-aa186491c120?w=1920',
-                       'https://images.unsplash.com/photo-1575138312433-d42e9f176f6b?w=1920',
-                       'https://images.unsplash.com/photo-1573614071230-c814e95ae3d1?w=1920',
-                       'https://images.unsplash.com/photo-1579765955778-3c78ba1d9481?w=1920',
-                       'https://images.unsplash.com/photo-1579801067857-8d4753d835b1?w=1920',
-                       'https://images.unsplash.com/photo-1577143224858-74381c3feb0e?w=1920']
-
-    let random_bg = backgrounds[Math.floor(Math.random() * backgrounds.length)];
-    setBackground(random_bg);
+    setBackground('https://source.unsplash.com/featured/1920x1080/?' + backgroundTheme);
 
     listSites(sendSync('newTab', 'loadItems'));
   </script>

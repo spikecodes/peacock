@@ -41,15 +41,12 @@ exports.setSearchIcon = setSearchIcon;
 exports.init = function (doc) { document = doc }
 
 exports.loadStart = function(view, extensions) {
-  // tab.tabElements.icon.innerHTML = `<div class='spinner'><svg class='svg' viewBox='22 22 44 44'>
-  //   <circle class='circle' cx='44' cy='44' r='20.2' stroke-width='3.6' fill='none'>
-  //   </circle></svg></div>`;
+  view.tab.icon.html(`<div class='spinner'><svg class='svg' viewBox='22 22 44 44'>
+    <circle class='circle' cx='44' cy='44' r='20.2' stroke-width='3.6' fill='none'>
+    </circle></svg></div>`);
 
   document.getElementById('star').style.visibility = 'hidden';
   document.getElementById('refresh').children[0].src = 'images/close.svg';
-
-  let url = new URL(view.webContents.getURL());
-  view.tab.setIcon(`https://www.google.com/s2/favicons?domain=${url.origin}`);
 
   if(!extensions) return;
 
@@ -68,6 +65,9 @@ exports.loadStart = function(view, extensions) {
 
 exports.loadStop = function(view, extensions) {
   document.getElementById('refresh').children[0].src = 'images/refresh.svg';
+
+  let url = new URL(view.webContents.getURL());
+  view.tab.setIcon(url.origin + '/favicon.ico');
 
   if(!extensions) return;
 
@@ -98,7 +98,7 @@ exports.loadStop = function(view, extensions) {
 }
 
 exports.failLoad = function(event, view, errorCode, errorDescription, validatedURL) {
-  if(errorCode != -27 && errorCode != -3) {
+  if(errorCode != -27 && errorCode != -3 && view.webContents.getURL() == validatedURL) {
     window.error = {errorCode: errorCode,
       errorDescription: errorDescription,
       validatedURL: validatedURL,
@@ -108,6 +108,8 @@ exports.failLoad = function(event, view, errorCode, errorDescription, validatedU
 }
 
 exports.didNavigate = function (url, view, storage) {
+  view.webContents.session.ads_blocked = 0;
+
   try {
     let protocol = (new URL(url)).protocol;
     if(protocol.startsWith('http')) {
@@ -122,8 +124,8 @@ exports.enterFllscrn = function(view, screen) {
 }
 
 exports.leaveFllscrn = function(view, width, height) {
-  view.setBounds({ x: 0, y: 89, width: width, height: height - 89 });
-  view.setBounds({ x: 0, y: 89, width: width, height: height - 89 });
+  view.setBounds({ x: 0, y: 68, width: width, height: height - 83 });
+  view.setBounds({ x: 0, y: 68, width: width, height: height - 83 });
 }
 
 exports.domReady = function (view, storage) {
@@ -174,9 +176,6 @@ exports.domReady = function (view, storage) {
     case 'peacock://network-error':
       view.webContents.send('setError', window.error);
       window.error = {errorCode: '-300', validatedURL: 'peacock://network-error', darkMode: window.darkMode};
-      break;
-    case 'peacock://version':
-      view.webContents.send('setVersions', process.versions);
       break;
     default:
       break;

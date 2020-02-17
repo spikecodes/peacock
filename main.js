@@ -7,19 +7,6 @@ const { join, normalize } = require('path');
 const settingsFile = join(__dirname, 'data/settings.json');
 const flags = join(__dirname, 'data/flags.json');
 
-/*require('jsonfile').readFile(settingsFile, async (err, obj) => {
-	let dl = require('electron-dl');
-	if(obj.save_location === 'Use Save As Window'){
-		dl({saveAs: true});
-	} else if (obj.save_location === 'Downloads'){
-		dl({saveAs: false});
-	} else {
-		console.error('ERROR');
-	}
-});*/
-
-// Keep a global reference of the window object, if you don't, the window will
-// be closed automatically when the JavaScript object is garbage collected.
 let mainWindow;
 
 process.noDeprecation = true;
@@ -34,6 +21,8 @@ async function sendToRenderer(channel, message) {
 }
 
 async function createWindow() {
+	process.env['ELECTRON_DISABLE_SECURITY_WARNINGS'] = 'true';
+
 	// Create the browser window.
 	var screenSize = screen.getPrimaryDisplay().size;
 
@@ -66,9 +55,6 @@ async function createWindow() {
 
 	mainWindow.webContents.on('crashed', async (e) => { console.log('crashed', e); });
 
-	// Open the DevTools.
-	// mainWindow.webContents.openDevTools()
-
 	// Emitted when the window is closed.
 	mainWindow.on('closed', async () => {
 		// Dereference the window object, usually you would store windows
@@ -78,9 +64,6 @@ async function createWindow() {
 	});
 }
 
-// This method will be called when Electron has finished
-// initialization and is ready to create browser windows.
-// Some APIs can only be used after this event occurs.
 app.on('ready', createWindow);
 
 // Quit when all windows are closed.
@@ -112,17 +95,6 @@ app.on('activate', async () => {
 		createWindow();
 	}
 });
-
-// app.on('certificate-error', async (event, webContents, url, error, certificate, callback) => {
-//   console.log("! url: " + url + "| issuerName: " + certificate.issuerName);
-//   event.preventDefault();
-//   callback(true);
-// });
-
-// app.on('certificate-error', (event, webContents, url, error, certificate, callback) => {
-// 	console.log(error);
-//  dialog.showCertificateTrustDialog(mainWindow, {certificate: certificate});
-// });
 
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and require them here.

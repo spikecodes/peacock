@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
   <head>
-    <link href="https://fonts.googleapis.com/css?family=Roboto&display=swap" rel="stylesheet">
+    <link href="https://peacock.link/fonts/circular_std.css" rel="stylesheet" type="text/css">
     <meta charset="utf-8">
     <title></title>
     <style>
-      * {font-family: Roboto !important;}
+      * {font-family: 'Circular Std' !important; overflow: hidden !important; }
 
       #site-info {
         box-shadow: 0 1px 5px 1px #00000063;
@@ -24,6 +24,8 @@
         padding: 22px 15px;
         box-sizing: border-box;
       }
+
+      #site-settings { opacity: 0.25;}
 
       #info-permissions {
         display: flex;
@@ -91,7 +93,7 @@
         flex-grow: 1;
       }
 
-      #info-buttons button:hover { background: rgba(255,255,255,0.075); }
+      #info-buttons button:not(#site-settings):hover { background: rgba(255,255,255,0.075); }
 
       #info-buttons img, #info-perm img {
         filter: invert(1);
@@ -138,19 +140,19 @@
       <ul id="info-permissions"></ul>
       <div id="info-buttons">
         <button id="certificate" title="Show certificate" onclick="message('Certificate')">
-          <img src="../images/license.svg">
+          <img src="../../images/license.svg">
           <p>Certificate</p>
           <label>(Valid)</label>
         </button>
 
         <button id="cookies" title="Show cookies" onclick="message('Cookies')">
-          <img src="../images/cookie.svg">
+          <img src="../../images/cookie.svg">
           <p>Cookies</p>
           <label id="cookies-in-use">(10 in use)</label>
         </button>
 
-        <button id="site-settings" title="Open site settings" onclick="message('Site Settings')">
-          <img src="../images/settings.svg">
+        <button disabled id="site-settings" title="Open site settings" onclick="message('Site Settings')">
+          <img src="../../images/settings.svg">
           <p>Site Settings</p>
         </button>
       </div>
