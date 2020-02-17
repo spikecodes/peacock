@@ -19,7 +19,6 @@ env:
 jobs:
   include:
     - stage: Deploy Windows & Mac
-      if: tag IS present
       os: osx
       osx_image: xcode10.1
       script:
@@ -27,7 +26,6 @@ jobs:
       before_cache:
         - rm -rf $HOME/.cache/electron-builder/wine
     - stage: Deploy linux
-      if: tag IS present
       os: linux
       dist: trusty
       script:
