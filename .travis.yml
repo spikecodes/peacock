@@ -1,7 +1,8 @@
-sudo: false
-
 language: node_js
 node_js: "9.11.1"
+
+before_install:
+  - npm install electron-builder-squirrel-windows
 
 cache:
   directories:
