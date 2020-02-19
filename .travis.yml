@@ -19,13 +19,15 @@ env:
 
 jobs:
   include:
-    - stage: Deploy Windows
-      os: osx
-      osx_image: xcode10.1
+    - stage: Deploy Linux
+      os: linux
+      dist: trusty
       script:
-        - npm run release -- --win
-      before_cache:
-        - rm -rf $HOME/.cache/electron-builder/wine
+        - npm run release
+    - stage: Deploy Windows
+      os: windows
+      script:
+        - npm run release
     - stage: Deploy Mac
       os: osx
       osx_image: xcode10.1
@@ -33,8 +35,3 @@ jobs:
         - npm run release
       before_cache:
         - rm -rf $HOME/.cache/electron-builder/wine
-    - stage: Deploy Linux
-      os: linux
-      dist: trusty
-      script:
-        - npm run release
