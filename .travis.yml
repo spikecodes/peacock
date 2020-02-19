@@ -24,10 +24,6 @@ jobs:
       dist: trusty
       script:
         - npm run release
-    - stage: Deploy Windows
-      os: windows
-      script:
-        - npm run release
     - stage: Deploy Mac
       os: osx
       osx_image: xcode10.1
@@ -35,3 +31,7 @@ jobs:
         - npm run release
       before_cache:
         - rm -rf $HOME/.cache/electron-builder/wine
+    - stage: Deploy Windows
+      os: windows
+      script:
+        - npm run release
