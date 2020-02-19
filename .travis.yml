@@ -1,8 +1,8 @@
 language: node_js
-node_js: "9.11.1"
+node_js: "10"
 
-before_install:
-  - npm install
+# before_install:
+#   - npm install electron-builder-squirrel-windows
 
 cache:
   directories:
@@ -19,19 +19,15 @@ env:
 
 jobs:
   include:
-    - stage: Deploy Linux
-      os: linux
-      dist: trusty
-      script:
-        - npm run release
-    - stage: Deploy Mac
+    - stage: Deploy Windows and Mac
       os: osx
       osx_image: xcode10.1
       script:
-        - npm run release
+        - npm run release -- --mac --win
       before_cache:
         - rm -rf $HOME/.cache/electron-builder/wine
-    - stage: Deploy Windows
-      os: windows
+    - stage: Deploy Linux
+      os: linux
+      dist: trusty
       script:
         - npm run release
