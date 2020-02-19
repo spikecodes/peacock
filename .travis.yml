@@ -2,7 +2,7 @@ language: node_js
 node_js: "9.11.1"
 
 before_install:
-  - npm install electron-builder-squirrel-windows
+  - npm install app-builder-bin
 
 cache:
   directories:
