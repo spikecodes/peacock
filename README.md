@@ -1,13 +1,12 @@
 <h1 align="center">Peacock</h1>
 <p align="center">
-  <img src="images/Peacock2.0.png" style="display: block;margin-left: auto;margin-right: auto;" data-canonical-src="https://i.imgur.com/Gdko6yP.png" width="300" height="300" align="center"/><br><br>
+  <img src="images/peacock.png" style="display: block;margin-left: auto;margin-right: auto;" data-canonical-src="https://i.imgur.com/Gdko6yP.png" width="300" height="300" align="center"/><br><br>
   Open source privacy-first browser that hosts your data on the blockchain.<br>
   <a href="https://invite.gg/peacock">Discord</a> |
-  <a href="https://peacock.link/"><s>Website (old)</s></a> |
   <a href="https://github.com/Codiscite/peacock/releases/latest">Download</a>
   <br><br>
+  <a href="ttps://github.com/Codiscite/peacock/releases/latest"><img src="https://travis-ci.org/Codiscite/peacock.svg?branch=master" alt="Travis"></a>
   <a href="https://github.com/Codiscite/peacock/releases/latest"><img src="https://img.shields.io/github/release/Codiscite/peacock.svg"/></a>
-  <a href="https://github.com/Codiscite/peacock/blob/master/LICENSE"><img alt="GitHub license" src="https://img.shields.io/github/license/Codiscite/peacock"></a>
   <a href="https://invite.gg/peacock"><img src="https://discordapp.com/api/guilds/630199884229771314/widget.png" alt="Discord"></a>
 </p><br>
 
@@ -17,12 +16,13 @@
 - 🕵️ Privacy on another level. No tracking. No ads. No analytics whatsoever.<br>
 - 💬 Discord Rich Presence Support<br>
 - 🔒 Strong data security, powered by Blockstack.<br>
+- ⛔ Powerful and speedy adblocker<br>
 - 🌓 Dark Mode<br>
 - 🎨 Customizable Themes<br><br>
 
 ### Screenshots
-<img src="https://user-images.githubusercontent.com/19519553/72939478-cd8ce700-3d21-11ea-984a-79b7895fe92c.png"/>
-<img src="https://file.coffee/nGTE8eBVO.gif"/>
+<img src="https://file.coffee/sq2JvhgAY.jpg"/>
+<img src="https://file.coffee/to-Jqlf_a.gif"/>
 
 ### Download
 Download the Mac, Windows and Linux editions [here](https://github.com/Codiscite/peacock/releases/latest).
