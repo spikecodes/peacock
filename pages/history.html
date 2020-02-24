@@ -61,6 +61,12 @@
         position: relative;
       }
 
+      #nothing-here {
+        display: none;
+        text-align: center;
+        opacity: 0.85;
+      }
+
       .selected { background: #8AB4F8; }
       .selected p { color: black; }
       .selected svg { filter: invert(0); }
@@ -92,6 +98,7 @@
         <button id="clear">Clear</button>
       </header>
       <ul id="list"></ul>
+      <p id="nothing-here">Nothing here!</p>
     </main>
   </body>
   <script>
@@ -146,6 +153,8 @@
         }
       };
     });
+
+    if(list.children.length == 0) { document.getElementById('nothing-here').style.display = "block"; }
 
     document.body.onclick = e => {
       let selected = document.getElementsByClassName('selected')[0];

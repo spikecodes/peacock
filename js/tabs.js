@@ -89,6 +89,8 @@ exports.handleDownload = async (e, item, webContents) => {
     }
   });
 
+  ipcMain.once('cancel-download-' + id, e => { item.cancel(); console.log('CANCELLED:', id); });
+
   item.once('done', (event, state) => {
     if (state === 'completed') {
       console.log(savePath);

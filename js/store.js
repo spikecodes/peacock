@@ -198,14 +198,14 @@ exports.addBookmark = async function (site, title) {
   }
 }
 
-exports.removeBookmark = async function (url) {
+exports.removeBookmark = async function (id) {
   await checkFiles();
   let loc = store.get('settings.storage');
   let books = await getBookmarks();
 
   if(typeof books === "string") { books = JSON.parse(books); }
 
-  let fixed = books.filter(item => item.url !== url);
+  let fixed = books.filter(item => item.id !== id);
   if(loc === "Blockstack"){
     if (blockchain.getUserSession().isUserSignedIn()) {
       let result = await blockchain.getUserSession().putFile("bookmarks.json", JSON.stringify(fixed));

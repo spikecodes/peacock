@@ -45,8 +45,10 @@ exports.loadStart = function(view, extensions) {
     <circle class='circle' cx='44' cy='44' r='20.2' stroke-width='3.6' fill='none'>
     </circle></svg></div>`);
 
-  document.getElementById('star').style.visibility = 'hidden';
-  document.getElementById('refresh').children[0].src = 'images/close.svg';
+  view.tab.setTitle('Loading...');
+
+  $('#star').css('visibility', 'hidden');
+  $('#refresh').children().first().attr('src','images/close.svg');
 
   if(!extensions) return;
 

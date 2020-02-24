@@ -120,6 +120,7 @@
       document.querySelector('#' + id + ' button').addEventListener('click', async e => {
         e.stopPropagation();
         console.log('cancel download');
+        ipcRenderer.send('cancel-download-' + id);
         document.getElementById(id).remove();
       });
 

@@ -443,7 +443,7 @@
     let engines = store.get('searchEngines');
     $(".search-engines-menu").empty();
     engines.forEach(item => {
-      let icon = 'https://www.google.com/s2/favicons?domain=' + new URL(item.url).host;
+      let icon = new URL(item.url).origin + '/favicon.ico';
       $(".search-engines-menu").append(`<a class="dropdown-item" href="#"><img class="search-engine-icon"
         src="${icon}"/>${item.name}</a>`);
     });

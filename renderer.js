@@ -33,8 +33,7 @@ if(!store.get('settings')) {
 
 store.set('searchEngines', [
   {"name": "Google", "url": "https://google.com/search?q="},
-	{"name": "DuckDuckGo","url": "https://duckduckgo.com/?q="},
-	{"name": "Ecosia","url": "https://www.ecosia.org/search?q="},
+	{"name": "DuckDuckGo","url": "https://duckduckgo.com/?t=peacock&q="},
 	{"name": "Bing","url": "https://www.bing.com/search?q="},
 	{"name": "Yahoo","url": "https://search.yahoo.com/search?p="}
 ]);
@@ -126,6 +125,8 @@ ipcMain.on('flags.js', async function(e, action, data) {
 
 
 ipcMain.on('getBookmarks', async e => { storage.getBookmarks().then(r => e.returnValue = r) });
+ipcMain.on('removeBookmark', async (e, id) => { storage.removeBookmark(id); console.log('b', id); });
+
 ipcMain.on('getHistory', async e => { storage.getHistory().then(r => e.returnValue = r) });
 ipcMain.on('clearHistory', async e => { storage.clearHistory() });
 ipcMain.on('removeHistoryItem', async (e, id) => { storage.removeHistoryItem(id) });
@@ -273,12 +274,6 @@ async function keyboardShortcut(shortcut) {
     case 'openClosedTab':
       tabs.openClosedTab();
       break;
-    case 'history':
-      storage.getHistory().then(console.log);
-      break;
-    case 'clearHistory':
-      storage.clearHistory();
-      break;
     case 'startVPN':
       startVPN(join(__dirname, 'tor-win32-0.4.1.6/Tor/tor.exe'));
       break;
@@ -344,6 +339,8 @@ async function keyboardShortcut(shortcut) {
     case 'findInPage':
       findInPage();
       break;
+    case 'scrollToTop':
+      tabs.current().webContents.executeJavaScript(`window.scrollTo({ top: 0, behavior: 'smooth' })`);
     default:
       break;
   }
@@ -739,7 +736,7 @@ async function toggleSiteInfo() {
       transparent: true,
       width: 320,
       height: 330,
-      x: 220,
+      x: $('#search')[0].offsetLeft,
       y: 67,
       parent: remote.getCurrentWindow(),
       webPreferences: {
@@ -753,6 +750,13 @@ async function toggleSiteInfo() {
       protocol: 'file:',
       slashes: true
     }));
+
+    siteInfo.on('blur', e => {
+      siteInfo.close();
+      siteInfo = null; $('#search').removeClass('search-active');
+      remote.getCurrentWindow().focus();
+      remote.getCurrentWindow().focus();
+    });
 
     siteInfo.on('close', e => {
       siteInfo = null; $('#search').removeClass('search-active');
@@ -1001,8 +1005,8 @@ $('#url').on('input', function() {
 });
 
 function showAutocomplete() {
-  $('#autocomplete').css('display', 'block');
-  $('#autocomplete > div').first().addClass('selected');
+  // $('#autocomplete').css('display', 'block');
+  // $('#autocomplete > div').first().addClass('selected');
 
   getSearchEngine(async (engine) => {
     let icon = new URL(engine.url).origin + '/favicon.ico';
@@ -1113,16 +1117,16 @@ certDialog.on('page-title-updated', async () => { certDialog.show(); });
 }
 
 async function showCertificateDialog (certificate) {
-certificate.bg = (window.theme == 'dark') ? '#292A2D' : '#FFFFFF';
+  certificate.bg = (window.theme == 'dark') ? '#292A2D' : '#FFFFFF';
 
-let params = encodeURIComponent(JSON.stringify(certificate));
+  let params = encodeURIComponent(JSON.stringify(certificate));
 
-let { format } = require('url');
-certDialog.loadURL(format({
-  pathname: join(__dirname, 'pages/dialogs/certificate.html'),
-  protocol: 'file:',
-  slashes: true
-}) + '?' + params);
+  let { format } = require('url');
+  certDialog.loadURL(format({
+    pathname: join(__dirname, 'pages/dialogs/certificate.html'),
+    protocol: 'file:',
+    slashes: true
+  }) + '?' + params);
 }
 
 $('#search').click(async (e) => {
@@ -1251,13 +1255,6 @@ const menuTemplate = [
 			label: 'Window',
 			submenu: [
 				{
-					label: 'Open Settings',
-					accelerator: 'CmdOrCtrl+Shift+S',
-					click: async () => {
-						keyboardShortcut('settings');
-					}
-				},
-				{
 					label: 'Open DevTools',
 					accelerator: 'CmdOrCtrl+Alt+I',
 					click: async () => {
@@ -1268,37 +1265,8 @@ const menuTemplate = [
 					label: 'Restart Peacock',
 					accelerator: 'CmdOrCtrl+Alt+R',
 					click: async () => {
-						// keyboardShortcut('restart');
 						app.relaunch();
 						app.exit(0);
-					}
-				},
-				{
-					label: 'Open History',
-					accelerator: 'CmdOrCtrl+H',
-					click: async () => {
-						keyboardShortcut('history');
-					}
-				},
-				{
-					label: 'Clear History',
-					accelerator: 'CmdOrCtrl+Shift+H',
-					click: async () => {
-						keyboardShortcut('clearHistory');
-					}
-				},
-				{
-					label: 'Start VPN',
-					accelerator: 'CmdOrCtrl+Shift+V',
-					click: async () => {
-						keyboardShortcut('startVPN');
-					}
-				},
-				{
-					label: 'Stop VPN',
-					accelerator: 'CmdOrCtrl+Alt+V',
-					click: async () => {
-						keyboardShortcut('stopVPN');
 					}
 				},
 				{
@@ -1313,13 +1281,6 @@ const menuTemplate = [
 					accelerator: 'CmdOrCtrl+L',
 					click: async () => {
 						keyboardShortcut('focusSearchbar');
-					}
-				},
-				{
-					label: 'Get Metrics',
-					accelerator: 'CmdOrCtrl+G',
-					click: async () => {
-						keyboardShortcut('getMetrics');
 					}
 				},
 				{
@@ -1383,6 +1344,13 @@ const menuTemplate = [
 						keyboardShortcut('refreshPage');
 					}
 				},
+        {
+					label: 'Reload Page',
+					accelerator: 'CmdOrCtrl+R',
+					click: async () => {
+						keyboardShortcut('refreshPage');
+					}
+				},
 				{
 					label: 'Force Reload Page',
 					accelerator: 'CmdOrCtrl+F5',
@@ -1402,6 +1370,13 @@ const menuTemplate = [
 					accelerator: 'CmdOrCtrl+S',
 					click: async () => {
 						keyboardShortcut('savePage');
+					}
+				},
+				{
+					label: 'Scroll To Top',
+					accelerator: 'CmdOrCtrl+Up',
+					click: async () => {
+						keyboardShortcut('scrollToTop');
 					}
 				}
 			]
