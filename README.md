@@ -5,9 +5,9 @@
   <a href="https://invite.gg/peacock">Discord</a> |
   <a href="https://github.com/Codiscite/peacock/releases/latest">Download</a>
   <br><br>
-  <a href="ttps://github.com/Codiscite/peacock/releases/latest"><img src="https://travis-ci.org/Codiscite/peacock.svg?branch=master" alt="Travis"></a>
-  <a href="https://github.com/Codiscite/peacock/releases/latest"><img src="https://img.shields.io/github/release/Codiscite/peacock.svg"/></a>
-  <a href="https://invite.gg/peacock"><img src="https://discordapp.com/api/guilds/630199884229771314/widget.png" alt="Discord"></a>
+  <a href="ttps://github.com/Codiscite/peacock/releases/latest"><img alt="Travis (.org)" src="https://img.shields.io/travis/Codiscite/peacock?style=for-the-badge"></a>
+  <a href="https://github.com/Codiscite/peacock/releases/latest"><img alt="GitHub release (latest by date)" src="https://img.shields.io/github/v/release/Codiscite/Peacock?color=tuquoise&label=LATEST&logo=github&logoColor=white&style=for-the-badge"></a>
+  <a href="https://invite.gg/peacock"><img alt="Discord" src="https://img.shields.io/discord/630199884229771314?color=%237289DA&label=discord&logo=Discord&logoColor=white&style=for-the-badge"></a>
 </p><br>
 
 ### Features
