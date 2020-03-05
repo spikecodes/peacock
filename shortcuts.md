@@ -34,3 +34,4 @@ Previous Tab | `Ctrl/⌘ + Shift + Tab`
 New Tab | `Ctrl/⌘ + T`
 Close Tab | `Ctrl/⌘ + W`
 Open Closed Tab | `Ctrl/⌘ + Shift + T`
+Switch Tabs | `Ctrl/⌘ + 1`, `Ctrl/⌘ + 2`, etc.

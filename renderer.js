@@ -1418,7 +1418,57 @@ const menuTemplate = [
 					click: async () => {
 						keyboardShortcut('openClosedTab');
 					}
-				}
+				},
+        {
+    			label: 'Quick Switch',
+    			submenu: [
+            {
+    					label: 'Nagiate to Tab 1',
+    					accelerator: 'CmdOrCtrl+1',
+    					click: async () => { if(tabs.get(1-1)) tabs.activate(tabs.get(1-1)); }
+    				},
+            {
+    					label: 'Nagiate to Tab 2',
+    					accelerator: 'CmdOrCtrl+2',
+    					click: async () => { if(tabs.get(2-1)) tabs.activate(tabs.get(2-1)); }
+    				},
+            {
+    					label: 'Nagiate to Tab 3',
+    					accelerator: 'CmdOrCtrl+3',
+    					click: async () => { if(tabs.get(3-1)) tabs.activate(tabs.get(3-1)); }
+    				},
+            {
+    					label: 'Nagiate to Tab 4',
+    					accelerator: 'CmdOrCtrl+4',
+    					click: async () => { if(tabs.get(4-1)) tabs.activate(tabs.get(4-1)); }
+    				},
+            {
+    					label: 'Nagiate to Tab 5',
+    					accelerator: 'CmdOrCtrl+5',
+    					click: async () => { if(tabs.get(5-1)) tabs.activate(tabs.get(5-1)); }
+    				},
+            {
+    					label: 'Nagiate to Tab 6',
+    					accelerator: 'CmdOrCtrl+6',
+    					click: async () => { if(tabs.get(6-1)) tabs.activate(tabs.get(6-1)); }
+    				},
+            {
+    					label: 'Nagiate to Tab 7',
+    					accelerator: 'CmdOrCtrl+7',
+    					click: async () => { if(tabs.get(7-1)) tabs.activate(tabs.get(7-1)); }
+    				},
+            {
+    					label: 'Nagiate to Tab 8',
+    					accelerator: 'CmdOrCtrl+8',
+    					click: async () => { if(tabs.get(8-1)) tabs.activate(tabs.get(8-1)); }
+    				},
+            {
+    					label: 'Nagiate to Tab 9',
+    					accelerator: 'CmdOrCtrl+9',
+    					click: async () => { if(tabs.get(9-1)) tabs.activate(tabs.get(9-1)); }
+    				}
+          ]
+        }
 			]
 		}
 ];
