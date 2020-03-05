@@ -35,3 +35,10 @@ New Tab | `Ctrl/⌘ + T`
 Close Tab | `Ctrl/⌘ + W`
 Open Closed Tab | `Ctrl/⌘ + Shift + T`
 Switch Tabs | `Ctrl/⌘ + 1`, `Ctrl/⌘ + 2`, etc.
+
+### Search
+
+Name | Shortcut
+------------ | -------------
+Append .com | `Ctrl/⌘ + Enter`
+Append .net | `Shift + Enter`

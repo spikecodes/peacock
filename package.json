@@ -30,7 +30,9 @@
 			"icon": "build/icon.png"
 		},
 		"linux": {
-			"target": ["AppImage"],
+			"target": [
+				"AppImage"
+			],
 			"icon": "build/icon.png"
 		},
 		"nsis": {
@@ -48,11 +50,11 @@
 	"author": "Codiscite",
 	"license": "MIT",
 	"devDependencies": {
-		"electron": "^9.0.0-beta.2",
-		"electron-builder": "^22.3.2"
+		"electron": "^9.0.0-beta.5",
+		"electron-builder": "^22.3.6"
 	},
 	"dependencies": {
-		"@cliqz/adblocker-electron": "^1.8.6",
+		"@cliqz/adblocker-electron": "^1.9.2",
 		"blockstack": "^19.3.0",
 		"child_process": "^1.0.2",
 		"cors": "^2.8.5",
@@ -60,11 +62,11 @@
 		"discord-rpc": "^3.1.0",
 		"dragula": "^3.7.2",
 		"electron-context-menu": "^0.16.0",
-		"electron-store": "^5.1.0",
+		"electron-store": "^5.1.1",
 		"express": "^4.17.1",
 		"jquery": "^3.4.1",
 		"jquery-ui": "^1.12.1",
 		"jquery-ui-dist": "^1.12.1",
-		"uuid": "^3.4.0"
+		"uuid": "^7.0.2"
 	}
 }
