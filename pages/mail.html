@@ -4,10 +4,18 @@
     <meta charset="utf-8">
     <title>Peacock Mail</title>
     <link href="https://peacock.link/fonts/circular_std.css" rel="stylesheet" type="text/css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
     <style>
-      *    { font-family : 'Circular Std';          }
-      body { background  : white;                   }
-      span { cursor      : pointer; color: #63E4FF; }
+      *     { font-family : 'Circular Std';          }
+      body  { background  : white;                   }
+      span  { cursor      : pointer; color: #63E4FF; }
+      table {
+        position: absolute;
+        left: 50%;
+        width: 50%;
+        top: 30%;
+        transform: translate(-50%, -50%);
+      }
 
       .email {
         position: absolute;
@@ -42,9 +50,63 @@
       <button id="set" type="button" name="button">SET</button>
       <p id="detail">We will never send you emails, your email is never shared with a third party. <span>Learn More</span></p>
     </div>
+
+    <table border="1">
+    </table>
+
   </body>
   <script type="text/javascript">
+    let aliases = sendSync('mail', 'aliases');
+    aliases = aliases.map(r => {
+      let y = Object.values(r)[0];
+      y[alias] = y[expression].replace('match_recipient("', '').replace
+      delete y.id;
+      delete y.priority;
+      return y;
+    });
+
     document.getElementById('addr').value = sendSync('mail', 'getAddress');
+
+    // Builds the HTML Table out of myList json data from Ivy restful service.
+   function buildHtmlTable(myList) {
+       var columns = addAllColumnHeaders(myList);
+
+       for (var i = 0 ; i < myList.length ; i++) {
+           var row$ = $('<tr/>');
+           for (var colIndex = 0 ; colIndex < columns.length ; colIndex++) {
+               var cellValue = myList[i][columns[colIndex]];
+
+               if (cellValue == null) { cellValue = ""; }
+
+               row$.append($('<td/>').html(cellValue));
+           }
+           $("table").append(row$);
+       }
+   }
+
+   // Adds a header row to the table and returns the set of columns.
+   // Need to do union of keys from all records as some records may not contain
+   // all records
+   function addAllColumnHeaders(myList)
+   {
+       var columnSet = [];
+       var headerTr$ = $('<tr/>');
+
+       for (var i = 0 ; i < myList.length ; i++) {
+           var rowHash = myList[i];
+           for (var key in rowHash) {
+               if ($.inArray(key, columnSet) == -1){
+                   columnSet.push(key);
+                   headerTr$.append($('<th/>').html(key));
+               }
+           }
+       }
+       $("table").append(headerTr$);
+
+       return columnSet;
+   }
+
+   buildHtmlTable(aliases);
 
     document.getElementById('set').addEventListener('click', async e => {
       send('mail', 'setAddress', document.getElementById('addr').value);

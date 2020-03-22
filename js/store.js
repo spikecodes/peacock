@@ -1,4 +1,5 @@
 const blockchain = require('./blockchain.js');
+const { v1 } = require('uuid');
 
 var store;
 
@@ -95,7 +96,7 @@ exports.logHistory = async function (site, title) {
   await checkFiles();
   let loc = store.get('settings.storage');
 
-  let id = require('uuid/v1')();
+  let id = v1();
   let time = + new Date();
   let item = { "url": site, "title": title, "id": id, "time": time };
 
@@ -178,7 +179,7 @@ exports.addBookmark = async function (site, title) {
   await checkFiles();
   let loc = store.get('settings.storage');
 
-  let id = require('uuid/v1')();
+  let id = v1();
   let item = { "url": site, "title": title, "id": id };
 
   if(loc === "Blockstack"){
