@@ -62,6 +62,7 @@
 		"discord-rpc": "^3.1.0",
 		"dragula": "^3.7.2",
 		"electron-context-menu": "^0.16.0",
+		"electron-privacy": "^1.0.2",
 		"electron-store": "^5.1.1",
 		"express": "^4.17.1",
 		"jquery": "^3.4.1",

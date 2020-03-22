@@ -7,6 +7,7 @@
 
     <style>
       * { font-family: 'Circular Std'; }
+      p { margin: 0px; }
 
       #content {
         padding-top: 100px;
@@ -247,6 +248,7 @@
       .dropdown-item {
         padding: .25rem 1rem;
         font-weight: 500;
+        margin: 0px !important;
       }
 
       .dropdown-item:hover {
@@ -302,7 +304,7 @@
                   Google
                 </button>
                 <div class="dropdown-menu search-engines-menu" aria-labelledby="dropdownMenuButton">
-                  <a locale-key="no_search_engines" class="dropdown-item" href="#">No search engines found.</a>
+                  <p locale-key="no_search_engines" class="dropdown-item" href="#">No search engines found.</p>
                 </div>
               </div>
             </div>
@@ -322,8 +324,8 @@
                   Default
                 </button>
                 <div class="dropdown-menu theme-dropdown-menu" aria-labelledby="dropdownMenuButton">
-                  <a locale-key="default_theme" class="dropdown-item" href="#">Default</a>
-                  <a locale-key="light_theme" class="dropdown-item" href="#">Light</a>
+                  <p locale-key="default_theme" class="dropdown-item" href="#">Default</p>
+                  <p locale-key="light_theme" class="dropdown-item" href="#">Light</p>
                 </div>
               </div>
             </div>
@@ -343,8 +345,8 @@
                   Locally
                 </button>
                 <div class="dropdown-menu storage-dropdown-menu" aria-labelledby="dropdownMenuButton">
-                  <a locale-key="locally_item" class="dropdown-item" href="#">Locally</a>
-                  <a locale-key="blockstack_item" class="dropdown-item" href="#">Blockstack</a>
+                  <p locale-key="locally_item" class="dropdown-item" href="#">Locally</p>
+                  <p locale-key="blockstack_item" class="dropdown-item" href="#">Blockstack</p>
                 </div>
               </div>
             </div>
@@ -364,8 +366,8 @@
                   Disabled
                 </button>
                 <div class="dropdown-menu rich_presence-dropdown-menu" aria-labelledby="dropdownMenuButton">
-                  <a locale-key="enabled_item" class="dropdown-item" href="#">Enabled</a>
-                  <a locale-key="disabled_item" class="dropdown-item" href="#">Disabled</a>
+                  <p locale-key="enabled_item" class="dropdown-item" href="#">Enabled</p>
+                  <p locale-key="disabled_item" class="dropdown-item" href="#">Disabled</p>
                 </div>
               </div>
             </div>
@@ -387,8 +389,8 @@
                   Downloads
                 </button>
                 <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                  <a class="dropdown-item" href="#">Downloads</a>
-                  <a class="dropdown-item" href="#">Use Save As Window</a>
+                  <p class="dropdown-item" href="#">Downloads</p>
+                  <p class="dropdown-item" href="#">Use Save As Window</p>
                 </div>
               </div>
               <p class="note"><b>Note:</b> Requires browser relaunch.</p>
@@ -444,8 +446,8 @@
     $(".search-engines-menu").empty();
     engines.forEach(item => {
       let icon = new URL(item.url).origin + '/favicon.ico';
-      $(".search-engines-menu").append(`<a class="dropdown-item" href="#"><img class="search-engine-icon"
-        src="${icon}"/>${item.name}</a>`);
+      $(".search-engines-menu").append(`<p class="dropdown-item" href="#"><img class="search-engine-icon"
+        src="${icon}"/>${item.name}</p>`);
     });
 
     $('.dropdown').on('show.bs.dropdown', function() {
@@ -465,7 +467,7 @@
     });
 
     sendSync('getThemes').forEach(theme => {
-     $('.theme-dropdown-menu').append(`<a class="dropdown-item" href="#">${theme}</a>`);
+     $('.theme-dropdown-menu').append(`<p class="dropdown-item" href="#">${theme}</p>`);
 
      let elem = $('.theme-dropdown-menu').children().last();
      elem.attr('locale-key', theme.toLowerCase());

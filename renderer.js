@@ -61,13 +61,13 @@ web.init(document);
 storage.init(store);
 mail.init(store);
 
+console.colorLog = (msg, color) => { console.log("%c" + msg, "color:" + color + ";font-weight:bold;") }
+
 const extensions = null;
 
 const { version } = require("./package.json");
 
-var userAgent = remote.getCurrentWebContents().userAgent.split(" ");
-userAgent =
-  "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:73.0) Gecko/20100101 Firefox/73.0";
+var userAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:68.0) Gecko/20100101 Firefox/68.0';
 
 //Discord Rich Presence
 if (store.get("settings.rich_presence") == "Enabled") {
@@ -185,6 +185,9 @@ ipcMain.on("mail", async function(e, action, data) {
         data.name
       );
       //e.returnValue = 'spikey';
+      break;
+    case "aliases":
+      mail.list().then(r => { e.returnValue = r; console.log(r) });
       break;
     case "setAddress":
       store.set("settings.mail.address", data);
@@ -1059,7 +1062,7 @@ new ResizeObserver(async () => {
   $("#autocomplete").width($("#url").width() + 55);
 }).observe($("#url")[0]);
 
-$("#url").on("input", function() {
+/*$("#url").on("input", function() {
   let value = $(this)
     .val()
     .toLowerCase();
@@ -1132,7 +1135,7 @@ $("#url").on("input", function() {
 
     showAutocomplete();
   });
-});
+});*/
 
 function showAutocomplete() {
   // $('#autocomplete').css('display', 'block');
@@ -1163,14 +1166,7 @@ $("#url").keypress(async e => {
       $("#url").val("www." + $("#url").val());
       $("#url").val($("#url").val() + ".net");
     } else {
-      if (
-        $(".selected").is(":first-child") ||
-        !$("#autocomplete").is(":visible")
-      ) {
-        loadPage($("#url").val());
-      } else {
-        loadPage($(".selected").text());
-      }
+      loadPage($("#url").val());
       $("#url").blur();
     }
   }
@@ -1710,4 +1706,5 @@ server.on("message", async m => {
   }
 });
 
-tabs.newView();
+tabs.newView(remote.process.argv[2] && remote.process.argv[2].startsWith('http')
+  ? remote.process.argv[2] : 'peacock://newtab');

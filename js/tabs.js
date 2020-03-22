@@ -6,6 +6,10 @@ const store = require('./store');
 const { BrowserView, BrowserWindow, ipcMain } = remote;
 const { join } = require('path');
 
+const privacy = require('electron-privacy');
+
+console.colorLog = (msg, color) => { console.log("%c" + msg, "color:" + color + ";font-weight:bold;") }
+
 exports.tabs = [];
 
 var tabGroup;
@@ -295,7 +299,8 @@ exports.close = function (view) {
 exports.newView = function (url='peacock://newtab', active=true) {
   if($('.etabs-tabs').children().length >= 7) return;
 
-  let userAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:73.0) Gecko/20100101 Firefox/73.0';
+  let version = Math.floor(Math.random() * (69 - 53) + 53);
+  var userAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:' + version + '.0) Gecko/20100101 Firefox/' + version + '.0';
 
   let view = new BrowserView({
     webPreferences: {
@@ -303,6 +308,11 @@ exports.newView = function (url='peacock://newtab', active=true) {
     }
   });
   let tabSession = view.webContents.session;
+
+  privacy.enableFingerprintProtection(view.webContents, {userAgentRandomization: false});
+  privacy.enableDoNotTrack(view.webContents);
+
+  view.webContents.setUserAgent(userAgent);
 
   let winBounds = remote.getCurrentWindow().getBounds();
 
@@ -318,8 +328,22 @@ exports.newView = function (url='peacock://newtab', active=true) {
   tabSession.webRequest.onBeforeSendHeaders(async (details, callback) => {
     let headers = details.requestHeaders;
     headers['DNT'] = '1';
+    headers['Accept-Language'] = 'en-US,en;q=0.9';
     headers['User-Agent'] = userAgent;
     callback({ cancel: false, requestHeaders: headers });
+  });
+
+  tabSession.cookies.on('changed', async (e, cookie, cause, rem) => {
+    if(!rem) {
+      let split = cookie.domain.split('.');
+      let domain = split[split.length - 2] + '.' + split[split.length - 1];
+      split = (new URL(view.webContents.getURL())).host.split('.');
+      let host = split[split.length - 2] + '.' + split[split.length - 1];
+      if(domain != host) {
+        console.colorLog('Cookie removed: ' + cookie.domain, 'lime');
+        tabSession.cookies.remove(view.webContents.getURL(), cookie.name);
+      }
+    }
   });
 
   tabSession.protocol.registerFileProtocol('peacock', (req, cb) => {
