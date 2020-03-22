@@ -5,7 +5,7 @@
   <a href="https://invite.gg/peacock">Discord</a> |
   <a href="https://github.com/Codiscite/peacock/releases/latest">Download</a>
   <br><br>
-  <a href="ttps://github.com/Codiscite/peacock/releases/latest"><img alt="Travis (.org)" src="https://img.shields.io/travis/Codiscite/peacock?style=for-the-badge"></a>
+  <img alt="GitHub Workflow Status" src="https://img.shields.io/github/workflow/status/Codiscite/peacock/build?style=for-the-badge">
   <a href="https://github.com/Codiscite/peacock/releases/latest"><img alt="GitHub release (latest by date)" src="https://img.shields.io/github/v/release/Codiscite/Peacock?color=tuquoise&label=LATEST&logo=github&logoColor=white&style=for-the-badge"></a>
   <a href="https://invite.gg/peacock"><img alt="Discord" src="https://img.shields.io/discord/630199884229771314?color=%237289DA&label=discord&logo=Discord&logoColor=white&style=for-the-badge"></a>
 </p><br>
