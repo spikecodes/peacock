@@ -310,7 +310,7 @@ exports.newView = function (url='peacock://newtab', active=true) {
   let tabSession = view.webContents.session;
 
   privacy.enableFingerprintProtection(view.webContents, {userAgentRandomization: false});
-  privacy.enableDoNotTrack(view.webContents);
+  privacy.enableDoNotTrack(view.webContents.session);
 
   view.webContents.setUserAgent(userAgent);
 
