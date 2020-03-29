@@ -66,7 +66,7 @@ exports.loadStart = function(view, extensions) {
 }
 
 exports.loadStop = function(view, extensions) {
-  document.getElementById('refresh').children[0].src = 'images/refresh.svg';
+  $('#refresh').children().first().attr('src', 'images/refresh.svg');
 
   view.webContents.executeJavaScript(`document.querySelector('link[rel="shortcut icon"]').href`)
     .then(r => view.tab.setIcon(r));
@@ -201,8 +201,8 @@ exports.titleUpdated = function (view, event, title) {
 
 exports.changeTab = function (view, storage) {
   storage.isBookmarked(view.webContents.getURL()).then((result) => {
-    document.getElementById('bookmark').style.visibility = 'visible';
-    document.getElementById('bookmark').src = result ? 'images/bookmark-saved.svg' : 'images/bookmark.svg';
+    $('#bookmark').css('visibility', 'visible');
+    $('#bookmark').attr('src', result ? 'images/bookmark-saved.svg' : 'images/bookmark.svg');
   });
 
   setURLBar(view.webContents.getURL());
@@ -229,14 +229,6 @@ exports.changeTab = function (view, storage) {
       $('forward').prop('disabled', true);
     }
   } catch (e) {}
-
-  // tab.on('webview-ready', () => {
-  //   tab.setTitle(tab.webview.getTitle());
-  // });
-}
-
-exports.changeThemeColor = function (event) {
-  //document.querySelector('.etabs-tab.active').style.boxShadow = `inset 0px 0px 0px 1px ${event.themeColor}`;
 }
 
 exports.exitPointerLock = function (view) {
