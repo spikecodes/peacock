@@ -1,0 +1,58 @@
+/* CSS VARIABLES */
+
+:root {
+  /* SPACING */
+
+  --bar-heights: 30px;
+
+  --nav-side-padding: 20px;
+  --nav-vert-padding: 5px;
+
+  --tab-padding: 8px;
+
+  /* ROUNDEDNESS */
+
+  --round-corners: 4px;
+
+  /* COLORS */
+
+  --yellow: #FFD563;
+
+  --navbar-color: white;
+
+  --lighter-1: rgba(255,255,255,0.35);
+
+  --darker-1: rgba(0,0,0,0.05);
+  --darker-2: rgba(0,0,0,0.1);
+
+  --outline: rgba(0,0,0,0.1);
+
+  /* DARKMODE */
+
+  --dark-1: #282828;
+  --dark-2: #393939;
+  --dark-3: #202020;
+
+  /* STATES */
+
+  --disabled-opacity: 0.25;
+
+  /* ANIMATIONS */
+
+  --transition: 0.05s all;
+}
+
+/* APPLY TO EVERYTHING */
+
+* { margin: 0px; outline: none; user-select: none; }
+* { font-family: "Roboto" !important; }
+
+/* DEFAULT BUTTON */
+
+button {
+  border: none; background: none;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

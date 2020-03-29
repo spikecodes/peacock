@@ -3,10 +3,11 @@
   <head>
     <meta charset="utf-8" />
     <title>Peacock Settings</title>
+    <link rel="shortcut icon" type="image/png" href="https://peacock.link/favicon.png">
     <link href="https://peacock.link/fonts/circular_std.css" rel="stylesheet" type="text/css">
 
     <style>
-      * { font-family: 'Circular Std'; }
+      * { font-family: 'Circular Std'; user-select: none; }
       p { margin: 0px; }
 
       #content {
@@ -512,7 +513,10 @@
     }
 
     function resetProfile() {
-      $("#profile").attr("src", '../images/blockstack.png');
+      let blockstack = `https://res.cloudinary.com/practicaldev/image/fetch/s--M-FjwJXs--/c_fill,f_auto,fl_progressive,h_320,q_auto,
+        w_320/https://dev-to-uploads.s3.amazonaws.com/uploads/organization/profile_image/435/dac160a8-a926-4eef-b1e4-884d5e3c1c95.png`;
+
+      $("#profile").attr("src", blockstack);
       $("#name").text("Blockstack");
       $("#signedIn").text("Signed Out");
       $("#signOut").text("SIGN IN");

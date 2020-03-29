@@ -27,13 +27,13 @@ function setURLBar(url) {
 exports.setURLBar = setURLBar;
 
 function setSearchIcon(url) {
-  $('#search').attr('style', '');
+  $('#site-info').attr('style', '');
 
   try {
     let protocol = (new URL(url)).protocol;
 
-    if(protocol == 'http:') document.getElementById('search').src = 'images/alert.svg';
-    else if(protocol == 'https:') document.getElementById('search').src = 'images/lock.svg';
+    if(protocol == 'http:') $('#site-info > img').attr('src', 'images/alert.svg');
+    else if(protocol == 'https:') $('#site-info > img').attr('src', 'images/lock.svg');
   } catch (e) {}
 }
 exports.setSearchIcon = setSearchIcon;
@@ -41,13 +41,13 @@ exports.setSearchIcon = setSearchIcon;
 exports.init = function (doc) { document = doc }
 
 exports.loadStart = function(view, extensions) {
-  view.tab.icon.html(`<div class='spinner'><svg class='svg' viewBox='22 22 44 44'>
-    <circle class='circle' cx='44' cy='44' r='20.2' stroke-width='3.6' fill='none'>
-    </circle></svg></div>`);
+  // view.tab.icon[0].outerHTML = `<div class='spinner'><svg class='svg' viewBox='22 22 44 44'>
+  //   <circle class='circle' cx='44' cy='44' r='20.2' stroke-width='3.6' fill='none'>
+  //   </circle></svg></div>`;
 
   view.tab.setTitle('Loading...');
 
-  $('#star').css('visibility', 'hidden');
+  $('#bookmark').css('visibility', 'hidden');
   $('#refresh').children().first().attr('src','images/close.svg');
 
   if(!extensions) return;
@@ -68,8 +68,10 @@ exports.loadStart = function(view, extensions) {
 exports.loadStop = function(view, extensions) {
   document.getElementById('refresh').children[0].src = 'images/refresh.svg';
 
-  let url = new URL(view.webContents.getURL());
-  view.tab.setIcon(url.origin + '/favicon.ico');
+  view.webContents.executeJavaScript(`document.querySelector('link[rel="shortcut icon"]').href`)
+    .then(r => view.tab.setIcon(r));
+
+  view.tab.setTitle(view.webContents.getTitle());
 
   if(!extensions) return;
 
@@ -126,8 +128,8 @@ exports.enterFllscrn = function(view, screen) {
 }
 
 exports.leaveFllscrn = function(view, width, height) {
-  view.setBounds({ x: 0, y: 68, width: width, height: height - 83 });
-  view.setBounds({ x: 0, y: 68, width: width, height: height - 83 });
+  view.setBounds({ x: 0, y: 71, width: width, height: height - 80 });
+  view.setBounds({ x: 0, y: 71, width: width, height: height - 80 });
 }
 
 exports.domReady = function (view, storage) {
@@ -136,24 +138,24 @@ exports.domReady = function (view, storage) {
   view.webContents.insertCSS('input::-webkit-calendar-picker-indicator {display: none;}');
 
   storage.isBookmarked(view.webContents.getURL()).then((result) => {
-    document.getElementById('star').style.visibility = 'visible';
-    document.getElementById('star').src = result ? 'images/bookmark-saved.svg' : 'images/bookmark.svg';
+    $('#bookmark').css('visibility', 'visible');
+    $('#bookmark').children().first().attr('src', result ? 'images/bookmark-saved.svg' : 'images/bookmark.svg');
   });
 
   if(view.webContents.canGoBack()) {
-    if(document.getElementById('back').classList.contains('disabled')) {
-      document.getElementById('back').classList.remove('disabled');
+    if($('#back').is(':disabled')) {
+      $('#back').removeAttr('disabled');
     }
   } else {
-    document.getElementById('back').classList.add('disabled');
+    $('#back').prop('disabled', true);
   }
 
   if(view.webContents.canGoForward()) {
-    if(document.getElementById('forward').classList.contains('disabled')) {
-      document.getElementById('forward').classList.remove('disabled');
+    if($('#forward').is(':disabled')) {
+      $('#forward').removeAttr('disabled');
     }
   } else {
-    document.getElementById('forward').classList.add('disabled');
+    $('forward').prop('disabled', true);
   }
 
   if(window.theme == 'dark') {
@@ -164,15 +166,6 @@ exports.domReady = function (view, storage) {
       ::-webkit-scrollbar-thumb:hover { background-color: #323537;}
       ::-webkit-scrollbar-corner { background-color: transparent;}`);
   }
-
-  view.webContents.executeJavaScript(`document.getElementsByTagName('video').length`)
-    .then((result) => {
-      if(result === 1) {
-        document.getElementById('pip').style.cssText = 'display:block !important';
-      } else {
-        document.getElementById('pip').style.cssText = 'display:none !important';
-      }
-    });
 
   switch (view.webContents.getURL()) {
     case 'peacock://network-error':
@@ -208,8 +201,8 @@ exports.titleUpdated = function (view, event, title) {
 
 exports.changeTab = function (view, storage) {
   storage.isBookmarked(view.webContents.getURL()).then((result) => {
-    document.getElementById('star').style.visibility = 'visible';
-    document.getElementById('star').src = result ? 'images/bookmark-saved.svg' : 'images/bookmark.svg';
+    document.getElementById('bookmark').style.visibility = 'visible';
+    document.getElementById('bookmark').src = result ? 'images/bookmark-saved.svg' : 'images/bookmark.svg';
   });
 
   setURLBar(view.webContents.getURL());
@@ -221,29 +214,20 @@ exports.changeTab = function (view, storage) {
 
   try {
     if(view.webContents.canGoBack()) {
-      if(document.getElementById('back').classList.contains('disabled')) {
-        document.getElementById('back').classList.remove('disabled');
+      if($('#back').is(':disabled')) {
+        $('#back').removeAttr('disabled');
       }
     } else {
-      document.getElementById('back').classList.add('disabled');
+      $('#back').prop('disabled', true);
     }
 
     if(view.webContents.canGoForward()) {
-      if(document.getElementById('forward').classList.contains('disabled')) {
-        document.getElementById('forward').classList.remove('disabled');
+      if($('#forward').is(':disabled')) {
+        $('#forward').removeAttr('disabled');
       }
     } else {
-      document.getElementById('forward').classList.add('disabled');
+      $('forward').prop('disabled', true);
     }
-
-    view.webContents.executeJavaScript(`document.getElementsByTagName('video').length`)
-      .then((result) => {
-        if(result === 1) {
-          document.getElementById('pip').style.cssText = 'display:block !important';
-        } else {
-          document.getElementById('pip').style.cssText = 'display:none !important';
-        }
-      });
   } catch (e) {}
 
   // tab.on('webview-ready', () => {
