@@ -491,7 +491,7 @@ async function toggleAdblock() {
     transparent: true,
     parent: remote.getCurrentWindow(),
     alwaysOnTop: true,
-    icon: join(__dirname, "images/peacock.ico")
+    icon: join(__dirname, "images/peacock.png")
   });
 
   let address = require("url").format({
@@ -673,7 +673,7 @@ async function initAlert() {
     },
     parent: remote.getCurrentWindow(),
     alwaysOnTop: true,
-    icon: join(__dirname, "images/peacock.ico")
+    icon: join(__dirname, "images/peacock.png")
   };
 
   alertWin = new BrowserWindow(args);
@@ -958,7 +958,7 @@ async function initCertDialog() {
     },
     show: false,
     parent: remote.getCurrentWindow(),
-    icon: join(__dirname, "images/peacock.ico")
+    icon: join(__dirname, "images/peacock.png")
   });
 
   certDialog.on("page-title-updated", async () => {
