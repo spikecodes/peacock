@@ -1,27 +1,125 @@
+/* TITLEBAR */
+
 #titlebar {
-  position: fixed;
-  height: 31px;
-  background: transparent;
+  height: var(--bar-heights);
   width: 100%;
-  display: block;
+
+  display: flex;
+  position: fixed;
+
+  background: var(--darker-2);
+}
+
+#titlebar > * { height: inherit; }
+
+/* TABS */
+
+#tabs {
+  min-width: 125px;
+  max-width: 85%;
+  display: flex;
+
+  align-items: center;
+}
+
+.tab {
+  width: 150px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  flex-shrink: 1;
+
+  transition: var(--transition);
+
+  padding-left: var(--tab-padding);
+}
+
+.tab:not(.selected):hover {
+  background: var(--lighter-1);
+}
+
+.tab.selected {
+  background: var(--navbar-color);
+  /* border-top-left-radius: var(--round-corners);
+   border-top-right-radius: var(--round-corners); */
+
+  transition: var(--transition);
+  box-shadow: -1px 0px 0px 0px var(--outline), 1px 0px 0px 0px var(--outline), 0px 1px 0px 0px var(--navbar-color);
+}
+
+/* TAB ITEMS */
+
+.tab-icon {
+  width: 15px;
+  height: 15px;
+
+  margin-right: var(--tab-padding);
+}
+
+.tab-label {
+  font-size: 13px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tab-close {
+  width: 13px;
+  height: 13px;
+
+  margin: 0px 7px 0px 7px;
+  margin-left: auto;
+  padding: 3px;
+
+  border-radius: var(--round-corners);
+  transition: var(--transition);
+}
+
+.tab-close:hover {
+  background: var(--darker-1);
+}
+
+/* NEW TAB BUTTON */
+
+#new-tab {
+  margin-left: 5px;
+
+  width: 23px;
+  height: 23px;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  transition: var(--transition);
+}
+
+#new-tab:hover {
+  background: var(--darker-1);
+  border-radius: var(--round-corners);
+}
+
+#new-tab > img {
+  width: 15px;
+}
+
+/* DRAGGABLE REGION */
+
+#drag-region {
+  flex-grow: 1;
   -webkit-app-region: drag;
 }
 
-#titlebar #drag-region {
-  float: right;
-  height: 100%;
-  width: 100%;
-  -webkit-app-region: drag;
-}
+/* WINDOW CONTROLS */
 
 #window-controls {
   display: grid;
-  grid-template-columns: repeat(3, 46px);
-  position: absolute;
+  grid-template-columns: repeat(3, 40px);
   top: 0;
   right: 0;
-  height: 100%;
-  font-size: 10px;
+  font-size: 14px;
+
+  -webkit-app-region: no-drag;
 }
 
 #window-controls .button {
@@ -33,44 +131,26 @@
   height: 100%;
 }
 
-#window-controls .button span {
-  font-family: "Segoe MDL2 Assets" !important;
-}
-
-#window-controls #min-button {
-  grid-column: 1;
-}
-
-#window-controls #max-button,
-#window-controls #restore-button {
-  grid-column: 2;
-}
-#window-controls #close-button {
-  grid-column: 3;
-}
-
-#window-controls {
-  -webkit-app-region: no-drag;
-}
-
 #window-controls .button {
   user-select: none;
   cursor: default;
   color: #050708;
+
+  transition: var(--transition);
 }
 
-#window-controls .button:hover {
-  background: rgba(0, 0, 0, 0.1);
+#window-controls .button:hover{ background: var(--darker-1); }
+#window-controls .button span { transform: translateY(-10%); }
+
+#window-controls #min-button { grid-column: 1; }
+#window-controls #max-button,
+#window-controls #restore-button { grid-column: 2; }
+#window-controls #close-button {
+  grid-column: 3;
+  transition: var(--transition);
 }
 
-#window-controls #close-button:hover {
-  background: #e81123;
-}
+#window-controls #restore-button { display: none; }
 
-#window-controls #close-button:hover > span {
-  color: #fff;
-}
-
-#window-controls #restore-button {
-  display: none;
-}
+#window-controls #close-button:hover { background: #e81123; }
+#window-controls #close-button:hover > span { color: #fff; }

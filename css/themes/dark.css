@@ -1,219 +1,36 @@
-body {
-  background: #131313;
+/* VARIABLE ALTERING */
+
+:root {
+  --navbar-color: var(--dark-1);
+
+  --lighter-1: rgba(0,0,0,0.1);
+
+  --darker-1: rgba(255,255,255,0.1);
+  --darker-2: rgba(255,255,255,0.2);
+
+  --outline: black;
 }
 
-#window-controls .button:hover {
-  background: rgba(255,255,255,0.1);
+/* STYLING CHANGE */
+
+body { background: var(--dark-1); }
+
+#titlebar { background: var(--dark-3); }
+
+.tab-close:hover {
+  background: var(--lighter-1);
 }
 
-.etabs-tab-buttons button:hover {
-  background-color: rgba(255, 255, 255, 0.1);
-}
+#nav-center { background: var(--dark-2); }
 
-.etabs-buttons button:hover {
-  background: rgba(255,255,255,0.1);
-}
-
-.etabs-buttons button img {
-  filter: invert(1);
-}
-
-.etabs-tab.active {
-  background: #393939;
-}
-
-.etabs-tab {
-  background: transparent;
-}
-
-.etabs-tab.visible::after {
-  background: linear-gradient(90deg, #13131300 0%, #131313 75%, #13131380 100%);
-}
-
-.etabs-tab.visible.active::after {
-  background: linear-gradient(90deg, #39393900 0%, #393939 75%, #39393980 100%);
-}
-
-.etabs-tab.visible:not(.active):hover::after {
-  background: linear-gradient(90deg, #1f1f1f00 0%, #1f1f1f 75%, #1f1f1f80 100%);
-}
-
-#navigation, #topbar, .etabs-views {
-  background: #393939;
-}
-
-#navigation div:not(#omnibox):not(.badge) img, #back-arrow, #search, #star {
-  filter: invert(1);
-}
-
-#navigation div:not(.disabled):not(#omnibox):hover {
-  background-color: rgba(255, 255, 255, 0.075) !important;
-}
-
-#navigation div:not(.disabled):not(#omnibox):active {
-  background-color: rgba(255, 255, 255, 0.15) !important;
-}
-
-#url{
-  background-color: #222222;
-  color: #fefefe;
-  box-shadow: none;
-}
-
-.etabs-tab:not(.active):hover {
-  background-color: #1f1f1f !important;
-}
-
-#target {
-  color: white;
-  background-color: rgb(46, 48, 51);
-}
-
-#header-text, #title, .label, .heading-title, .etabs-buttons button,
-.etabs-tab-title,.etabs-tab-buttons button, #window-controls .button, .dropdown-toggle,
-#pills-profile #name, #pills-profile button
-{
-  color: #efefef;
-}
-
-#pills-profile #signedIn{
-  color: rgba(255,255,255,0.75);
-}
-
-#header-text{
-  text-shadow: 0px 2.5px 0px #4e5254;
-}
-
-.dropdown, .btn {
-  background-color: #3c3e42;
-  border-radius: 5px;
-}
-
-.dropdown-menu{
-  background: #3c3e42;
-}
-
-.dropdown-item{
-  color: white;
-}
-
-.dropdown-item:hover{
-  background-color: #545B62;
-  color: white;
-}
-
-.btn, .note {
-  color: #dedede;
-}
-
-#shield.gu-mirror, #shield.gu-transit, #shieldIMG.gu-mirror, #shieldIMG.gu-transit {
-  max-width: 30px !important;
-  max-height: 30px !important;
-}
-
-.nav-link {
-  background-color: #232323;
-  color: white;
-}
-
-.nav-link:hover {
-  color: #ddd;
-}
-
-.item-history, .item-bookmarks {
-  color: white;
-  transition: all 0.05s;
-  border: 2px solid #444444 !important;
-  background: #131313 !important;
-}
-
-.item-history:hover, .item-bookmarks:hover {
-  color: white;
-  box-shadow: -4px 0px 0px 0px white;
-  border: 2px solid white !important;
-}
-
-.item-history > .history-title, .item-bookmarks > .bookmark-title {
-  color: white;
-}
-
-#autocomplete {
-  box-shadow: 0px 10px 27px -12px rgba(0, 0, 0, 0.75);
-}
-
-#autocomplete > div{
-  background: #3C4043;
-  color: white;
-}
-
-#autocomplete > div:hover, #autocomplete > div.selected {
-  background: #5B5F61;
-}
-
-#autocomplete > div > img {
-  filter: invert(1);
-}
-
-.delete-bookmark {
-  color: white;
-}
-
-.delete-bookmark:hover {
-  background: rgba(255,255,255,0.1);
-}
-
-#profile {
-  background: #545B62;
-}
-
-#profile-jumbo {
-  background: transparent;
-  border: 2px solid #232323;
-}
-
-#profile-jumbo:hover {
-  background: #1c1c1d;
-}
-
-.btn {
-  border: 2px solid #444444;
-  background: #131313;
-  /* box-shadow: -4px 4px 0px 0px white; */
-}
-
-.btn:hover {
-  box-shadow: 0px 3.5px 0px 0px #d2d1d6;
-}
-
-.btn:hover, .btn:focus {
-  background-color: white !important;
-  border: 2px solid white !important;
-  color: #313a43 !important;
-}
-
-.nav-link.active {
-  background-color: #FDD332 !important;
-  color: #131313 !important;
-}
-
-#window-controls > div > span {
-  color: white;
-}
-
-.url-hover {
-  background-color: #444444 !important;
-  color: #fefefe !important;
-  transition: all 0.25s !important;
-}
-
-b {
-  color: white;
-}
-
-#find > *:not(input) {
+#window-controls > .button > span {
   color: white !important;
 }
 
-.spinner, .earth svg {
-  color: white;
+/* ICON AND TEXT INVERSION */
+
+img[src$="svg"]:not(.extension) {
+  filter: invert(1);
 }
+
+.tab-label, #url { color: white; }

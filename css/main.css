@@ -119,7 +119,6 @@ video {
 
 * {
   font-family: "Roboto", sans-serif !important;
-  font-weight: unset;
 }
 
 article,
@@ -285,7 +284,7 @@ webview {
   margin-top: -1px;
 }
 
-#navigation #omnibox #search:hover, .search-active {
+#navigation #omnibox #search:hover, #star:hover, .search-active {
   background: rgba(0, 0, 0, 0.1);
 }
 
@@ -547,49 +546,6 @@ b {
   display: inline-block;
   position: absolute;
   color: black;
-}
-
-.spinner {
-  width: 16px;
-  height: 16px;
-  top: 0;
-  bottom: 0;
-  margin: auto;
-  display: inline-block;
-  animation: spinner-rotate 1.4s linear infinite;
-  position: absolute;
-  color: black;
-}
-
-.svg {
-  display: block;
-}
-
-.circle {
-  stroke: currentColor;animation: spinner-dash 1.4s ease-in-out infinite;
-  stroke-dasharray: 80px, 200px;
-  stroke-dashoffset: 0px;
-}
-
-@-webkit-keyframes spinner-rotate {
-  100% {
-    transform: rotate(360deg);
-  }
-}
-
-@-webkit-keyframes spinner-dash {
-  0% {
-    stroke-dasharray: 1px, 200px;
-    stroke-dashoffset: 0px;
-  }
-  50% {
-    stroke-dasharray: 100px, 200px;
-    stroke-dashoffset: -15px;
-  }
-  100% {
-    stroke-dasharray: 100px, 200px;
-    stroke-dashoffset: -125px;
-  }
 }
 
 .messageBox {
