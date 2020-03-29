@@ -44,12 +44,14 @@ async function createWindow() {
 
 	//mainWindow.openDevTools({ mode: 'detach' });
 
-	// and load the index.html of the app.
+	// and load the html of the app.
 	mainWindow.loadURL(format({
-		pathname: join(__dirname, 'index.html'),
+		pathname: join(__dirname, 'browser.html'),
 		protocol: 'file:',
 		slashes: true
 	}));
+
+	mainWindow.openDevTools();
 
 	mainWindow.maximize();
 
