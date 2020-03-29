@@ -39,7 +39,7 @@ async function createWindow() {
 		},
 		width: 1280,
 		height: 720,
-		icon: join(__dirname, 'images/peacock.ico')
+		icon: join(__dirname, 'images/peacock.png')
 	});
 
 	//mainWindow.openDevTools({ mode: 'detach' });
@@ -50,8 +50,6 @@ async function createWindow() {
 		protocol: 'file:',
 		slashes: true
 	}));
-
-	mainWindow.openDevTools();
 
 	mainWindow.maximize();
 
