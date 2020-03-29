@@ -1,4 +1,4 @@
-const { remote, ipcRenderer } = require('electron');
+const { remote, ipcRenderer, nativeImage } = require('electron');
 
 const web = require('./web');
 const store = require('./store');
@@ -31,7 +31,7 @@ $.fn.fadeSlideLeft = function(speed,fn) {
 $.fn.fadeSlideRight = function(speed,fn) {
   return $(this).animate({
     'opacity' : 1,
-    'width' : '225px'
+    'width' : '250px'
   },speed || 400,function() {
     $.isFunction(fn) && fn.call(this);
   });
@@ -63,7 +63,7 @@ exports.initDownloads = async () => {
 
   ipcMain.on('startDrag', async (e, file) => {
     file = file.replace(/\\/g, "/");
-    let image = join(__dirname, '../images/blank.png');
+    let image = nativeImage.createFromDataURL(`data:null`);
 
     console.log(file);
 
@@ -155,49 +155,9 @@ exports.length = function () {
   return this.tabs.length;
 }
 
-exports.makeTabGroup = function (newTab_title, newTab_url, callback=()=>{}) {
-  const TabGroup = require("electron-tabs");
-  let newTab = this.new;
-  tabGroup = new TabGroup({
-    ready: function(tabGroup) {
-      require("dragula")([tabGroup.tabContainer], {
-        direction: 'horizontal',
-        moves: function (el, container, handle) {
-         return $(handle).attr('class') != 'etabs-tab-button-close';
-       }
-      });
-
-      $('.etabs-tab-button-new').replaceWith($('.etabs-tab-button-new').clone());
-      $('.etabs-tab-button-new').click(async e => { newTab(newTab_title, newTab_url); });
-      $('.etabs-tab-button-new').attr('title', 'New tab');
-
-      callback(tabGroup);
-    },
-    newTab: {
-     title: newTab_title,
-     src: newTab_url,
-     visible: true,
-     active: true,
-     webviewAttributes: {
-       partition: "persist:peacock",
-       sandbox: true,
-       plugins: false,
-       preload: 'js/preload.js',
-       disablewebsecurity: true
-     }
-    }
-  });
-
-  tabGroup.tabContainer.nextElementSibling.firstElementChild.innerHTML = `<img src="images/plus.svg">`;
-
-  return tabGroup;
-}
-exports.getTabGroup = function () { return tabGroup; }
-
 exports.initBrowserView = async (view) => {
   view.webContents.on('did-start-loading', async (e) => { web.loadStart(view) });
   view.webContents.on('did-stop-loading', async (e) => { web.loadStop(view) });
-  //view.webContents.on('did-finish-load', async (e) => { finishLoad(e, tab) });
   view.webContents.on('did-fail-load', async (e, ec, ed, vu) => {web.failLoad(e, view, ec, ed, vu); });
   view.webContents.on('enter-html-full-screen', async (e) => { web.enterFllscrn(view, remote.screen) });
   view.webContents.on('leave-html-full-screen', async (e) => { web.leaveFllscrn(view, window.outerWidth, remote.getCurrentWindow().getBounds().height) });
@@ -257,11 +217,11 @@ exports.savePage = function(contents) {
 
 exports.activate = function (view) {
 
-  if($('div.active').length > 0) $('div.active').removeClass('active');
+  if($('.selected').length > 0) $('.selected').removeClass('selected');
 
   remote.getCurrentWindow().setBrowserView(view);
   remote.getCurrentWindow().setBrowserView(view);
-  view.tab.element.addClass('active');
+  view.tab.element.addClass('selected');
   activeTab = view;
 
   this.viewActivated(view);
@@ -297,8 +257,6 @@ exports.close = function (view) {
 }
 
 exports.newView = function (url='peacock://newtab', active=true) {
-  if($('.etabs-tabs').children().length >= 7) return;
-
   let version = Math.floor(Math.random() * (69 - 53) + 53);
   var userAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:' + version + '.0) Gecko/20100101 Firefox/' + version + '.0';
 
@@ -316,13 +274,12 @@ exports.newView = function (url='peacock://newtab', active=true) {
 
   let winBounds = remote.getCurrentWindow().getBounds();
 
-  view.setBounds({ x: 0, y: 68, width: window.outerWidth, height: winBounds.height - 83 });
+  view.setBounds({ x: 0, y: 71, width: window.outerWidth, height: winBounds.height - 80 });
   view.setAutoResize({ height: true, horizontal: true });
 
   window.onresize = async () => {
     let bounds = view.getBounds();
     winBounds = remote.getCurrentWindow().getBounds();
-    //view.setBounds({ x: bounds.x, y: bounds.y, width: window.outerWidth, height: winBounds.height - 83 });
   };
 
   tabSession.webRequest.onBeforeSendHeaders(async (details, callback) => {
@@ -333,18 +290,7 @@ exports.newView = function (url='peacock://newtab', active=true) {
     callback({ cancel: false, requestHeaders: headers });
   });
 
-  tabSession.cookies.on('changed', async (e, cookie, cause, rem) => {
-    if(!rem) {
-      let split = cookie.domain.split('.');
-      let domain = split[split.length - 2] + '.' + split[split.length - 1];
-      split = (new URL(view.webContents.getURL())).host.split('.');
-      let host = split[split.length - 2] + '.' + split[split.length - 1];
-      if(domain != host) {
-        console.colorLog('Cookie removed: ' + cookie.domain, 'lime');
-        tabSession.cookies.remove(view.webContents.getURL(), cookie.name);
-      }
-    }
-  });
+  privacy.blockThirdPartyCookies(view.webContents);
 
   tabSession.protocol.registerFileProtocol('peacock', (req, cb) => {
     var url = new URL(req.url);
@@ -413,24 +359,18 @@ exports.newView = function (url='peacock://newtab', active=true) {
     showInspectElement: true
   });
 
-  $('.etabs-tabs').append(`<div class="etabs-tab visible" style="opacity: 1; width: 225px; transition: all 0.1s ease 0s;">
-      <span class="etabs-tab-icon">
-        <img src="./images/earth_white.svg">
-      </span>
-
-      <span class="etabs-tab-title" title="New Tab">New Tab</span>
-
-      <span class="etabs-tab-buttons">
-        <button class="etabs-tab-button-close">✖</button>
-      </span>
-    </div>`);
+  $('#new-tab').before(`<div class="tab">
+        <img class="tab-icon" src="images/peacock.png">
+        <p class="tab-label">Loading...</p>
+        <img class="tab-close" src="images/close.svg">
+      </div>`);
 
   view.tab = {
-    element: $('.etabs-tabs').children().last(),
+    element: $('#new-tab').prev(),
     setIcon: async (icon) => {
-      view.tab.icon.html('<img src="./images/earth_white.svg">');
-      view.tab.icon.children().first().on("error", () => { view.tab.icon.children().first().attr('src', `./images/earth_white.svg`) });
-      view.tab.icon.children().first().attr('src', icon);
+      // view.tab.icon[0].outerHTML = '<img src="//:0">';
+      view.tab.icon.on("error", () => { view.tab.icon.attr('src', `//:0`) });
+      view.tab.icon.attr('src', icon);
     },
     setTitle: async (title) => { view.tab.title.text(title); },
     close: async () => { view.tab.element.remove(); }
@@ -443,7 +383,7 @@ exports.newView = function (url='peacock://newtab', active=true) {
 
   view.tab.icon = view.tab.element.children().eq(0);
   view.tab.title = view.tab.element.children().eq(1);
-  view.tab.button = view.tab.element.children().eq(2).children().first();
+  view.tab.button = view.tab.element.children().eq(2);
 
   view.tab.element.click(async (e) => {
     this.activate(view);
@@ -461,9 +401,7 @@ exports.newView = function (url='peacock://newtab', active=true) {
 
   this.viewAdded(view);
 
-  if(active) {
-    this.activate(view);
-  }
+  if(active) { this.activate(view); }
 
   return view;
 }
@@ -502,15 +440,15 @@ exports.showDialog = async (text) => {
   remote.getCurrentWindow().addBrowserView(view);
 }
 
-$('.etabs-tab-button-new').click(async e => {
+$('#new-tab').click(async e => {
   this.newView('peacock://newtab');
 });
 
-let tabContainer = $('.etabs-tabs')[0];
+let tabContainer = $('#tabs')[0];
 require("dragula")([tabContainer], {
   direction: 'horizontal',
   moves: function (el, container, handle) {
-    return !$(handle).hasClass('etabs-tab-button-close');
+    return !$(handle).hasClass('tab-close');
   }
 });
 
