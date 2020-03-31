@@ -32,9 +32,9 @@
 		"linux": {
 			"target": [
 				"AppImage",
-				"deb",
-				"snap"
+				"deb"
 			],
+			"author": "Spike Raxstone",
 			"icon": "build/icon.png"
 		},
 		"nsis": {
@@ -44,12 +44,9 @@
 		}
 	},
 	"scripts": {
-		"start": "electron .",
-		"pack": "electron-builder --dir",
-		"release": "electron-builder -p always",
-		"dist-all": "electron-builder -mwl --publish=always"
+		"start": "electron ."
 	},
-	"author": "Codiscite",
+	"author": "Spike Raxstone <spike@peacock.link>",
 	"license": "MIT",
 	"devDependencies": {
 		"electron": "^9.0.0-beta.12",
