@@ -34,3 +34,18 @@ img[src$="svg"]:not(.extension) {
 }
 
 .tab-label, #url { color: white; }
+
+/* SETTINGS */
+
+#pills-tabContent, #title, .heading-title, #signOut {
+  color: white;
+}
+
+#profile-jumbo {
+  border: none;
+  background: var(--dark-2);
+}
+
+#profile-jumbo:hover {
+  background: var(--dark-2);
+}

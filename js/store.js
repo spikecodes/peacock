@@ -153,7 +153,7 @@ exports.isBookmarked = async function (url) {
         blockchain.getUserSession().getFile("bookmarks.json").then(data => {
           var exists = false;
           for (var i = 0; i < data.length; i++) {
-            if(data[i].url === url){ exists = true; break; }
+            if(data[i].url === url){ exists = data[i]; break; }
           }
           resolve(exists);
         });
@@ -167,7 +167,7 @@ exports.isBookmarked = async function (url) {
       let bookmarks = store.get('bookmarks');
       var exists = false;
       for (var i = 0; i < bookmarks.length; i++) {
-        if(bookmarks[i].url === url){ exists = true; break; }
+        if(bookmarks[i].url === url){ exists = bookmarks[i]; break; }
       }
       resolve(exists);
     });

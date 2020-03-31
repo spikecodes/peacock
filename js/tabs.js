@@ -8,6 +8,10 @@ const { join } = require('path');
 
 const privacy = require('electron-privacy');
 
+const win = remote.getCurrentWindow();
+
+const topbarHeight = 70;
+
 console.colorLog = (msg, color) => { console.log("%c" + msg, "color:" + color + ";font-weight:bold;") }
 
 exports.tabs = [];
@@ -160,7 +164,7 @@ exports.initBrowserView = async (view) => {
   view.webContents.on('did-stop-loading', async (e) => { web.loadStop(view) });
   view.webContents.on('did-fail-load', async (e, ec, ed, vu) => {web.failLoad(e, view, ec, ed, vu); });
   view.webContents.on('enter-html-full-screen', async (e) => { web.enterFllscrn(view, remote.screen) });
-  view.webContents.on('leave-html-full-screen', async (e) => { web.leaveFllscrn(view, window.outerWidth, remote.getCurrentWindow().getBounds().height) });
+  view.webContents.on('leave-html-full-screen', async (e) => { web.leaveFllscrn(view, win.getBounds().height) });
   view.webContents.on('update-target-url', async (e, url) => { web.updateTargetURL(e, url) });
   view.webContents.on('dom-ready', async (e) => { web.domReady(view, store) });
   view.webContents.on('new-window', async (e, url, f, disposition) => {
@@ -216,15 +220,15 @@ exports.savePage = function(contents) {
 }
 
 exports.activate = function (view) {
+  remote.getCurrentWindow().setBrowserView(view);
+  $('#url').val('');
+
+  this.viewActivated(view);
 
   if($('.selected').length > 0) $('.selected').removeClass('selected');
 
-  remote.getCurrentWindow().setBrowserView(view);
-  remote.getCurrentWindow().setBrowserView(view);
   view.tab.element.addClass('selected');
   activeTab = view;
-
-  this.viewActivated(view);
 }
 
 exports.close = function (view) {
@@ -272,15 +276,11 @@ exports.newView = function (url='peacock://newtab', active=true) {
 
   view.webContents.setUserAgent(userAgent);
 
-  let winBounds = remote.getCurrentWindow().getBounds();
+  view.setBounds({x:0, y:topbarHeight, width:win.getContentBounds().width, height:win.getContentBounds().height - topbarHeight });
 
-  view.setBounds({ x: 0, y: 71, width: window.outerWidth, height: winBounds.height - 80 });
-  view.setAutoResize({ height: true, horizontal: true });
-
-  window.onresize = async () => {
-    let bounds = view.getBounds();
-    winBounds = remote.getCurrentWindow().getBounds();
-  };
+  win.on('resize', e => {
+    view.setBounds({x:0, y:topbarHeight, width:win.getContentBounds().width, height:win.getContentBounds().height - topbarHeight });
+  });
 
   tabSession.webRequest.onBeforeSendHeaders(async (details, callback) => {
     let headers = details.requestHeaders;
@@ -291,6 +291,16 @@ exports.newView = function (url='peacock://newtab', active=true) {
   });
 
   privacy.blockThirdPartyCookies(view.webContents);
+
+  tabSession.protocol.registerHttpProtocol('ipfs', (req, cb) => {
+    var hash = req.url.replace('ipfs://', '');
+    cb({ url: 'https://ipfs.io/ipfs/' + hash });
+  }, (error) => {})
+
+  tabSession.protocol.registerFileProtocol('assets', (req, cb) => {
+    var url = req.url.replace(new URL(req.url).protocol, '');
+    cb({ path: join(__dirname, '../css/', url) });
+  }, (error) => {});
 
   tabSession.protocol.registerFileProtocol('peacock', (req, cb) => {
     var url = new URL(req.url);
@@ -401,7 +411,7 @@ exports.newView = function (url='peacock://newtab', active=true) {
 
   this.viewAdded(view);
 
-  if(active) { this.activate(view); }
+  if(active) { this.activate(view); this.activate(view); }
 
   return view;
 }
@@ -444,12 +454,18 @@ $('#new-tab').click(async e => {
   this.newView('peacock://newtab');
 });
 
-let tabContainer = $('#tabs')[0];
-require("dragula")([tabContainer], {
+// require("dragula")([$('#tabs')[0]], {
+//   direction: 'horizontal',
+//   moves: function (el, container, handle) {
+//     return !$(handle).hasClass('tab-close');
+//   }
+// });
+
+let Sortable = require('sortablejs');
+
+var sortable = new Sortable($('#tabs')[0], {
   direction: 'horizontal',
-  moves: function (el, container, handle) {
-    return !$(handle).hasClass('tab-close');
-  }
+  draggable: '.tab'
 });
 
 remote.app.on('certificate-error', (event, webContents, url, error, certificate, callback) => {
