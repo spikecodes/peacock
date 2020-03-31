@@ -34,7 +34,6 @@
 				"AppImage",
 				"deb"
 			],
-			"author": "Spike Raxstone",
 			"icon": "build/icon.png"
 		},
 		"nsis": {
