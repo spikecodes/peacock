@@ -4,10 +4,10 @@
     <meta charset="utf-8">
     <title>New Tab</title>
 
-    <link rel="stylesheet" href="https://storage.googleapis.com/non-spec-apps/mio-icons/latest/round.css">
-    <link href="https://peacock.link/fonts/circular_std.css" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" href="https://storage.googleapis.com/non-spec-apps/mio-icons/latest/outline.css">
+    <link rel="shortcut icon" type="image/png" href="assets://favicon.png">
 
-    <link rel="shortcut icon" type="image/png" href="https://peacock.link/favicon.png">
+    <link href="assets://fonts/circular_std.css" rel="stylesheet" type="text/css">
 
     <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
     <style>
@@ -16,11 +16,10 @@
         --background-soft: rgba(255,255,255,0.05);
         --background-firm: rgba(255,255,255,0.1);
         --background-hard: rgba(255,255,255,0.15);
-
-        --peacock-color: #FFD563;
       }
 
-      * { font-family: 'Circular Std' !important; box-sizing: border-box; z-index: 2; letter-spacing: -1px; }
+      * { font-family: 'Circular Std' !important; box-sizing: border-box;
+      z-index: 2; letter-spacing: -1px; user-select: none; outline: none; }
 
       body {
         position: relative;
@@ -51,47 +50,20 @@
       }
 
       footer {
+        display: flex;
         position: absolute;
         bottom: 60px;
-        right: 70px;
-      }
-
-      .home-title {
-        margin-top: -450px;
-      }
-
-      .home-title span{
-        position: relative;
-        overflow: hidden;
-        display: block;
-        line-height: 1.2;
-      }
-
-      .home-title span::after{
-        content: '';
-        position: absolute;
-        top: 0; right: 0;
-        width: 100%; height: 100%;
-        background: #38393B;
-        animation: a-ltr-after 2s cubic-bezier(.77,0,.18,1) forwards;
-        transform: translateX(-101%);
-      }
-
-      .home-title span::before{
-        content: '';
-        position: absolute;
-        top: 0; right: 0;
-        width: 100%; height: 100%;
-        background: #292A2D;
-        animation: a-ltr-before 2s cubic-bezier(.77,0,.18,1) forwards;
-        transform: translateX(0);
+        left: 50%;
+        transform: translateX(-50%);
       }
 
       #peacock {
-        color: #FFD563;
+        color: white;
         font-weight: bold;
-        font-size: 100px;
-        animation: peacock-shrink 2.5s forwards;
+        font-size: 50px;
+
+        position: absolute;
+        top: 10px;
       }
 
       .icon {
@@ -101,21 +73,29 @@
         background-repeat: no-repeat !important;
         background-size: contain !important;
         filter: contrast(4) invert(1);
-        opacity: 0.75;
       }
 
       .icon-container {
         background: transparent;
         border: none;
-
-        margin-left: 10px;
-        padding: 5px 5px 2px 5px;
         border-radius: 5px;
+
         cursor: pointer;
+
+        display: flex;
+        justify-content: center;
+        align-items: center;
+
+        padding: 8px;
+        margin-left: 10px;
+
+        opacity: 0.9;
       }
 
       .icon-container:hover {
-        background: var(--background-soft);
+        backdrop-filter: blur(3px);
+        background: rgba(0,0,0,0.1);
+        opacity: 1;
       }
 
       #grid {
@@ -123,23 +103,25 @@
         flex-direction: row;
 
         position: absolute;
-        top: 50%;
-        left: 50%;
-        margin-left: -700px;
-        width: 1376px;
-        height: 228px;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        margin: auto;
 
-        animation: grid-center 2.5s forwards;
+        width: 90%;
+        max-width: 1300px;
+        height: 230px;
       }
 
       .item {
         flex-grow: 1;
-        background: var(--background-firm);
+        background: var(--background-soft);
         margin-left: 20px;
         border-radius: 5px;
         transition: all 0.1s;
 
-        backdrop-filter: blur(2px);
+        backdrop-filter: blur(3px);
 
         display: flex;
         justify-content: center;
@@ -148,10 +130,11 @@
         cursor: pointer;
 
         position: relative;
+        border: 2px solid rgba(0,0,0,0.075);
       }
 
       .item:hover {
-        background: var(--background-hard);
+        background: var(--background-firm);
         margin-bottom: 5px;
         margin-top: -5px;
       }
@@ -253,26 +236,6 @@
       }
 
       aside button { color: black; padding: 5px 10px; border: none; border-radius: 5px; }
-
-      @keyframes a-ltr-after{
-        0% {transform: translateX(-100%)}
-        100% {transform: translateX(101%)}
-      }
-
-      @keyframes a-ltr-before{
-        0% {transform: translateX(0)}
-        100% {transform: translateX(200%)}
-      }
-
-      @keyframes peacock-shrink{
-        75% { font-size: 100px; margin-top: 0px; color: #FFD563; }
-        100%{ font-size: 50px; margin-top: -200px; color: var(--peacock-color); }
-      }
-
-      @keyframes grid-center{
-        75% { transform: translateY(0%); }
-        100%{ transform: translateY(-50%); }
-      }
     </style>
   </head>
   <body onload="startTime()">
@@ -280,9 +243,7 @@
     <p id="time"></p>
 
     <header>
-      <h1 class="home-title">
-        <span id="peacock">Peacock</span>
-      </h1>
+      <h1 id="peacock">Peacock</h1>
     </header>
 
     <div id="grid">
@@ -313,14 +274,14 @@
     </aside>
 
     <footer>
-      <button id="tune-btn" class="icon-container">
-        <i class="material-icons-new round-tune icon"></i>
+      <button id="palette-btn" class="icon-container">
+        <i class="material-icons-new outline-palette icon"></i>
       </button>
       <button id="bookmarks-btn" class="icon-container">
-        <i class="material-icons-new round-bookmarks icon"></i>
+        <i class="material-icons-new outline-bookmarks icon"></i>
       </button>
       <button id="settings-btn" class="icon-container">
-        <i class="material-icons-new round-settings icon"></i>
+        <i class="material-icons-new outline-settings icon"></i>
       </button>
     </footer>
   </body>
@@ -440,13 +401,11 @@
           $('html')[0].style.setProperty("--background-soft", "rgba(0,0,0,0.25)");
           $('html')[0].style.setProperty("--background-firm", "rgba(0,0,0,0.35)");
           $('html')[0].style.setProperty("--background-hard", "rgba(0,0,0,0.5)");
-
-          $('html')[0].style.setProperty("--peacock-color", "white");
         });
       }
     }
 
-    $('#tune-btn').click(async e => { $('aside').toggle() });
+    $('#palette-btn').click(async e => { $('aside').toggle() });
     $('#bookmarks-btn').click(async e => { location.href = 'peacock://bookmarks'; });
     $('#settings-btn').click(async e => { location.href = 'peacock://settings'; });
 

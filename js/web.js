@@ -7,6 +7,8 @@ let { remote } = require('electron');
 function webContents(webview) { return remote.webContents.fromId(webview.getWebContentsId()); }
 exports.webContents = webContents;
 
+const topbarHeight = 70;
+
 function setURLBar(url) {
   let bar = $('#url');
   if(!firstTime) {
@@ -32,8 +34,19 @@ function setSearchIcon(url) {
   try {
     let protocol = (new URL(url)).protocol;
 
-    if(protocol == 'http:') $('#site-info > img').attr('src', 'images/alert.svg');
-    else if(protocol == 'https:') $('#site-info > img').attr('src', 'images/lock.svg');
+    if(protocol == 'http:') {
+      $('#site-info').removeClass('secure');
+      $('#site-info').addClass('insecure');
+      $('#site-info > img').attr('src', 'images/alert.svg');
+    }
+    else if(protocol == 'https:') {
+      $('#site-info').removeClass('insecure');
+      $('#site-info').addClass('secure');
+      $('#site-info > img').attr('src', 'images/lock.svg');
+    } else {
+      $('#site-info').removeClass('secure');
+      $('#site-info').removeClass('insecure');
+    }
   } catch (e) {}
 }
 exports.setSearchIcon = setSearchIcon;
@@ -69,7 +82,11 @@ exports.loadStop = function(view, extensions) {
   $('#refresh').children().first().attr('src', 'images/refresh.svg');
 
   view.webContents.executeJavaScript(`document.querySelector('link[rel="shortcut icon"]').href`)
-    .then(r => view.tab.setIcon(r));
+    .then(r => view.tab.setIcon(r))
+    .catch(e => {
+      let origin = new URL(view.webContents.getURL()).origin;
+      view.tab.setIcon(origin + '/favicon.ico');
+    });
 
   view.tab.setTitle(view.webContents.getTitle());
 
@@ -127,9 +144,9 @@ exports.enterFllscrn = function(view, screen) {
   view.setBounds({ x: 0, y: 0, width: screen.getPrimaryDisplay().size.width, height: screen.getPrimaryDisplay().size.height });
 }
 
-exports.leaveFllscrn = function(view, width, height) {
-  view.setBounds({ x: 0, y: 71, width: width, height: height - 80 });
-  view.setBounds({ x: 0, y: 71, width: width, height: height - 80 });
+exports.leaveFllscrn = function(view, bounds) {
+  view.setBounds({x:0, y:topbarHeight, width:bounds.width, height:bounds.height-topbarHeight});
+  view.setBounds({x:0, y:topbarHeight, width:bounds.width, height:bounds.height-topbarHeight});
 }
 
 exports.domReady = function (view, storage) {
@@ -142,21 +159,10 @@ exports.domReady = function (view, storage) {
     $('#bookmark').children().first().attr('src', result ? 'images/bookmark-saved.svg' : 'images/bookmark.svg');
   });
 
-  if(view.webContents.canGoBack()) {
-    if($('#back').is(':disabled')) {
-      $('#back').removeAttr('disabled');
-    }
-  } else {
-    $('#back').prop('disabled', true);
-  }
+  console.log('# disabling buttons');
 
-  if(view.webContents.canGoForward()) {
-    if($('#forward').is(':disabled')) {
-      $('#forward').removeAttr('disabled');
-    }
-  } else {
-    $('forward').prop('disabled', true);
-  }
+  if (view.webContents.canGoBack()) { $("#back").removeAttr("disabled") } else { $("#back").attr("disabled", true) }
+  if (view.webContents.canGoForward()){$("#forward").removeAttr("disabled")}else{$("#forward").attr("disabled", true)}
 
   if(window.theme == 'dark') {
     view.webContents.insertCSS(`
@@ -200,12 +206,13 @@ exports.titleUpdated = function (view, event, title) {
 }
 
 exports.changeTab = function (view, storage) {
+  setURLBar(view.webContents.getURL());
+  setSearchIcon(view.webContents.getURL());
+
   storage.isBookmarked(view.webContents.getURL()).then((result) => {
     $('#bookmark').css('visibility', 'visible');
     $('#bookmark').attr('src', result ? 'images/bookmark-saved.svg' : 'images/bookmark.svg');
   });
-
-  setURLBar(view.webContents.getURL());
 
   try {
     let protocol = (new URL(view.webContents)).protocol;
@@ -213,21 +220,8 @@ exports.changeTab = function (view, storage) {
   } catch (e) {}
 
   try {
-    if(view.webContents.canGoBack()) {
-      if($('#back').is(':disabled')) {
-        $('#back').removeAttr('disabled');
-      }
-    } else {
-      $('#back').prop('disabled', true);
-    }
-
-    if(view.webContents.canGoForward()) {
-      if($('#forward').is(':disabled')) {
-        $('#forward').removeAttr('disabled');
-      }
-    } else {
-      $('forward').prop('disabled', true);
-    }
+    if (view.webContents.canGoBack()) { $("#back").removeAttr("disabled") } else { $("#back").attr("disabled", true) }
+    if (view.webContents.canGoForward()){$("#forward").removeAttr("disabled")}else{$("#forward").attr("disabled", true)}
   } catch (e) {}
 }
 

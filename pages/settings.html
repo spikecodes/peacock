@@ -3,12 +3,12 @@
   <head>
     <meta charset="utf-8" />
     <title>Peacock Settings</title>
-    <link rel="shortcut icon" type="image/png" href="https://peacock.link/favicon.png">
-    <link href="https://peacock.link/fonts/circular_std.css" rel="stylesheet" type="text/css">
+    <link rel="shortcut icon" type="image/png" href="assets://favicon.png">
 
+    <link href="assets://fonts/circular_std.css" rel="stylesheet" type="text/css">
     <style>
-      * { font-family: 'Circular Std'; user-select: none; }
-      p { margin: 0px; }
+      * { font-family: 'Circular Std'; }
+      html, body { background: white; height: 100%; width: 100%; }
 
       #content {
         padding-top: 100px;
@@ -272,6 +272,7 @@
     <script src="https://code.jquery.com/jquery-3.4.1.min.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://raw.githack.com/Codiscite/peacock/master/css/global.css">
   </head>
   <body style="display: none;">
     <div id="content">
@@ -483,24 +484,24 @@
       if (window.theme != newTheme) {
         if (theme === "light") {
           window.theme = 'light';
-          if($('head link[href*="https://raw.githack.com/Codiscite/peacock/master/css/themes"]').length > 0){
-            $('head link[href*="https://raw.githack.com/Codiscite/peacock/master/css/themes"]').remove();
+          if($('head link[href*="assets://themes"]').length > 0){
+            $('head link[href*="assets://themes"]').remove();
           }
         } else if (theme === "default") {
           if (window.darkMode) {
             // If Dark Mode
             window.theme = 'dark';
-            $("head").append('<link rel="stylesheet" href="https://raw.githack.com/Codiscite/peacock/master/css/themes/dark.css">');
+            $("head").append('<link rel="stylesheet" href="assets://themes/dark.css">');
           } else {
             // If Light Mode
             window.theme = 'light';
-            if($('head link[href*="https://raw.githack.com/Codiscite/peacock/master/css/themes"]').length > 0){
-      				$('head link[href*="https://raw.githack.com/Codiscite/peacock/master/css/themes"]').remove();
+            if($('head link[href*="assets://themes"]').length > 0){
+      				$('head link[href*="assets://themes"]').remove();
       			}
           }
         } else {
           window.theme = 'dark';
-          $("head").append('<link rel="stylesheet" href="https://raw.githack.com/Codiscite/peacock/master/css/themes/' + theme + '.css">');
+          $("head").append('<link rel="stylesheet" href="assets://themes/' + theme + '.css">');
         }
         $('body').css('display', 'block');
       }
@@ -513,8 +514,7 @@
     }
 
     function resetProfile() {
-      let blockstack = `https://res.cloudinary.com/practicaldev/image/fetch/s--M-FjwJXs--/c_fill,f_auto,fl_progressive,h_320,q_auto,
-        w_320/https://dev-to-uploads.s3.amazonaws.com/uploads/organization/profile_image/435/dac160a8-a926-4eef-b1e4-884d5e3c1c95.png`;
+      let blockstack = `https://dev-to-uploads.s3.amazonaws.com/uploads/organization/profile_image/435/dac160a8-a926-4eef-b1e4-884d5e3c1c95.png`;
 
       $("#profile").attr("src", blockstack);
       $("#name").text("Blockstack");

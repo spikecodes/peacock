@@ -42,6 +42,11 @@ async function createWindow() {
 		icon: join(__dirname, 'images/peacock.png')
 	});
 
+	mainWindow.webContents.session.protocol.registerFileProtocol('assets', (req, cb) => {
+    var url = req.url.replace(new URL(req.url).protocol, '');
+    cb({ path: join(__dirname, 'css/', url) });
+  }, (error) => {});
+
 	//mainWindow.openDevTools({ mode: 'detach' });
 
 	// and load the html of the app.

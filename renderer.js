@@ -16,8 +16,6 @@ const { join, normalize } = require("path");
 
 const { ElectronBlocker } = require("@cliqz/adblocker-electron");
 
-const { writeFile } = require("fs");
-
 const mail = require("./js/mail.js");
 const tabs = require("./js/tabs.js");
 const blockchain = require("./js/blockchain.js");
@@ -42,7 +40,7 @@ if (!store.get("settings")) {
     theme: "Default",
     save_location: "Downloads",
     storage: "Locally",
-    newTab: { backgroundTheme: "nature", items: ["", "", "", "", ""] },
+    newTab: { backgroundTheme: "peacock", items: ["", "", "", "", ""] },
     mail: { address: "", ids: [] },
     rich_presence: "Enabled"
   };
@@ -95,7 +93,7 @@ if (store.get("settings.rich_presence") == "Enabled") {
       state: state,
       startTimestamp,
 
-      largeImageKey: "peacockbg_light",
+      largeImageKey: "tom",
       largeImageText: `Peacock Browser v` + version,
       instance: false
     });
@@ -284,7 +282,7 @@ ipcMain.on(
 );
 
 ipcMain.on("getThemes", async e =>
-  require("fs").readdir("css/themes", (err, files) => {
+  require("fs").readdir(join(__dirname, "css/themes"), (err, files) => {
     let result = [];
     files.forEach(file => {
       if (file.endsWith(".css")) {
@@ -347,32 +345,14 @@ async function keyboardShortcut(shortcut) {
     case "backPage":
       tabs.current().webContents.goBack();
 
-      if (tabs.current().webContents.canGoBack()) {
-        $("#back").removeClass("disabled");
-      } else {
-        $("#back").addClass("disabled");
-      }
-
-      if (tabs.current().webContents.canGoForward()) {
-        $("#forward").removeClass("disabled");
-      } else {
-        $("#forward").addClass("disabled");
-      }
+      if (tabs.current().webContents.canGoBack()) { $("#back").removeAttr("disabled") } else { $("#back").attr("disabled", true) }
+      if (tabs.current().webContents.canGoForward()){$("#forward").removeAttr("disabled")}else{$("#forward").attr("disabled", true)}
       break;
     case "forwardPage":
       tabs.current().webContents.goForward();
 
-      if (tabs.current().webContents.canGoBack()) {
-        $("#back").removeClass("disabled");
-      } else {
-        $("#back").addClass("disabled");
-      }
-
-      if (tabs.current().webContents.canGoForward()) {
-        $("#forward").removeClass("disabled");
-      } else {
-        $("#forward").addClass("disabled");
-      }
+      if (tabs.current().webContents.canGoBack()) { $("#back").removeAttr("disabled") } else { $("#back").attr("disabled", true) }
+      if (tabs.current().webContents.canGoForward()){$("#forward").removeAttr("disabled")}else{$("#forward").attr("disabled", true)}
       break;
     case "savePage":
       tabs.savePage(tabs.current().webContents);
@@ -986,6 +966,8 @@ async function showCertificateDialog(certificate) {
 // HTML ELEMENTS
 
 $("#shield").click(toggleAdblock);
+
+$("#home").click(async e => tabs.current().webContents.loadURL('peacock://newtab'));
 $("#back").click(async e => keyboardShortcut("backPage"));
 $("#forward").click(async e => keyboardShortcut("forwardPage"));
 $("#refresh").mousedown(async e => {
@@ -1041,15 +1023,21 @@ $("#url").blur(async e => {
   }, 75);
 });
 $("#bookmark").click(async e => {
+  console.log('bookmarking...');
+
   let url = tabs.current().webContents.getURL();
   let title = tabs.current().webContents.getTitle();
 
+  console.log('checking if is book of the marked');
   storage.isBookmarked(url).then(isBookmarked => {
+    console.log('is bookmarked?', isBookmarked ? 'yes' : 'no');
     if (isBookmarked) {
-      $("#bookmark").attr("src", "images/bookmark.svg");
-      storage.removeBookmark(url);
+      $("#bookmark").children().first().attr("src", "images/bookmark.svg");
+      console.log('removing bookmark');
+      storage.removeBookmark(isBookmarked.id);
     } else {
-      $("#bookmark").attr("src", "images/bookmark-saved.svg");
+      $("#bookmark").children().first().attr("src", "images/bookmark-saved.svg");
+      console.log('adding bookmark');
       storage.addBookmark(url, title);
     }
   });
@@ -1060,16 +1048,6 @@ $("#site-info").click(async e => toggleSiteInfo());
 $("#info-header h4").click(async e => {
   toggleSiteInfo();
   tabs.newView("https://support.google.com/chrome/answer/95617");
-});
-
-$("#bookmark").on("mouseover mouseout", async e => {
-  $(this).toggleClass("star-hover", e.type === "mouseover");
-  e.stopPropagation();
-});
-
-$("#omnibox > #url").on("mouseover mouseout", async e => {
-  $(this).toggleClass("url-hover", e.type === "mouseover");
-  e.stopPropagation();
 });
 
 $("#find a").click(async e => $(this).toggleClass("down"));

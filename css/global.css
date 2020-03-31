@@ -18,14 +18,14 @@
 
   --yellow: #FFD563;
 
-  --navbar-color: white;
+  --navbar-color: #f7f7f7;
 
   --lighter-1: rgba(255,255,255,0.35);
 
   --darker-1: rgba(0,0,0,0.05);
   --darker-2: rgba(0,0,0,0.1);
 
-  --outline: rgba(0,0,0,0.1);
+  --outline: rgba(0,0,0,0.05);
 
   /* DARKMODE */
 
@@ -39,7 +39,10 @@
 
   /* ANIMATIONS */
 
-  --transition: 0.05s all;
+  --transition: 0.1s all;
+
+  --spinner-offset: 187;
+  --spinner-duration: 1.4s;
 }
 
 /* APPLY TO EVERYTHING */
