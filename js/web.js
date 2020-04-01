@@ -81,11 +81,15 @@ exports.loadStart = function(view, extensions) {
 exports.loadStop = function(view, extensions) {
   $('#refresh').children().first().attr('src', 'images/refresh.svg');
 
-  view.webContents.executeJavaScript(`document.querySelector('link[rel="shortcut icon"]').href`)
-    .then(r => view.tab.setIcon(r))
-    .catch(e => {
-      let origin = new URL(view.webContents.getURL()).origin;
-      view.tab.setIcon(origin + '/favicon.ico');
+  view.webContents.executeJavaScript(`document.querySelectorAll('link[rel="shortcut icon"]').length`)
+    .then(r => {
+      if(r > 0) {
+        view.webContents.executeJavaScript(`document.querySelector('link[rel="shortcut icon"]').href`)
+          .then(u => view.tab.setIcon(r));
+      } else {
+        let origin = new URL(view.webContents.getURL()).origin;
+        view.tab.setIcon(origin + '/favicon.ico');
+      }
     });
 
   view.tab.setTitle(view.webContents.getTitle());
