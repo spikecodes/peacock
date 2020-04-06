@@ -61,6 +61,8 @@
 #nav-center {
   background: white;
   min-width: 75%;
+  flex-grow: 1;
+  margin: 0px 5px;
 
   display: flex;
   border-radius: var(--round-corners);
@@ -71,6 +73,7 @@
 #nav-center > button {
   padding: 10px;
   transition: var(--transition);
+  border-radius: var(--round-corners);
 }
 
 #nav-center > button:hover {
@@ -88,7 +91,7 @@
   background: transparent;
   border: none;
 
-  padding: 0px 5px;
+  padding: 0px 10px;
 }
 
 .secure {

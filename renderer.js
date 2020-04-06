@@ -8,7 +8,8 @@ const {
   dialog,
   nativeTheme,
   ipcMain,
-  app
+  app,
+  Menu
 } = remote;
 require("electron").ipcMain = ipcMain;
 
@@ -16,16 +17,14 @@ const { join, normalize } = require("path");
 
 const { ElectronBlocker } = require("@cliqz/adblocker-electron");
 
-const mail = require("./js/mail.js");
 const tabs = require("./js/tabs.js");
-const blockchain = require("./js/blockchain.js");
 const storage = require("./js/store.js");
 
 const shortcuts = require("./js/shortcuts.js");
 
-window.tabs = tabs;
+const { autoUpdater } = require("electron-updater");
 
-var blockstackTab;
+const web = require("./js/web.js");
 
 const web = require("./js/web.js");
 
@@ -40,8 +39,7 @@ if (!store.get("settings")) {
     theme: "Default",
     save_location: "Downloads",
     storage: "Locally",
-    newTab: { backgroundTheme: "peacock", items: ["", "", "", "", ""] },
-    mail: { address: "", ids: [] },
+    newTab: { backgroundTheme: "https://source.unsplash.com/featured/1920x1080/?peacock", items: ["", "", "", "", ""] },
     rich_presence: "Enabled"
   };
   store.set("settings", data);
@@ -54,7 +52,7 @@ store.set("searchEngines", [
   { name: "Yahoo", url: "https://search.yahoo.com/search?p=" }
 ]);
 
-if (!store.get("blocked")) store.set("blocked", []);
+if (!store.get("blocked")) store.set("blocked", 0);
 if (!store.get("bookmarks")) store.set("bookmarks", []);
 if (!store.get("flags")) store.set("flags", []);
 if (!store.get("history")) store.set("history", []);
@@ -62,7 +60,6 @@ if (!store.get("permissions")) store.set("permissions", {});
 
 web.init(document);
 storage.init(store);
-mail.init(store);
 shortcuts.init(keyboardShortcut, n => { if (tabs.get(n-1)) tabs.activate(tabs.get(n-1)) });
 
 console.colorLog = (msg, color) => { console.log("%c" + msg, "color:" + color + ";font-weight:bold;") }
@@ -143,17 +140,13 @@ ipcMain.on("flags.js", async function(e, action, data) {
   }
 });
 
-ipcMain.on("getBookmarks", async e =>
-  storage.getBookmarks().then(r => (e.returnValue = r))
-);
+ipcMain.on("getBookmarks", async e => { e.returnValue = (await storage.getBookmarks()) });
 ipcMain.on("removeBookmark", async (e, id) => {
   storage.removeBookmark(id);
   console.log("b", id);
 });
 
-ipcMain.on("getHistory", async e =>
-  storage.getHistory().then(r => (e.returnValue = r))
-);
+ipcMain.on("getHistory", async e => { e.returnValue = (await storage.getHistory()) });
 ipcMain.on("clearHistory", async e => storage.clearHistory());
 ipcMain.on("removeHistoryItem", async (e, id) => storage.removeHistoryItem(id));
 
@@ -172,32 +165,6 @@ ipcMain.on("newTab", async function(e, action, extra) {
     e.returnValue = store.get("settings.newTab.backgroundTheme");
   } else if (action == "setBackgroundTheme") {
     store.set("settings.newTab.backgroundTheme", extra);
-  }
-});
-
-ipcMain.on("mail", async function(e, action, data) {
-  switch (action) {
-    case "new":
-      mail.new(
-        data.alias,
-        result => {
-          e.returnValue = result;
-        },
-        data.name
-      );
-      //e.returnValue = 'spikey';
-      break;
-    case "aliases":
-      mail.list().then(r => { e.returnValue = r; console.log(r) });
-      break;
-    case "setAddress":
-      store.set("settings.mail.address", data);
-      break;
-    case "getAddress":
-      e.returnValue = store.get("settings.mail.address");
-      break;
-    default:
-      break;
   }
 });
 
@@ -250,26 +217,6 @@ ipcMain.on("siteInfo", async (e, action) => {
 });
 
 ipcMain.on("shield-toggle", async (e, val) => changeAdBlock(val));
-
-ipcMain.on(
-  "signIntoBlockstack",
-  (e, a) => (blockstackTab = tabs.newView(blockchain.signIntoBlockstack()))
-);
-
-ipcMain.on("blockchain", async (e, a) => {
-  switch (a) {
-    case "isUserSignedIn":
-      e.returnValue = blockchain.getUserSession().isUserSignedIn();
-      break;
-    case "signOut":
-      blockchain.getUserSession().signUserOut();
-      break;
-    case "profile":
-      e.returnValue = blockchain.getUserSession().loadUserData().profile;
-      break;
-    default:
-  }
-});
 
 ipcMain.on(
   "getBlockCount",
@@ -412,13 +359,7 @@ async function enableAdBlocking(session) {
   ElectronBlocker.fromPrebuiltAdsAndTracking(fetch).then(blocker => {
     blocker.enableBlockingInSession(session);
     blocker.on("request-blocked", async ad => {
-      let obj = store.get("blocked");
-      obj.push({
-        type: ad.type,
-        url: ad.url,
-        sourceHostname: ad.sourceHostname
-      });
-      store.set("blocked", obj);
+      store.set("blocked", store.get("blocked") + 1);
 
       if (!session.ads_blocked) session.ads_blocked = 0;
       session.ads_blocked++;
@@ -963,6 +904,21 @@ async function showCertificateDialog(certificate) {
   );
 }
 
+// MENU
+
+let menuTemp = [
+  { label:'New Tab', click: async() => keyboardShortcut('newTab') },
+  { label:'New window', click: async() => keyboardShortcut('newTab') },
+  { type: 'separator' },
+  { label:'History', click: async() => tabs.newView('peacock://history') },
+  { label:'Bookmarks', click: async() => tabs.newView('peacock://bookmarks') },
+  { type: 'separator' },
+  { label:'Exit', click: async() => app.exit() },
+  { label:'About Peacock', click: async() => tabs.newView('peacock://versions') },
+];
+
+let menu = Menu.buildFromTemplate(menuTemp);
+
 // HTML ELEMENTS
 
 $("#shield").click(toggleAdblock);
@@ -992,7 +948,10 @@ $("#refresh").mousedown(async e => {
   return true; // to allow the browser to know that we handled it.
 });
 
-$("#menu").click(async e => tabs.newView('peacock://settings'));
+$("#menu").click(async e => menu.popup({
+  x: $('#menu').offset().left,
+  y: $('#menu').offset().top + $('#menu').height()
+}));
 
 $("#url").keypress(async e => {
   if (e.which == 13 || e.which == 10) {
@@ -1043,7 +1002,9 @@ $("#bookmark").click(async e => {
   });
 });
 
-$("#site-info").click(async e => toggleSiteInfo());
+$("#site-info").click(async e => {
+  if(!$("#site-info").children().first().attr('src').includes('search')) toggleSiteInfo();
+});
 
 $("#info-header h4").click(async e => {
   toggleSiteInfo();
@@ -1058,51 +1019,7 @@ getSearchEngine(async e => {
   $("#url").attr("data-placeholder", `Search ${e.name} or type a URL`);
 });
 
-var options = {
-  url: "https://api.github.com/repos/Codiscite/peacock/releases",
-  headers: { "User-Agent": userAgent }
-};
-require("request").get(
-  options,
-  async function(error, response, body) {
-    if (error) console.error(error);
-
-    let newestVersion = JSON.parse(body)[0]
-      .tag_name.split(".")
-      .join("")
-      .replace("v", "")
-      .substr(0, 3);
-    let currentVersion = version
-      .split(".")
-      .join("")
-      .replace("v", "")
-      .substr(0, 3);
-    if (Number(newestVersion) > Number(currentVersion)) {
-      const { dialog } = remote;
-
-      const optionso = {
-        type: "question",
-        buttons: ["Cancel", "Update", "No, thanks"],
-        defaultId: 2,
-        title: "Peacock",
-        message: "Update available!",
-        detail: JSON.parse(body)[0].tag_name + " > " + version,
-        checkboxLabel: "Do Not Show Again",
-        checkboxChecked: false
-      };
-
-      dialog.showMessageBox(null, optionso).then(data => {
-        if (data.response === 1) {
-          tabs.newView("https://github.com/Codiscite/peacock/releases/latest");
-        }
-        console.log(data.checkboxChecked);
-      });
-    } else {
-      console.log(`Using newest version! v${version}`);
-    }
-  },
-  "jsonp"
-);
+autoUpdater.checkForUpdatesAndNotify();
 
 initCertDialog();
 initAlert();
@@ -1114,30 +1031,6 @@ remote.getCurrentWindow().on("closed", async e => {
     .getCurrentWindow()
     .getChildWindows()
     .forEach(win => win.close());
-});
-
-const server = require("child_process").fork(__dirname + "/js/server.js");
-
-// QUIT SERVER IF APP QUIT:
-app.on("will-quit", async () => {
-  server.send("quit");
-});
-
-server.on("message", async m => {
-  let { decodeToken } = require("blockstack");
-  const token = decodeToken(m.authResponse);
-
-  console.log("blockstack", "signed in");
-  if (blockchain.getUserSession().isUserSignedIn()) {
-    if (!blockstackTab) return;
-    tabs.close(blockstackTab);
-    blockstackTab = null;
-  } else {
-    blockchain.getUserSession().handlePendingSignIn(m.authResponse);
-    if (!blockstackTab) return;
-    tabs.close(blockstackTab);
-    blockstackTab = null;
-  }
 });
 
 tabs.newView(remote.process.argv[2] && remote.process.argv[2].startsWith('http')

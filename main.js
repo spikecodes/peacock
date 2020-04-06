@@ -20,6 +20,7 @@ async function sendToRenderer(channel, message) {
 	catch (e) { console.log(e); }
 }
 
+
 async function createWindow() {
 	process.env['ELECTRON_DISABLE_SECURITY_WARNINGS'] = 'true';
 
@@ -41,11 +42,6 @@ async function createWindow() {
 		height: 720,
 		icon: join(__dirname, 'images/peacock.png')
 	});
-
-	mainWindow.webContents.session.protocol.registerFileProtocol('assets', (req, cb) => {
-    var url = req.url.replace(new URL(req.url).protocol, '');
-    cb({ path: join(__dirname, 'css/', url) });
-  }, (error) => {});
 
 	//mainWindow.openDevTools({ mode: 'detach' });
 

@@ -5,7 +5,8 @@
     <title>History</title>
     <link rel="shortcut icon" type="image/png" href="assets://favicon.png">
 
-    <link href="assets://fonts/circular_std.css" rel="stylesheet" type="text/css">
+    <<link href="assets://fonts/circular_std.css" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" href="assets://global.css">
 
     <style id="global">
       *  { font-family: 'Circular Std'; user-select: none; }
@@ -57,6 +58,7 @@
       }
 
       ul {
+        margin-top: 20px;
         padding: 5px 0px;
         border-radius: 5px;
         border: 1px solid;
@@ -69,10 +71,9 @@
         opacity: 0.85;
       }
 
-      .selected { background: #8AB4F8; }
+      .selected { background: var(--yellow); }
       .selected p { color: black; }
       .selected svg { filter: invert(0); }
-      .selected svg path { color: black; }
       .selected #stamp { display: block; }
     </style>
 

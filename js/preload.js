@@ -2,6 +2,21 @@ const {	ipcRenderer, dialog, BrowserWindow } = require('electron');
 const {	join } = require('path');
 const { format } = require('url');
 
+async function modifyDefault (defaultVar, name, value) {
+	if (Object.defineProperty) {
+	  Object.defineProperty(defaultVar, name, {
+			get: () => { return value }
+		});
+	} else if (Object.prototype.__defineGetter__) {
+	  defaultVar.__defineGetter__(name, () => { return value });
+	}
+}
+
+modifyDefault(navigator, 'doNotTrack', '1');
+modifyDefault(navigator, 'hardwareConcurrency', Math.round(Math.random()) == 0 ? 4 : 8);
+modifyDefault(screen, 'colorDepth', Math.round(Math.random()) == 0 ? 24 : 32);
+navigator.getBattery = () => {};
+
 global.alert = window.alert = (message) => {
 	let url = (window.location.href.startsWith('peacock')) ? 'Peacock' : window.location.href;
 
@@ -31,42 +46,6 @@ global.prompt = window.prompt = (message) => {
 		url: url
 	});
 }
-
-window.addEventListener('DOMContentLoaded', (event) => {
-	setTimeout(function () {
-		document.querySelectorAll('input[type="email"]').forEach((box, i) => {
-			if(box.getAttribute('list')) return;
-
-			let list = document.createElement('datalist');
-			list.id = 'peacock-list';
-			list.innerHTML = '<option value="Create Mail Alias">';
-			document.body.appendChild(list);
-
-			box.setAttribute('list', 'peacock-list');
-
-			box.addEventListener('input', (event) => {
-				if(event.target.value == 'Create Mail Alias') {
-					event.target.value = 'Creating Mail Alias...';
-
-					let r = Math.random().toString(36).substring(7);
-
-					let route = ipcRenderer.sendSync('mail', 'new', { alias: r, name: document.title });
-					if(!route.message.startsWith('error')) {
-						console.log(route.route);
-						event.target.value = r + '@mail.peacock.link';
-					} else {
-						ipcRenderer.send('alert', {
-							message: route.message,
-							type: 'alert',
-							url: 'Peacock'
-						});
-						event.target.value = '';
-					}
-				}
-			});
-		});
-	}, 1000);
-});
 
 let esc_pointer = event => { if (event.keyCode === 27) { document.exitPointerLock(); } };
 let esc_fullscreen = event => { if (event.keyCode === 27) { document.exitFullscreen(); } };

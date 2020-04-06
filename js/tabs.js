@@ -6,8 +6,6 @@ const store = require('./store');
 const { BrowserView, BrowserWindow, ipcMain } = remote;
 const { join } = require('path');
 
-const privacy = require('electron-privacy');
-
 const win = remote.getCurrentWindow();
 
 const topbarHeight = 70;
@@ -271,9 +269,6 @@ exports.newView = function (url='peacock://newtab', active=true) {
   });
   let tabSession = view.webContents.session;
 
-  privacy.enableFingerprintProtection(view.webContents, {userAgentRandomization: false});
-  privacy.enableDoNotTrack(view.webContents.session);
-
   view.webContents.setUserAgent(userAgent);
 
   view.setBounds({x:0, y:topbarHeight, width:win.getContentBounds().width, height:win.getContentBounds().height - topbarHeight });
@@ -284,13 +279,24 @@ exports.newView = function (url='peacock://newtab', active=true) {
 
   tabSession.webRequest.onBeforeSendHeaders(async (details, callback) => {
     let headers = details.requestHeaders;
+    headers['Referer'] = '';
     headers['DNT'] = '1';
     headers['Accept-Language'] = 'en-US,en;q=0.9';
     headers['User-Agent'] = userAgent;
     callback({ cancel: false, requestHeaders: headers });
   });
 
-  privacy.blockThirdPartyCookies(view.webContents);
+  tabSession.cookies.on('changed', async (e, cookie, cause, rem) => {
+    if(!rem) {
+      let split = cookie.domain.split('.');
+      let domain = split[split.length - 2] + '.' + split[split.length - 1];
+      split = (new URL(view.webContents.getURL())).host.split('.');
+      let host = split[split.length - 2] + '.' + split[split.length - 1];
+      if(domain != host) {
+        tabSession.cookies.remove(view.webContents.getURL(), cookie.name);
+      }
+    }
+  });
 
   tabSession.protocol.registerHttpProtocol('ipfs', (req, cb) => {
     var hash = req.url.replace('ipfs://', '');
@@ -299,7 +305,12 @@ exports.newView = function (url='peacock://newtab', active=true) {
 
   tabSession.protocol.registerFileProtocol('assets', (req, cb) => {
     var url = req.url.replace(new URL(req.url).protocol, '');
-    cb({ path: join(__dirname, '../css/', url) });
+
+    if(url.includes('..')) {
+      cb({ path: join(__dirname, '../css/favicon.png') });
+    } else {
+      cb({ path: join(__dirname, '../css/', url) });
+    }
   }, (error) => {});
 
   tabSession.protocol.registerFileProtocol('peacock', (req, cb) => {

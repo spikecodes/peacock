@@ -1,7 +1,7 @@
 {
 	"name": "peacock",
 	"productName": "Peacock",
-	"version": "2.3.3",
+	"version": "2.3.4",
 	"description": "Open source privacy-first browser that hosts your data on the blockchain.",
 	"main": "main.js",
 	"repository": {
@@ -18,29 +18,47 @@
 	],
 	"build": {
 		"appId": "com.codiscite.peacock",
+		"productName": "Peacock",
 		"win": {
-			"target": "nsis",
-			"icon": "build/icon.png"
+			"target": [
+				"nsis",
+				"zip"
+			],
+			"icon": "images/peacock.ico"
 		},
 		"mac": {
 			"category": "books",
 			"target": [
 				"dmg"
 			],
-			"icon": "build/icon.png"
+			"icon": "images/peacock.png"
 		},
 		"linux": {
 			"target": [
 				"AppImage",
 				"deb"
 			],
-			"icon": "build/icon.png"
+			"icon": "images/peacock.png"
 		},
 		"nsis": {
 			"oneClick": "false",
 			"allowToChangeInstallationDirectory": "true",
 			"perMachine": "true"
-		}
+		},
+		"fileAssociations": [
+			{
+				"name": "Peacock HTML Document",
+				"description": "Peacock",
+				"ext": "html",
+				"icon": "../images/peacock.ico"
+			},
+			{
+				"name": "Peacock WebP Image",
+				"description": "Peacock WebP Image",
+				"ext": "webp",
+				"icon": "../images/peacock.ico"
+			}
+		]
 	},
 	"scripts": {
 		"start": "electron ."
@@ -48,22 +66,22 @@
 	"author": "Spike Raxstone <spike@peacock.link>",
 	"license": "MIT",
 	"devDependencies": {
-		"electron": "^9.0.0-beta.12",
-		"electron-builder": "^22.4.1"
+		"electron": "^9.0.0-beta.13",
+		"electron-builder": "^22.3.1"
 	},
 	"dependencies": {
-		"@cliqz/adblocker-electron": "^1.12.3",
+		"@cliqz/adblocker-electron": "^1.13.1",
 		"blockstack": "^21.0.0",
 		"child_process": "^1.0.2",
 		"cors": "^2.8.5",
 		"cross-fetch": "^3.0.4",
 		"discord-rpc": "^3.1.0",
 		"electron-context-menu": "^0.16.0",
-		"electron-privacy": "^1.0.4",
 		"electron-store": "^5.1.1",
+		"electron-updater": "^4.2.5",
 		"express": "^4.17.1",
 		"jquery": "^3.4.1",
 		"sortablejs": "^1.10.2",
-		"uuid": "^7.0.2"
+		"uuid": "^7.0.3"
 	}
 }

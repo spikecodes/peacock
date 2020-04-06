@@ -46,6 +46,7 @@ function setSearchIcon(url) {
     } else {
       $('#site-info').removeClass('secure');
       $('#site-info').removeClass('insecure');
+      $('#site-info > img').attr('src', 'images/search.svg');
     }
   } catch (e) {}
 }
@@ -162,8 +163,6 @@ exports.domReady = function (view, storage) {
     $('#bookmark').css('visibility', 'visible');
     $('#bookmark').children().first().attr('src', result ? 'images/bookmark-saved.svg' : 'images/bookmark.svg');
   });
-
-  console.log('# disabling buttons');
 
   if (view.webContents.canGoBack()) { $("#back").removeAttr("disabled") } else { $("#back").attr("disabled", true) }
   if (view.webContents.canGoForward()){$("#forward").removeAttr("disabled")}else{$("#forward").attr("disabled", true)}

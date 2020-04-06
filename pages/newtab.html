@@ -8,6 +8,7 @@
     <link rel="shortcut icon" type="image/png" href="assets://favicon.png">
 
     <link href="assets://fonts/circular_std.css" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" href="assets://global.css">
 
     <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
     <style>
@@ -19,7 +20,7 @@
       }
 
       * { font-family: 'Circular Std' !important; box-sizing: border-box;
-      z-index: 2; letter-spacing: -1px; user-select: none; outline: none; }
+      z-index: 2; user-select: none; outline: none; }
 
       body {
         position: relative;
@@ -55,6 +56,16 @@
         bottom: 60px;
         left: 50%;
         transform: translateX(-50%);
+        align-items: center;
+      }
+
+      #separator {
+        width: 1px;
+        background: white;
+        margin-left: 15px;
+        margin-right: 10px;
+        height: 25px;
+        opacity: 0.75;
       }
 
       #peacock {
@@ -63,7 +74,7 @@
         font-size: 50px;
 
         position: absolute;
-        top: 10px;
+        top: 35px;
       }
 
       .icon {
@@ -87,7 +98,7 @@
         align-items: center;
 
         padding: 8px;
-        margin-left: 10px;
+        margin-left: 5px;
 
         opacity: 0.9;
       }
@@ -119,7 +130,7 @@
         background: var(--background-soft);
         margin-left: 20px;
         border-radius: 5px;
-        transition: all 0.1s;
+        transition: var(--transition);
 
         backdrop-filter: blur(3px);
 
@@ -135,8 +146,7 @@
 
       .item:hover {
         background: var(--background-firm);
-        margin-bottom: 5px;
-        margin-top: -5px;
+        transform: translateY(-5px);
       }
 
       .item:hover > .remove-item {
@@ -168,7 +178,7 @@
 
       .remove-item {
         opacity: 0;
-        transition: all 0.1s;
+        transition: var(--transition);
 
         border: none;
         background: none;
@@ -215,27 +225,97 @@
         transform: scale(1.2);
       }
 
-      aside {
-        display: none;
+      /* ASIDE */
 
+      aside {
         position: absolute;
         bottom: 50px;
         left: 50px;
-        padding: 20px;
-        background: rgba(0,0,0,0.75);
-        border-radius: 5px;
+
+        width: fit-content;
+        min-width: 150px;
+        height: 100px;
+
+        background: var(--dark-1);
+        border-radius: var(--round-corners);
+
+        flex-direction: column;
       }
 
-      aside > * { font-size: 20px; color: white; }
-      aside label { margin-right: 10px; }
-      aside input {
-        border-radius: 5px;
+      aside button {
         border: none;
-        padding: 5px;
-        background: rgba(255,255,255,0.15);
+        background: none;
       }
 
-      aside button { color: black; padding: 5px 10px; border: none; border-radius: 5px; }
+      /* TOP */
+
+      aside #top { width: 100%; display: flex; height: 30px; }
+      aside #top button { width: 50%; height: 30px; }
+
+      aside #top .tab { outline: none; }
+
+      aside #top .tab:not(.selected) {
+        color: white;
+        background: var(--dark-2);
+        transition: var(--transition);
+      }
+
+      aside #top .tab:not(.selected):hover {
+        background: #484848;
+      }
+
+      aside #top .tab.selected {
+        background: var(--yellow);
+      }
+
+      /* BOTTOM */
+
+      aside #bottom {
+        height: 100%;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        padding: 0px 10px;
+      }
+
+      aside #bottom #save {
+        color: white;
+        background: var(--dark-2);
+        border-radius: var(--round-corners);
+        transition: var(--transition);
+
+        padding: 10px 15px;
+        height: 35px;
+      }
+
+      aside #bottom #save:hover {
+        background: #484848;
+      }
+
+      aside #bottom #theme {
+        display: flex;
+        flex-direction: column;
+
+        height: 35px;
+
+        margin-right: 10px;
+      }
+
+      aside #bottom #theme > * {
+        border: none;
+        background: var(--dark-2);
+        padding: 10px;
+        height: 100%;
+        color: white;
+        border-radius: var(--round-corners);
+      }
+
+      aside #bottom #theme * svg {
+        fill: white;
+        margin-top: -4px;
+      }
     </style>
   </head>
   <body onload="startTime()">
@@ -266,22 +346,32 @@
       </div>
     </div>
 
-    <aside>
-      <label>Background Theme:</label>
-      <input type="text" name="" value="">
-
-      <button type="button" name="button">Save</button>
+    <aside style="display: none;">
+      <div id="top">
+        <button class="tab selected">Unsplash</button>
+        <button class="tab">Image</button>
+      </div>
+      <div id="bottom">
+        <div id="theme">
+          <input placeholder="Theme (eg. nature)">
+        </div>
+        <button id="save">Save</button>
+      </div>
     </aside>
 
     <footer>
       <button id="palette-btn" class="icon-container">
         <i class="material-icons-new outline-palette icon"></i>
       </button>
+      <p id="separator"></p>
+      <button id="settings-btn" class="icon-container">
+        <i class="material-icons-new outline-settings icon"></i>
+      </button>
       <button id="bookmarks-btn" class="icon-container">
         <i class="material-icons-new outline-bookmarks icon"></i>
       </button>
-      <button id="settings-btn" class="icon-container">
-        <i class="material-icons-new outline-settings icon"></i>
+      <button id="history-btn" class="icon-container">
+        <i class="material-icons-new outline-history icon"></i>
       </button>
     </footer>
   </body>
@@ -405,25 +495,43 @@
       }
     }
 
-    $('#palette-btn').click(async e => { $('aside').toggle() });
-    $('#bookmarks-btn').click(async e => { location.href = 'peacock://bookmarks'; });
-    $('#settings-btn').click(async e => { location.href = 'peacock://settings'; });
+    $('#palette-btn').click(async e => { toggleAside() });
+    $('#bookmarks-btn').click(async e => { location.href = 'peacock://bookmarks' });
+    $('#settings-btn').click(async e => { location.href = 'peacock://settings' });
+    $('#history-btn').click(async e => { location.href = 'peacock://history' });
 
-    $('aside input').val(backgroundTheme);
-
-    $('aside button').click(async e => {
-      let val = $('aside input').val();
-
-      send('newTab', 'setBackgroundTheme', val);
-      backgroundTheme = val;
-      setBackground('https://source.unsplash.com/featured/1920x1080/?' + backgroundTheme);
-
-      $('aside').toggle();
+    $('aside #top .tab').click(async e => {
+      if(e.target.innerHTML == 'Image') {
+        $('aside #bottom #theme').html(`<input id="static" placeholder="Image URL (eg. png, jpg, gif)">`);
+      } else {
+        $('aside #bottom #theme').html(`<input id="unsplash" placeholder="Theme (eg. nature, peacock)">`);
+      }
+      $('.selected').removeClass('selected');
+      $(e.target).addClass('selected');
     });
+
+    $('aside #bottom #save').click(async e => {
+      if($('aside #bottom #theme input').val().length > 0) {
+        let val = $('aside #bottom #theme input').val();
+
+        if($('aside #bottom #theme input').attr('id') == 'static') backgroundTheme = val;
+        else backgroundTheme = 'https://source.unsplash.com/featured/1920x1080/?' + val;
+
+        send('newTab', 'setBackgroundTheme', backgroundTheme);
+        setBackground(backgroundTheme);
+
+        toggleAside();
+      }
+    });
+
+    async function toggleAside () {
+      if ($('aside').css('display') == 'none') $('aside').css('display', 'flex');
+      else if ($('aside').css('display') == 'flex') $('aside').css('display', 'none');
+    }
 
     try { send('newTab', 'focusSearchbar'); } catch (e) {}
 
-    setBackground('https://source.unsplash.com/featured/1920x1080/?' + backgroundTheme);
+    setBackground(backgroundTheme);
 
     listSites(sendSync('newTab', 'loadItems'));
   </script>

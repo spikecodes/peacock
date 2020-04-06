@@ -1,0 +1,49 @@
+Windows Registry Editor Version 5.00
+
+[HKEY_CURRENT_USER\SOFTWARE\RegisteredApplications] "Peacock"="Software\Clients\StartMenuInternet\Peacock\Capabilities"
+
+[HKEY_CURRENT_USER\SOFTWARE\Clients\StartMenuInternet\Peacock]
+@="Peacock"
+
+[HKEY_CURRENT_USER\SOFTWARE\Clients\StartMenuInternet\Peacock\Capabilities]
+"ApplicationDescription"="Peacock"
+"ApplicationIcon"="C:\\Program Files\\Peacock\\Peacock.exe,0"
+"ApplicationName"="Peacock"
+
+[HKEY_CURRENT_USER\SOFTWARE\Clients\StartMenuInternet\Peacock\Capabilities\FileAssociations]
+".htm"="PeacockHTML"
+".html"="PeacockHTML"
+
+[HKEY_CURRENT_USER\SOFTWARE\Clients\StartMenuInternet\Peacock\Capabilities\Startmenu]
+"StartMenuInternet"="Peacock"
+
+[HKEY_CURRENT_USER\SOFTWARE\Clients\StartMenuInternet\Peacock\Capabilities\URLAssociations]
+"http"="PeacockHTML"
+"https"="PeacockHTML"
+
+[HKEY_CURRENT_USER\SOFTWARE\Clients\StartMenuInternet\Peacock\DefaultIcon]
+@="C:\\Program Files\\Peacock\\Peacock.exe,0"
+
+[HKEY_CURRENT_USER\SOFTWARE\Clients\StartMenuInternet\Peacock\shell]
+[HKEY_CURRENT_USER\SOFTWARE\Clients\StartMenuInternet\Peacock\shell\open]
+[HKEY_CURRENT_USER\SOFTWARE\Clients\StartMenuInternet\Peacock\shell\open\command]
+@="\"C:\\Program Files\\Peacock\\Peacock.exe\""
+
+[HKEY_CURRENT_USER\SOFTWARE\Classes\PeacockHTML]
+@="Peacock Handler"
+"AppUserModelId"="Peacock"
+
+[HKEY_CURRENT_USER\SOFTWARE\Classes\PeacockHTML\Application]
+"AppUserModelId"="Peacock"
+"ApplicationIcon"="C:\\Program Files\\Peacock\\Peacock.exe,0"
+"ApplicationName"="Peacock"
+"ApplicationDescription"="Browse the web"
+"ApplicationCompany"="Peacock"
+
+[HKEY_CURRENT_USER\SOFTWARE\Classes\PeacockHTML\DefaultIcon]
+@="C:\\Program Files\\Peacock\\Peacock.exe,0"
+
+[HKEY_CURRENT_USER\SOFTWARE\Classes\PeacockHTML\shell]
+[HKEY_CURRENT_USER\SOFTWARE\Classes\PeacockHTML\shell\open]
+[HKEY_CURRENT_USER\SOFTWARE\Classes\PeacockHTML\shell\open\command]
+@="\"C:\\Program Files\\Peacock\\Peacock.exe\" \"%1\""

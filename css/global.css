@@ -8,7 +8,7 @@
   --nav-side-padding: 20px;
   --nav-vert-padding: 5px;
 
-  --tab-padding: 8px;
+  --tab-padding: 10px;
 
   /* ROUNDEDNESS */
 
@@ -22,10 +22,10 @@
 
   --lighter-1: rgba(255,255,255,0.35);
 
-  --darker-1: rgba(0,0,0,0.05);
+  --darker-1: rgba(0,0,0,0.06);
   --darker-2: rgba(0,0,0,0.1);
 
-  --outline: rgba(0,0,0,0.05);
+  --outline: rgba(0,0,0,0.1);
 
   /* DARKMODE */
 
@@ -39,7 +39,7 @@
 
   /* ANIMATIONS */
 
-  --transition: 0.1s all;
+  --transition: all 0.1s cubic-bezier(0.77, 0, 0.175, 1);
 
   --spinner-offset: 187;
   --spinner-duration: 1.4s;
@@ -47,8 +47,14 @@
 
 /* APPLY TO EVERYTHING */
 
-* { margin: 0px; outline: none; user-select: none; }
-* { font-family: "Roboto" !important; }
+* {
+  font-family: "Roboto" !important;
+  margin: 0px;
+  outline: none;
+  user-select: none;
+}
+
+*:focus { outline-color: var(--yellow); }
 
 /* DEFAULT BUTTON */
 
