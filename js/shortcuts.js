@@ -178,69 +178,15 @@ const menuTemplate = [
       {
         label: 'Quick Switch',
         submenu: [
-          {
-            label: 'Nagiate to Tab 1',
-            accelerator: 'CmdOrCtrl+1',
-            click: async () => {
-              switchTab(1);
-            }
-          },
-          {
-            label: 'Nagiate to Tab 2',
-            accelerator: 'CmdOrCtrl+2',
-            click: async () => {
-              switchTab(2);
-            }
-          },
-          {
-            label: 'Nagiate to Tab 3',
-            accelerator: 'CmdOrCtrl+3',
-            click: async () => {
-              switchTab(3);
-            }
-          },
-          {
-            label: 'Nagiate to Tab 4',
-            accelerator: 'CmdOrCtrl+4',
-            click: async () => {
-              switchTab(4);
-            }
-          },
-          {
-            label: 'Nagiate to Tab 5',
-            accelerator: 'CmdOrCtrl+5',
-            click: async () => {
-              switchTab(5);
-            }
-          },
-          {
-            label: 'Nagiate to Tab 6',
-            accelerator: 'CmdOrCtrl+6',
-            click: async () => {
-              switchTab(6);
-            }
-          },
-          {
-            label: 'Nagiate to Tab 7',
-            accelerator: 'CmdOrCtrl+7',
-            click: async () => {
-              switchTab(7);
-            }
-          },
-          {
-            label: 'Nagiate to Tab 8',
-            accelerator: 'CmdOrCtrl+8',
-            click: async () => {
-              switchTab(8);
-            }
-          },
-          {
-            label: 'Nagiate to Tab 9',
-            accelerator: 'CmdOrCtrl+9',
-            click: async () => {
-              switchTab(9);
-            }
-          }
+          { label: 'Nagiate to Tab 1', accelerator: 'CmdOrCtrl+1', click: async () => switchTab(1) },
+          { label: 'Nagiate to Tab 2', accelerator: 'CmdOrCtrl+2', click: async () => switchTab(2) },
+          { label: 'Nagiate to Tab 3', accelerator: 'CmdOrCtrl+3', click: async () => switchTab(3) },
+          { label: 'Nagiate to Tab 4', accelerator: 'CmdOrCtrl+4', click: async () => switchTab(4) },
+          { label: 'Nagiate to Tab 5', accelerator: 'CmdOrCtrl+5', click: async () => switchTab(5) },
+          { label: 'Nagiate to Tab 6', accelerator: 'CmdOrCtrl+6', click: async () => switchTab(6) },
+          { label: 'Nagiate to Tab 7', accelerator: 'CmdOrCtrl+7', click: async () => switchTab(7) },
+          { label: 'Nagiate to Tab 8', accelerator: 'CmdOrCtrl+8', click: async () => switchTab(8) },
+          { label: 'Nagiate to Tab 9', accelerator: 'CmdOrCtrl+9', click: async () => switchTab(9) }
         ]
       }
     ]

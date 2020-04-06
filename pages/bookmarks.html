@@ -6,6 +6,7 @@
     <link rel="shortcut icon" type="image/png" href="assets://favicon.png">
 
     <link href="assets://fonts/circular_std.css" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" href="assets://global.css">
     <style>
       * { font-family: 'Circular Std'; user-select: none; }
       body { width: 100%; height: 100%; margin: 0px; position: absolute; }
@@ -37,6 +38,7 @@
       }
 
       ul {
+        margin-top: 20px;
         padding: 5px 0px;
         border-radius: 5px;
         border: 1px solid;
@@ -49,9 +51,9 @@
         opacity: 0.85;
       }
 
-      .selected { background: #8AB4F8; }
+      .selected { background: var(--yellow); }
       .selected p { color: black; }
-      .selected svg path { color: black; }
+      .selected svg { filter: invert(0);}
     </style>
 
     <!-- Dark -->

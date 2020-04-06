@@ -23,6 +23,9 @@
 }
 
 .tab {
+  border-top-left-radius: var(--round-corners);
+  border-top-right-radius: var(--round-corners);
+
   width: 150px;
   height: 30px;
   display: flex;
@@ -69,20 +72,34 @@ img[src="//:0"] {
   font-size: 13px;
   white-space: nowrap;
   overflow: hidden;
-  text-overflow: ellipsis;
+  position: relative;
 }
 
+.tab-label:after {
+  content: '';
+  background: linear-gradient(90deg, transparent, var(--navbar-color));
+
+  width: 20px;
+  height: 100%;
+
+  position: absolute;
+  top: 0px; right: 0px;
+}
+
+.tab:hover > .tab-close { opacity: 0.75; }
+
 .tab-close {
-  width: 13px;
-  height: 13px;
+  opacity: 0;
 
-  margin: 0px 7px 0px 7px;
+  width: 12px;
+  height: 12px;
+
+  margin: 1px 4px 0px 7px;
   margin-left: auto;
-  padding: 3px;
+  padding: 6px;
 
-  border-radius: var(--round-corners);
+  border-radius: 50%;
   transition: var(--transition);
-
   flex-shrink: 0;
 }
 
@@ -93,10 +110,10 @@ img[src="//:0"] {
 /* NEW TAB BUTTON */
 
 #new-tab {
-  margin-left: 5px;
+  margin-left: 3px;
 
-  width: 23px;
-  height: 23px;
+  width: 25px;
+  height: 25px;
 
   display: flex;
   justify-content: center;

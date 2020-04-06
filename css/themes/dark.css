@@ -3,6 +3,8 @@
 :root {
   --navbar-color: var(--dark-1);
 
+  --dark-4: #181818;
+
   --lighter-1: rgba(0,0,0,0.1);
 
   --darker-1: rgba(255,255,255,0.1);
@@ -21,7 +23,10 @@ body { background: var(--dark-1); }
   background: var(--lighter-1);
 }
 
-#nav-center { background: var(--dark-2); }
+#nav-center { background: var(--dark-4); box-shadow: none; }
+
+.secure { background: #00ff1521; }
+.insecure { background: #ff2c2c30; }
 
 #window-controls > .button > span {
   color: white !important;
@@ -37,6 +42,12 @@ img[src$="svg"]:not(.extension) {
 
 /* SETTINGS */
 
+.nav-link.active { color: var(--dark-3) !important; }
+.nav-link:not(.active) {
+  background-color: var(--dark-2);
+  color: white;
+}
+
 #pills-tabContent, #title, .heading-title, #signOut {
   color: white;
 }
@@ -49,3 +60,18 @@ img[src$="svg"]:not(.extension) {
 #profile-jumbo:hover {
   background: var(--dark-2);
 }
+
+#signOut { background: var(--dark-3) !important; }
+
+.btn-secondary {
+  color: white !important;
+  background-color: var(--dark-3);
+  border: none;
+}
+
+.dropdown-menu {
+  background: var(--dark-3); width: max-content;
+}
+
+.dropdown-item { color: white; transition: var(--transition); font-weight: 500; }
+.dropdown-item:hover { background-color: var(--yellow); }
