@@ -22,10 +22,6 @@ const storage = require("./js/store.js");
 
 const shortcuts = require("./js/shortcuts.js");
 
-const { autoUpdater } = require("electron-updater");
-
-const web = require("./js/web.js");
-
 const web = require("./js/web.js");
 
 // STORAGE
@@ -1018,8 +1014,6 @@ getSearchEngine(async e => {
   $("#url").attr("placeholder", `Search ${e.name} or type a URL`);
   $("#url").attr("data-placeholder", `Search ${e.name} or type a URL`);
 });
-
-autoUpdater.checkForUpdatesAndNotify();
 
 initCertDialog();
 initAlert();

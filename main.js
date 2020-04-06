@@ -43,7 +43,7 @@ async function createWindow() {
 		icon: join(__dirname, 'images/peacock.png')
 	});
 
-	//mainWindow.openDevTools({ mode: 'detach' });
+	// mainWindow.openDevTools({ mode: 'detach' });
 
 	// and load the html of the app.
 	mainWindow.loadURL(format({
@@ -63,6 +63,9 @@ async function createWindow() {
 		// when you should delete the corresponding element.
 		mainWindow = null;
 	});
+
+	const { autoUpdater } = require("electron-updater");
+	autoUpdater.checkForUpdatesAndNotify();
 }
 
 app.on('ready', createWindow);
