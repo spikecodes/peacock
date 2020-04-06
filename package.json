@@ -1,7 +1,7 @@
 {
 	"name": "peacock",
 	"productName": "Peacock",
-	"version": "2.3.4",
+	"version": "2.3.5",
 	"description": "Open source privacy-first browser that hosts your data on the blockchain.",
 	"main": "main.js",
 	"repository": {
@@ -45,8 +45,7 @@
 			"allowToChangeInstallationDirectory": "true",
 			"perMachine": "true"
 		},
-		"fileAssociations": [
-			{
+		"fileAssociations": [{
 				"name": "Peacock HTML Document",
 				"description": "Peacock",
 				"ext": "html",
