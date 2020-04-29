@@ -4,7 +4,7 @@
   🦚 Open source experimental private-by-default web browser.<br>
   <a href="https://invite.gg/peacock">Discord</a> |
   <a href="https://github.com/Codiscite/peacock/releases/latest">Download</a> |
-  <a href="#FAQ">FAQ</a>
+  <a href="#faq">FAQ</a>
   <br><br>
   <img alt="GitHub Workflow Status" src="https://img.shields.io/github/workflow/status/Codiscite/peacock/build?style=for-the-badge">
   <a href="https://github.com/Codiscite/peacock/releases/latest"><img alt="GitHub release (latest by date)" src="https://img.shields.io/github/v/release/Codiscite/Peacock?color=tuquoise&label=LATEST&logo=github&logoColor=white&style=for-the-badge"></a>
@@ -45,6 +45,3 @@ Some people are skeptical about [Electron](https://www.electronjs.org/) for it's
 On Windows, apps are deemed as insecure if they haven't been code-signed with a certificate. Sigining certificates are expensive and therefore, Peacock doesn't have one. This means that Peacock may show up to antiviruses or Windows Defender as a 'suspicious application' but can be easily bypsased using this GIF:
 
 <img src="https://i.imgur.com/az4ZKPx.gif"/>
-
-More to come! This is just a placeholder README file currently.<br>
-**Note:** Don't store any highly sensitive data on Peacock as it is in Beta and your information could risk being lost.
