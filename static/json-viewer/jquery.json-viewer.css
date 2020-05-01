@@ -1,0 +1,78 @@
+body {
+  margin: 1em;
+  font-family: Circular Std Medium;
+}
+p.options label {
+  margin-right: 10px;
+}
+p.options input[type=checkbox] {
+  vertical-align: middle;
+}
+textarea#json-input {
+  width: 100%;
+  height: 200px;
+}
+
+/* Root element */
+.json-document {
+  padding: 2em;
+}
+
+/* Syntax highlighting for JSON objects */
+ul.json-dict, ol.json-array {
+  list-style-type: none;
+  margin: 0 0 0 1px;
+  border-left: 1px dotted #ccc;
+  padding-left: 1.5em;
+}
+.json-string {
+  color: #dd02a8;
+}
+.json-literal {
+  color: #148e0e;
+}
+li {
+  margin-bottom: 5px;
+}
+
+a.json-toggle, span.json-label {
+  color: #1b5fdf;
+}
+
+/* Toggle button */
+a.json-toggle {
+  position: relative;
+  color: inherit;
+  text-decoration: none;
+}
+a.json-toggle:focus {
+  outline: none;
+}
+a.json-toggle:before {
+  font-size: 1.1em;
+  color: #c0c0c0;
+  content: "\25BC"; /* down arrow */
+  position: absolute;
+  display: inline-block;
+  width: 1em;
+  text-align: center;
+  line-height: 1em;
+  left: -1.2em;
+}
+a.json-toggle:hover:before {
+  color: #aaa;
+}
+a.json-toggle.collapsed:before {
+  /* Use rotated down arrow, prevents right arrow appearing smaller than down arrow in some browsers */
+  transform: rotate(-90deg);
+}
+
+/* Collapsable placeholder links */
+a.json-placeholder {
+  color: #aaa;
+  padding: 0 0.75em;
+  text-decoration: none;
+}
+a.json-placeholder:hover {
+  text-decoration: underline;
+}

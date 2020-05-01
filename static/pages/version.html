@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>About Version</title>
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+      integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
+      crossorigin="anonymous"/>
+
+    <link href="assets://global.css" rel="stylesheet" type="text/css">
+    <style>
+      * { border-color: var(--foreground) !important; }
+
+      body { background: var(--background); }
+
+      .table {
+        position: absolute;
+        width: 50%;
+        top: 5rem;
+        left: 0;
+        right: 0;
+        margin: auto;
+      }
+    </style>
+  </head>
+  <body style="display: none;">
+    <table class="table table-bordered table-hover table-condensed">
+      <thead><tr><th title="Field #1">Name</th>
+      <th title="Field #2">Value</th>
+      </tr></thead>
+      <tbody>
+        <tr>
+        <td>User Agent</td>
+        <td id="user-agent">USER_AGENT_HERE</td>
+        </tr>
+
+        <tr>
+        <td>Chrome</td>
+        <td id="chrome">CHROME_VERSION_HERE</td>
+        </tr>
+
+        <tr>
+        <td>Node</td>
+        <td id="node">NODE_VERSION_HERE</td>
+        </tr>
+
+        <tr>
+        <td>Electron</td>
+        <td id="electron">ELECTRON_VERSION_HERE</td>
+        </tr>
+
+        <tr>
+        <td>Peacock</td>
+        <td id="peacock">PEACOCK_VERSION_HERE</td>
+        </tr>
+      </tbody>
+    </table>
+  </body>
+  <script type="text/javascript">
+    let theme = sendSync('getTheme');
+    if(theme != 'light') document.querySelector("head").innerHTML += '<link rel="stylesheet" href="assets://themes/' + theme + '.css">';
+
+    function getUserAgent() {
+      return navigator.userAgent;
+    }
+
+    function setVersions(versions) {
+      document.getElementById('user-agent').innerHTML = getUserAgent();
+      document.getElementById('chrome').innerHTML = versions.chrome;
+      document.getElementById('node').innerHTML = versions.node;
+      document.getElementById('electron').innerHTML = versions.electron;
+      document.getElementById('peacock').innerHTML = versions.peacock;
+
+      document.body.style.display = 'block';
+    }
+
+    setVersions(sendSync('getVersions'));
+  </script>
+</html>

@@ -1,0 +1,34 @@
+directories:
+  output: dist
+  buildResources: build
+appId: com.codiscite.peacock
+productName: Peacock
+win:
+  target:
+    - nsis
+    - zip
+  icon: images/peacock.ico
+mac:
+  category: books
+  target:
+    - dmg
+  icon: images/peacock.icns
+linux:
+  target:
+    - AppImage
+    - deb
+  icon: images/peacock.png
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+  perMachine: true
+fileAssociations:
+  - name: Peacock HTML Document
+    description: Peacock
+    ext: html
+    icon: ../images/peacock.ico
+  - name: Peacock WebP Image
+    description: Peacock WebP Image
+    ext: webp
+    icon: ../images/peacock.ico
+electronVersion: 9.0.0-beta.16
