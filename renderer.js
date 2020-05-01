@@ -1,11 +1,8 @@
 // PACKAGES
 
-const { remote, webFrame, nativeImage } = require("electron");
+const { remote, ipcRenderer } = require("electron");
 const {
-  BrowserView,
   BrowserWindow,
-  screen,
-  dialog,
   nativeTheme,
   ipcMain,
   app,
@@ -13,7 +10,9 @@ const {
 } = remote;
 require("electron").ipcMain = ipcMain;
 
-const { join, normalize } = require("path");
+require('v8-compile-cache');
+
+const { join } = require("path");
 
 const { ElectronBlocker } = require("@cliqz/adblocker-electron");
 
@@ -24,10 +23,32 @@ const shortcuts = require("./js/shortcuts.js");
 
 const web = require("./js/web.js");
 
+window.search = require("./js/search.js");
+
+function searchBounds () {
+  let winBounds = remote.getCurrentWindow().getBounds();
+  let bounds = {};
+
+  bounds.x = Math.ceil($('#nav-center').offset().left);
+  bounds.y = Math.ceil($('#nav-center').offset().top + $('#nav-center').height()) + 5;
+  bounds.width = Math.floor($('#nav-center').width());
+  bounds.height = 240;
+
+  if(winBounds.x >= 0) bounds.x += winBounds.x;
+  if(winBounds.y >= 0) bounds.y += winBounds.y;
+
+  return bounds;
+};
+
+search.initialize(searchBounds());
+
 // STORAGE
 
 const Store = require("electron-store");
 const store = new Store();
+
+window.store = store;
+window.storage = storage;
 
 if (!store.get("settings")) {
   let data = {
@@ -35,7 +56,7 @@ if (!store.get("settings")) {
     theme: "Default",
     save_location: "Downloads",
     storage: "Locally",
-    newTab: { backgroundTheme: "https://source.unsplash.com/featured/1920x1080/?peacock", items: ["", "", "", "", ""] },
+    newTab: { backgroundTheme: "https://source.unsplash.com/featured/1280x720/?peacock", items: ["", "", "", "", ""] },
     rich_presence: "Enabled"
   };
   store.set("settings", data);
@@ -50,9 +71,20 @@ store.set("searchEngines", [
 
 if (!store.get("blocked")) store.set("blocked", 0);
 if (!store.get("bookmarks")) store.set("bookmarks", []);
-if (!store.get("flags")) store.set("flags", []);
 if (!store.get("history")) store.set("history", []);
 if (!store.get("permissions")) store.set("permissions", {});
+if (!store.get("flags")) store.set("flags", [
+  // '--disable-reading-from-canvas'
+  '--enable-smooth-scrolling',
+  '--dns-prefetch-disable',
+  '--no-pings',
+  '--no-referrers',
+  '--no-crash-upload',
+  '--no-default-browser-check',
+  '--disable-breakpad',
+  '--disable-plugins',
+  '--do-not-track'
+]);
 
 web.init(document);
 storage.init(store);
@@ -61,8 +93,6 @@ shortcuts.init(keyboardShortcut, n => { if (tabs.get(n-1)) tabs.activate(tabs.ge
 console.colorLog = (msg, color) => { console.log("%c" + msg, "color:" + color + ";font-weight:bold;") }
 
 const { version } = require("./package.json");
-
-var userAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:68.0) Gecko/20100101 Firefox/68.0';
 
 // DISCORD RICH PRESENCE
 if (store.get("settings.rich_presence") == "Enabled") {
@@ -110,7 +140,7 @@ exports.showAlert = showAlert;
 
 window.theme = "light";
 
-var alertWin, settings, certDialog;
+var alertWin, certDialog;
 
 window.darkMode = nativeTheme.shouldUseDarkColors || false;
 
@@ -124,13 +154,7 @@ ipcMain.on("flags.js", async function(e, action, data) {
   let flags = store.get("flags");
 
   if (action == "set") {
-    if (data.value) {
-      flags.push(data.flag);
-    } else {
-      flags.splice(flags.indexOf(data.flag), 1);
-    }
-
-    store.set("flags", flags);
+    store.set("flags", data);
   } else {
     e.returnValue = flags;
   }
@@ -143,14 +167,14 @@ ipcMain.on("removeBookmark", async (e, id) => {
 });
 
 ipcMain.on("getHistory", async e => { e.returnValue = (await storage.getHistory()) });
-ipcMain.on("clearHistory", async e => storage.clearHistory());
+ipcMain.on("clearHistory", async () => storage.clearHistory());
 ipcMain.on("removeHistoryItem", async (e, id) => storage.removeHistoryItem(id));
 
 ipcMain.on("newTab", async function(e, action, extra) {
   if (action == "focusSearchbar") {
-    $("#url").val("");
-    $("#url").focus();
-    $("#url").select();
+    $('#url').val("");
+    $('#url').focus();
+    $('#url').select();
   } else if (action == "saveItem") {
     let items = store.get("settings.newTab.items");
     items[extra.id] = extra.domain;
@@ -189,7 +213,7 @@ ipcMain.on("siteInfo", async (e, action) => {
         showCertificateDialog(cert);
       });
 
-      req.on("error", e => {
+      req.on("error", () => {
         showAlert({
           type: "alert",
           message: "Site doesn't have an SSL Certificate.",
@@ -227,12 +251,12 @@ ipcMain.on(
 ipcMain.on("getThemes", async e =>
   require("fs").readdir(join(__dirname, "css/themes"), (err, files) => {
     let result = [];
-    files.forEach(file => {
-      if (file.endsWith(".css")) {
-        let theme = file.replace(".css", "");
+    for (let i = 0; i < files.length; i++) {
+      if (files[i].endsWith(".css")) {
+        let theme = files[i].replace(".css", "");
         result.push(theme[0].toUpperCase() + theme.slice(1));
       }
-    });
+    }
     e.returnValue = result;
   })
 );
@@ -282,8 +306,8 @@ async function keyboardShortcut(shortcut) {
       tabs.current().webContents.zoomFactor = 1;
       break;
     case "focusSearchbar":
-      $("#url").focus();
-      $("#url").select();
+      $('#url').focus();
+      $('#url').select();
       break;
     case "backPage":
       tabs.current().webContents.goBack();
@@ -332,13 +356,13 @@ async function keyboardShortcut(shortcut) {
   }
 }
 
-ipcMain.on("loadPage", async (e, a) => tabs.current().webContents.loadURL(a));
+ipcMain.on("loadPage", async (e, a) => loadPage(a));
 
 ipcMain.on("openPage", async (e, a) => tabs.newView(a));
 
-ipcMain.on("loadTheme", async (e, a) => loadTheme());
+ipcMain.on("loadTheme", async () => loadTheme());
 
-ipcMain.on("viewAdded", async e => {
+ipcMain.on("viewAdded", async () => {
   enableAdBlocking();
   tabs
     .current()
@@ -354,7 +378,7 @@ async function enableAdBlocking(session) {
 
   ElectronBlocker.fromPrebuiltAdsAndTracking(fetch).then(blocker => {
     blocker.enableBlockingInSession(session);
-    blocker.on("request-blocked", async ad => {
+    blocker.on("request-blocked", async () => {
       store.set("blocked", store.get("blocked") + 1);
 
       if (!session.ads_blocked) session.ads_blocked = 0;
@@ -412,14 +436,14 @@ async function toggleAdblock() {
   });
 
   let address = require("url").format({
-    pathname: join(__dirname, "pages/dialogs/shield.html"),
+    pathname: join(__dirname, "static/pages/dialogs/shield.html"),
     protocol: "file:",
     slashes: true
   });
 
   adblock.focus();
 
-  adblock.webContents.once("dom-ready", async e => {
+  adblock.webContents.once("dom-ready", async () => {
     let enabled = !$("#shieldIMG")
       .attr("src")
       .endsWith("Empty.svg");
@@ -571,7 +595,6 @@ async function findInPage() {
 // ALERTS
 
 async function initAlert() {
-  let bg = window.theme == "dark" ? "#292A2D" : "#ffffff";
 
   var screenSize = { width: window.outerWidth, height: window.outerHeight };
 
@@ -589,14 +612,23 @@ async function initAlert() {
       enableRemoteModule: true
     },
     parent: remote.getCurrentWindow(),
-    alwaysOnTop: true,
     icon: join(__dirname, "images/peacock.png")
   };
 
   alertWin = new BrowserWindow(args);
 
+  alertWin.webContents.session.protocol.registerFileProtocol('assets', (req, cb) => {
+    var url = req.url.replace(new URL(req.url).protocol, '');
+
+    if(url.includes('..')) {
+      cb(join(__dirname, 'css/favicon.png'));
+    } else {
+      cb(join(__dirname, 'css/', url));
+    }
+  }, () => {});
+
   let address = require("url").format({
-    pathname: join(__dirname, "pages/dialogs/alert.html"),
+    pathname: join(__dirname, "static/pages/dialogs/alert.html"),
     protocol: "file:",
     slashes: true
   });
@@ -649,25 +681,25 @@ async function getSearchEngine(cb) {
 }
 
 async function loadPage(val) {
-  $("#url").blur();
+  $('#url').blur();
 
   try {
     new URL(val);
     tabs.current().webContents.loadURL(val);
   } catch (e) {
     if (val.includes(".") && !val.includes(" ")) {
-      $("#url").val(val);
+      $('#url').val(val);
       tabs.current().webContents.loadURL("https://" + val);
     } else if (
       val.includes("://") ||
       val.startsWith("data:") ||
       (val.startsWith("localhost:") && !val.includes(" "))
     ) {
-      $("#url").val(val);
+      $('#url').val(val);
       tabs.current().webContents.loadURL(val);
     } else {
       getSearchEngine(async function(engine) {
-        $("#url").val(engine.url + val);
+        $('#url').val(engine.url + val);
         tabs.current().webContents.loadURL(engine.url + val);
       });
     }
@@ -696,7 +728,7 @@ async function showSnackbar(
     }
   });
 
-  snackbar.webContents.once("dom-ready", async e => {
+  snackbar.webContents.once("dom-ready", async () => {
     snackbar.webContents.send("permission-request", text, items, buttons);
 
     ipcMain.once("permission-reply", (event, reply) => {
@@ -710,22 +742,20 @@ async function showSnackbar(
 
   snackbar.loadURL(
     require("url").format({
-      pathname: join(__dirname, "pages/dialogs/snackbar.html"),
+      pathname: join(__dirname, "static/pages/dialogs/snackbar.html"),
       protocol: "file:",
       slashes: true
     })
   );
 }
 
-async function hideSnackbar() {
-  $("#snackbar").css("display", "none");
-}
 
 async function loadFlags() {
-  store.get("flags").forEach(function(flag) {
-    console.log("Added flag: " + flag);
-    app.commandLine.appendSwitch(flag);
-  });
+  let flags = store.get("flags");
+  for (let i = 0; i < flags.length; i++) {
+    console.log(`Added flag: ${flags[i]}`);
+    app.commandLine.appendSwitch(flags[i]);
+  }
 }
 
 // SITE INFO
@@ -733,14 +763,16 @@ async function loadFlags() {
 let siteInfo;
 async function toggleSiteInfo() {
   if (!siteInfo) {
-    $("#site-info").addClass("search-active");
+    console.log(remote.getCurrentWindow().getBounds().x + $("#site-info").offset().left,
+      remote.getCurrentWindow().getBounds().y + $("#site-info").offset().top + ($("#site-info").height() * 3));
+
     siteInfo = new BrowserWindow({
       frame: false,
       transparent: true,
       width: 320,
       height: 330,
-      x: $("#site-info")[0].offsetLeft,
-      y: 67,
+      x: remote.getCurrentWindow().getBounds().x + $("#site-info").offset().left,
+      y: remote.getCurrentWindow().getBounds().y + $("#site-info").offset().top + ($("#site-info").height() * 3),
       parent: remote.getCurrentWindow(),
       webPreferences: {
         nodeIntegration: true,
@@ -750,23 +782,21 @@ async function toggleSiteInfo() {
 
     siteInfo.loadURL(
       require("url").format({
-        pathname: join(__dirname, "pages/dialogs/info.html"),
+        pathname: join(__dirname, "static/pages/dialogs/info.html"),
         protocol: "file:",
         slashes: true
       })
     );
 
-    siteInfo.on("blur", e => {
-      siteInfo.close();
+    siteInfo.on("blur", () => {
+      if(siteInfo) siteInfo.close();
       siteInfo = null;
-      $("#site-info").removeClass("search-active");
       remote.getCurrentWindow().focus();
       remote.getCurrentWindow().focus();
     });
 
-    siteInfo.on("close", e => {
+    siteInfo.on("close", () => {
       siteInfo = null;
-      $("#site-info").removeClass("search-active");
       remote.getCurrentWindow().focus();
       remote.getCurrentWindow().focus();
     });
@@ -775,7 +805,7 @@ async function toggleSiteInfo() {
 
     let perms = store.get("permissions")[url.hostname];
 
-    siteInfo.webContents.once("dom-ready", async e => {
+    siteInfo.webContents.once("dom-ready", async () => {
       cookies()
         .then(c => {
           siteInfo.webContents.send("cookies", c.length);
@@ -784,7 +814,7 @@ async function toggleSiteInfo() {
 
       if (!perms) return;
 
-      Object.keys(perms).forEach((item, index) => {
+      Object.keys(perms).forEach((item) => {
         let allowed = perms[item] ? "Allow" : "Block";
 
         siteInfo.webContents.send(
@@ -820,7 +850,6 @@ async function cookies(contents, site) {
 
 async function handlePermission(webContents, permission, callback, details) {
   if (details.mediaTypes) {
-    let mediaType = details.mediaTypes[0] == "audio" ? "microphone" : "camera";
   }
   if (permission == "geolocation") permission = "location";
   if (permission == "midiSysex") permission = "midi";
@@ -891,7 +920,7 @@ async function showCertificateDialog(certificate) {
   let { format } = require("url");
   certDialog.loadURL(
     format({
-      pathname: join(__dirname, "pages/dialogs/certificate.html"),
+      pathname: join(__dirname, "static/pages/dialogs/certificate.html"),
       protocol: "file:",
       slashes: true
     }) +
@@ -900,28 +929,28 @@ async function showCertificateDialog(certificate) {
   );
 }
 
-// MENU
+// MENU BUTTON MENU
 
 let menuTemp = [
   { label:'New Tab', click: async() => keyboardShortcut('newTab') },
-  { label:'New window', click: async() => keyboardShortcut('newTab') },
+  // { label:'New window', click: async() => keyboardShortcut('newTab') },
   { type: 'separator' },
+  { label:'Settings', click: async() => tabs.newView('peacock://settings') },
   { label:'History', click: async() => tabs.newView('peacock://history') },
   { label:'Bookmarks', click: async() => tabs.newView('peacock://bookmarks') },
   { type: 'separator' },
+  { label:'Manage Tasks', click: async() => ipcRenderer.send('openProcessManager') },
+  { label:'About Peacock', click: async() => tabs.newView('peacock://version') },
   { label:'Exit', click: async() => app.exit() },
-  { label:'About Peacock', click: async() => tabs.newView('peacock://versions') },
 ];
-
-let menu = Menu.buildFromTemplate(menuTemp);
 
 // HTML ELEMENTS
 
 $("#shield").click(toggleAdblock);
 
-$("#home").click(async e => tabs.current().webContents.loadURL('peacock://newtab'));
-$("#back").click(async e => keyboardShortcut("backPage"));
-$("#forward").click(async e => keyboardShortcut("forwardPage"));
+$("#home").click(async () => tabs.current().webContents.loadURL('peacock://newtab'));
+$("#back").click(async () => keyboardShortcut("backPage"));
+$("#forward").click(async () => keyboardShortcut("forwardPage"));
 $("#refresh").mousedown(async e => {
   switch (e.which) {
     case 1:
@@ -944,40 +973,53 @@ $("#refresh").mousedown(async e => {
   return true; // to allow the browser to know that we handled it.
 });
 
-$("#menu").click(async e => menu.popup({
-  x: $('#menu').offset().left,
-  y: $('#menu').offset().top + $('#menu').height()
+$("#menu").click(async () => Menu.buildFromTemplate(menuTemp).popup({
+  x: Math.ceil($('#menu').offset().left),
+  y: Math.ceil($('#menu').offset().top + $('#menu').height())
 }));
 
-$("#url").keypress(async e => {
+$('#url').keypress(async e => {
   if (e.which == 13 || e.which == 10) {
     if (e.ctrlKey) {
-      $("#url").val("www." + $("#url").val());
-      $("#url").val($("#url").val() + ".org");
+      $('#url').val("www." + $('#url').val());
+      $('#url').val($('#url').val() + ".org");
     } else if (e.shiftKey) {
-      $("#url").val("www." + $("#url").val());
-      $("#url").val($("#url").val() + ".net");
+      $('#url').val("www." + $('#url').val());
+      $('#url').val($('#url').val() + ".net");
     } else {
-      loadPage($("#url").val());
-      $("#url").blur();
+      loadPage($('#url').val());
+      $('#url').blur();
     }
   }
 });
 
-$("#url").focus(async e => {
-  $("#url").attr("placeholder", "");
-  getSearchEngine(async e => {
+$('#url').focus(async e => {
+  e.preventDefault();
 
-  });
+  $('#nav-center').css('border', 'var(--accent) 2px solid');
+
+  $('#url').val(tabs.current().webContents.getURL())
+  $('#url').select();
+
+  $('#url').attr("placeholder", "");
 });
 
-$("#url").blur(async e => {
-  $("#url").attr("placeholder", $("#url").attr("data-placeholder"));
+$('#url').on('input', async e => {
+  search.show($('#url').val(), searchBounds());
+});
+
+$('#url').blur(async () => {
+  $('#nav-center').removeAttr('style');
+
+  $('#url')[0].setSelectionRange(0,0);
+  $('#url').attr("placeholder", $('#url').attr("data-placeholder"));
   setTimeout(function() {
+    search.hide();
     web.setSearchIcon(tabs.current().webContents.getURL());
-  }, 75);
+  }, 100);
 });
-$("#bookmark").click(async e => {
+
+$("#bookmark").click(async () => {
   console.log('bookmarking...');
 
   let url = tabs.current().webContents.getURL();
@@ -998,21 +1040,21 @@ $("#bookmark").click(async e => {
   });
 });
 
-$("#site-info").click(async e => {
+$("#site-info").click(async () => {
   if(!$("#site-info").children().first().attr('src').includes('search')) toggleSiteInfo();
 });
 
-$("#info-header h4").click(async e => {
+$("#info-header h4").click(async () => {
   toggleSiteInfo();
   tabs.newView("https://support.google.com/chrome/answer/95617");
 });
 
-$("#find a").click(async e => $(this).toggleClass("down"));
-$("#close-find").click(async e => findInPage());
+$("#find a").click(async () => $(this).toggleClass("down"));
+$("#close-find").click(async () => findInPage());
 
 getSearchEngine(async e => {
-  $("#url").attr("placeholder", `Search ${e.name} or type a URL`);
-  $("#url").attr("data-placeholder", `Search ${e.name} or type a URL`);
+  $('#url').attr("placeholder", `Search ${e.name} or type a URL`);
+  $('#url').attr("data-placeholder", `Search ${e.name} or type a URL`);
 });
 
 initCertDialog();
@@ -1020,12 +1062,17 @@ initAlert();
 
 loadFlags();
 
-remote.getCurrentWindow().on("closed", async e => {
+remote.getCurrentWindow().on("closed", async () => {
   remote
     .getCurrentWindow()
     .getChildWindows()
     .forEach(win => win.close());
 });
 
-tabs.newView(remote.process.argv[2] && remote.process.argv[2].startsWith('http')
-  ? remote.process.argv[2] : 'peacock://newtab');
+remote.getCurrentWindow().on("move", async () => {
+  search.hide();
+  $('#url').blur();
+});
+
+tabs.newView(remote.process.argv[2] && (remote.process.argv[2].startsWith('http') ||
+  remote.process.argv[2].startsWith('peacock')) ? remote.process.argv[2] : 'peacock://newtab');

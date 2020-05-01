@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <link href="assets://global.css" rel="stylesheet" type="text/css">
+    <meta charset="utf-8">
+    <title></title>
+    <style>
+      * { overflow: hidden !important; }
+
+      #site-info {
+        box-shadow: 0 1px 5px 1px #00000063;
+        background-color: #292A2D;
+        color: white !important;
+        border-radius: 3px;
+
+        z-index: 10;
+        position: absolute;
+        top: 0px;
+        left: 0px;
+        margin: 0px;
+        width: 320px;
+        height: auto;
+
+        padding: 22px 15px;
+        box-sizing: border-box;
+      }
+
+      #site-settings { opacity: 0.25;}
+
+      #info-permissions {
+        display: flex;
+        flex-direction: column;
+        height: auto;
+        margin-top: 15px;
+        padding-top: 0px;
+      }
+
+      #info-close {
+        position: absolute;
+        right: 4px;
+        top: 4px;
+        background: transparent;
+        color: white;
+        border: none;
+        font-size: 20px;
+        padding: 1px 7px;
+        box-sizing: border-box;
+        border-radius: 20px;
+      }
+
+      #info-header h2 {
+        color: #81C995;
+        font-weight: 500;
+        font-size: 15px;
+        font-weight: 500;
+      }
+
+      #info-header h3 {
+        font-size: 13px;
+        opacity: 0.8;
+        color: white;
+        margin-top: 10px;
+        letter-spacing: -0.25px;
+        line-height: 20px;
+        font-weight: 400;
+      }
+
+      #info-header h4 {
+        color: #FFD563;
+        margin-top: 7px;
+        font-size: 13px;
+        font-weight: 500;
+      }
+
+      #info-header h4:hover { cursor: pointer; }
+      #info-close:hover { background: rgba(255,255,255,0.075) !important; }
+
+      #info-buttons {
+        display: flex;
+        flex-direction: column;
+        height: 135px;
+        margin-top: 15px;
+        border-top: 1px solid #ffffff29;
+        padding-top: 5px;
+      }
+
+      #info-buttons button, #info-perm {
+        padding: 0px;
+        background: none;
+        border: none;
+        display: inline-flex;
+        align-items: center;
+        flex-grow: 1;
+      }
+
+      #info-buttons button:not(#site-settings):hover { background: rgba(255,255,255,0.075); }
+
+      #info-buttons img, #info-perm img {
+        filter: invert(1);
+        margin-right: 10px;
+        opacity: 0.75;
+      }
+
+      #info-buttons p, #info-buttons label, #info-perm p { color: white; }
+
+      #info-buttons p, #info-perm p {
+        opacity: 0.85;
+        font-size: 13px;
+      }
+
+      #info-buttons label {
+        margin-left: 7px;
+        font-size: 12px;
+        opacity: 0.5;
+      }
+
+      #info-perm { height: 35px; }
+
+      #perm-allow {
+        background: rgba(0,0,0,0.35);
+        color: white;
+        border: none;
+        padding: 7px 15px;
+        border-radius: 3px;
+        position: absolute;
+        right: 25px;
+        width: 80px;
+        text-align: left;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="site-info">
+      <button onclick="window.close()" id="info-close">×</button>
+      <div id="info-header">
+        <h2>Connection is secure</h2>
+        <h3>Your information (for example, passwords or credit card numbers) is private when it is sent to this site.</h3>
+        <h4>Learn more</h4>
+      </div>
+      <ul id="info-permissions"></ul>
+      <div id="info-buttons">
+        <button id="certificate" title="Show certificate" onclick="message('Certificate')">
+          <img src="../../images/license.svg">
+          <p>Certificate</p>
+          <label>(Valid)</label>
+        </button>
+
+        <button id="cookies" title="Show cookies" onclick="message('Cookies')">
+          <img src="../../images/cookie.svg">
+          <p>Cookies</p>
+          <label id="cookies-in-use">(10 in use)</label>
+        </button>
+
+        <button disabled id="site-settings" title="Open site settings" onclick="message('Site Settings')">
+          <img src="../../images/settings.svg">
+          <p>Site Settings</p>
+        </button>
+      </div>
+    </div>
+  </body>
+  <script type="text/javascript">
+    let { ipcRenderer, remote } = require('electron');
+
+    ipcRenderer.on('perm', (e, perm) =>       { document.getElementById('info-permissions').innerHTML += perm; });
+    ipcRenderer.on('cookies', (e, cookies) => { document.getElementById('cookies-in-use').innerHTML = '(' + cookies + ' in use)'; });
+
+    function message(txt) { ipcRenderer.send('siteInfo', txt); }
+
+    new ResizeObserver(e => {
+      remote.getCurrentWindow().setBounds({ height: document.getElementById('site-info').offsetHeight });
+    }).observe(document.getElementById('site-info'));
+  </script>
+</html>

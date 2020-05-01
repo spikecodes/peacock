@@ -1,6 +1,4 @@
-const {	ipcRenderer, dialog, BrowserWindow } = require('electron');
-const {	join } = require('path');
-const { format } = require('url');
+const {	ipcRenderer, remote } = require('electron');
 
 async function modifyDefault (defaultVar, name, value) {
 	if (Object.defineProperty) {
@@ -12,10 +10,18 @@ async function modifyDefault (defaultVar, name, value) {
 	}
 }
 
+modifyDefault(document, 'referrer', '');
 modifyDefault(navigator, 'doNotTrack', '1');
+modifyDefault(navigator, 'deviceMemory', undefined);
 modifyDefault(navigator, 'hardwareConcurrency', Math.round(Math.random()) == 0 ? 4 : 8);
+modifyDefault(navigator, 'appCodeName', Math.round(Math.random()) == 0 ? 'Mozilla' : 'Peacock');
+modifyDefault(navigator, 'appName', Math.round(Math.random()) == 0 ? 'Netscape' : 'Peacock');
+modifyDefault(navigator, 'mimeTypes', Math.round(Math.random()) == 0 ? {} : navigator.mimeTypes);
+modifyDefault(navigator, 'plugins', Math.round(Math.random()) == 0 ? {} : navigator.plugins);
 modifyDefault(screen, 'colorDepth', Math.round(Math.random()) == 0 ? 24 : 32);
+window.close = e => { ipcRenderer.send('closeCurrentTab', remote.getCurrentWebContents().id); };
 navigator.getBattery = () => {};
+if(navigator.mediaDevices) navigator.mediaDevices.enumerateDevices = ()=>{return new Promise((r)=>{r(undefined)})}
 
 global.alert = window.alert = (message) => {
 	let url = (window.location.href.startsWith('peacock')) ? 'Peacock' : window.location.href;
@@ -83,7 +89,18 @@ document.addEventListener('pointerlockchange', pointerlockchange, false);
 document.addEventListener('fullscreenchange', fullscreenchange);
 document.addEventListener('webkitfullscreenchange', fullscreenchange);
 
-if (window.location.protocol == 'peacock:') {
+// PDF Reader
+
+// window.addEventListener('load', async e => {
+// 	if(document.querySelectorAll('embed[type="application/pdf"]').length == 1) {
+// 		document.body.innerHTML = `<iframe style="position: absolute; height: 100%; width: 100%; border: none;"
+// 			src="https://peacock-pdf.spikethecoder.repl.co/web/viewer.html?file=https://cors-anywhere.herokuapp.com/${window.location.href}"></iframe>`;
+// 	}
+// });
+
+// IPC FEATURES
+
+if (window.location.protocol == 'peacock:' || window.location.protocol == 'file:') {
 	ipcRenderer.once('setError', (event, details) => {
 		setError(details);
 	});

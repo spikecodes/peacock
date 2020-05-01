@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang='en' dir='ltr'>
+  <head>
+    <meta charset='utf-8'>
+    <title></title>
+    <link href="assets://global.css" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/tonsky/FiraCode@1.207/distr/fira_code.css">
+  </head>
+  <style>
+    ::-webkit-scrollbar { width: 17px; }
+    ::-webkit-scrollbar-track { background-color: #1C1E1F;}
+    ::-webkit-scrollbar-thumb { background-color: #2A2C2E;}
+    ::-webkit-scrollbar-thumb:hover { background-color: #323537;}
+    ::-webkit-scrollbar-corner { background-color: transparent;}
+
+    * { color: white; }
+
+    div, button, pre {
+      border-radius: 5px;
+    }
+
+    button {
+      position: fixed;
+      bottom: 30px;
+      border: 0;
+      padding: 10px 25px;
+    }
+
+    button, h1, h2, h4 {
+      font-weight: 500;
+    }
+
+    body {
+      padding: 30px;
+      background: #292A2D;
+    }
+
+    h1, h2 {
+      line-height: 10px;
+    }
+
+    h1 {
+      font-size: 34px;
+      font-weight: 900;
+    }
+
+    h2 {
+      font-size: 23px;
+      font-weight: bold;
+      color: var(--yellow);
+    }
+
+    h3, h4, body {
+      margin: 0px;
+    }
+
+    h4 {
+      font-size: 17px;
+      color: rgba(255,255,255,0.5);
+    }
+
+    h3, li {
+      font-size: 18px;
+      font-weight: 400;
+      color: white;
+    }
+
+    header {
+      position: fixed;
+      top: 0px;
+      left: 0px;
+      width: 100%;
+      height: 5px;
+      background: rgba(255,255,255,0.1);
+      -webkit-app-region: drag;
+    }
+
+    #icon {
+      position: fixed;
+      right: 30px;
+      top: 43px;
+    }
+
+    #info {
+      background: #38393B;
+      padding: 30px;
+      margin-top: 35px;
+      width: 370px;
+      height: 320px;
+    }
+
+    #info div { margin-bottom: 26px; }
+
+    #details {
+      left: 30px;
+      background: rgba(255,255,255,0.1);
+    }
+
+    #ok {
+      right: 30px;
+      color: black;
+      background: var(--yellow);
+    }
+
+    ul {
+      margin-top: 10px;
+      padding-left: 10px;
+    }
+
+    li {
+      list-style-type: none;
+      padding: 2.5px 0px;
+    }
+
+    pre {
+      height: 100%;
+      margin: 0px;
+      padding: 10px;
+      overflow: auto;
+      background: rgba(0, 0, 0, 0.35);
+      letter-spacing: -1px;
+      font-family: 'Fira Code', monospace;
+    }
+  </style>
+  <body>
+    <header></header>
+
+    <h1>SSL Certificate</h1>
+    <h2 id='site'>duckduckgo.com</h2>
+
+    <svg id="icon" xmlns="http://www.w3.org/2000/svg" width="26.669" height="35" viewBox="0 0 26.669 35">
+      <g id="Group_529" data-name="Group 529" transform="translate(-422.333 -33)">
+        <path id="license" d="M17.334,30.333,24,32V26.866a12.566,12.566,0,0,1-6.666,1.8,12.566,12.566,0,0,1-6.666-1.8V32M17.334,5.334a9.633,9.633,0,0,0-7.066,2.9,9.633,9.633,0,0,0-2.933,7.1,9.633,9.633,0,0,0,2.933,7.05,9.633,9.633,0,0,0,7.066,2.95,9.633,9.633,0,0,0,7.066-2.95,9.633,9.633,0,0,0,2.933-7.05,9.633,9.633,0,0,0-2.933-7.1,9.633,9.633,0,0,0-7.066-2.9m13.333,10A13.4,13.4,0,0,1,29.716,20a13.066,13.066,0,0,1-2.383,4.133V37l-10-3.333L7.334,37V24.133A13.166,13.166,0,0,1,4,15.333a12.8,12.8,0,0,1,3.883-9.4A12.883,12.883,0,0,1,17.334,2a12.883,12.883,0,0,1,9.45,3.933,12.8,12.8,0,0,1,3.883,9.4Z" transform="translate(418.334 31.001)" fill="currentcolor"/>
+        <path id="license-2" data-name="license" d="M12.334,15.333a5,5,0,1,1,5,5,5.066,5.066,0,0,1-5-5" transform="translate(418.334 31.001)" fill="var(--yellow)"/>
+      </g>
+    </svg>
+
+    <div id='info'>
+      <div>
+        <h4>Certificate Purpose(s)</h4>
+        <ul>
+          <li>• Ensures the identity of a remote computer</li>
+          <li>• Proves your identity to a remote computer</li>
+          <li>• Encrypt sensitive inputted information</li>
+        </ul>
+      </div>
+      <div>
+        <h4>Issued To</h4>
+        <h3 id='issued_to'>duckduckgo.com</h3>
+      </div>
+      <div>
+        <h4>Issued By</h4>
+        <h3 id='issued_by'>Let's Encrypt Authority X3</h3>
+      </div>
+      <div>
+        <h4>Valid</h4>
+        <h3 id='valid'>8/9/19 → 10/30/20</h3>
+      </div>
+      <pre id="raw" style="display: none;"></pre>
+    </div>
+    <button id='details' type='button' name='button'>RAW</button>
+    <button id='ok' type='button' name='button' onclick="hideWin()" autofocus>OK</button>
+  </body>
+  <script>
+    let cert = JSON.parse(decodeURIComponent(window.location.href.split('?')[1]));
+
+    if(cert.bg.startsWith('#FFF')){
+      var css = `
+        ::-webkit-scrollbar-track { background-color: #eee;}
+        ::-webkit-scrollbar-thumb { background-color: #c2c2c2;}
+        ::-webkit-scrollbar-thumb:hover { background-color: #adacac;}
+        ::-webkit-scrollbar-corner { background-color: transparent;}
+
+        * {
+          color: black;
+        }
+
+        body {
+          background: white;
+        }
+
+        #site {
+          color: #fbd263;
+        }
+
+        #info {
+          filter: invert(1);
+          background: #0c0c0c;
+        }
+
+        #details {
+          background: #eee;
+        }
+
+        pre {
+          filter: invert(1) !important;
+          background: #e4e4e4;
+        }
+      `,
+          head = document.head || document.getElementsByTagName('head')[0],
+          style = document.createElement('style');
+
+      head.appendChild(style);
+
+      style.type = 'text/css';
+      if (style.styleSheet){
+        // This is required for IE8 and below.
+        style.styleSheet.cssText = css;
+      } else {
+        style.appendChild(document.createTextNode(css));
+      }
+    }
+
+    function getFormattedDate(date) {
+      var year = date.getFullYear();
+
+      var month = (1 + date.getMonth()).toString();
+      month = month.length > 1 ? month : '0' + month;
+
+      var day = date.getDate().toString();
+      day = day.length > 1 ? day : '0' + day;
+
+      return month + '/' + day + '/' + year;
+    }
+
+    let validFrom = getFormattedDate(new Date(cert.valid_from));
+    let validTo = getFormattedDate(new Date(cert.valid_to));
+
+    document.getElementById('valid').innerHTML = `${validFrom}  →  ${validTo}`;
+
+    document.getElementById('site').innerHTML = cert.subject.CN;
+
+    document.getElementById('issued_to').innerHTML = cert.subject.CN;
+    document.getElementById('issued_by').innerHTML = cert.issuer.CN;
+
+    document.getElementById('details').onclick = function () {
+      var childDivs = document.getElementById('info').getElementsByTagName('div');
+      if (this.innerHTML == 'RAW') {
+        for( i = 0; i < childDivs.length; i++ ) { childDivs[i].style.display = 'none'; }
+        document.getElementById('raw').style.display = 'block';
+        this.innerHTML = 'DETAILS';
+      } else {
+        document.getElementById('raw').style.display = 'none';
+        for( i = 0; i < childDivs.length; i++ ) { childDivs[i].style.display = 'block'; }
+        this.innerHTML = 'RAW';
+      }
+    }
+
+    document.getElementById('raw').innerHTML = JSON.stringify(cert, null, 4);
+
+    document.title = cert.subject.CN;
+
+    let { remote } = require('electron');
+    function hideWin() { remote.getCurrentWindow().hide(); }
+  </script>
+</html>

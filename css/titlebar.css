@@ -7,7 +7,9 @@
   display: flex;
   position: fixed;
 
-  background: var(--darker-2);
+  top: 40px;
+
+  background: var(--nord4);
 }
 
 #titlebar > * { height: inherit; }
@@ -23,9 +25,6 @@
 }
 
 .tab {
-  border-top-left-radius: var(--round-corners);
-  border-top-right-radius: var(--round-corners);
-
   width: 150px;
   height: 30px;
   display: flex;
@@ -34,22 +33,17 @@
 
   min-width: 50px;
 
-  transition: var(--transition);
-
   padding-left: var(--tab-padding);
-}
 
-.tab:not(.selected):hover {
-  background: var(--lighter-1);
+  position: relative;
 }
 
 .tab.selected {
-  background: var(--navbar-color);
+  background: var(--nord5);
   /* border-top-left-radius: var(--round-corners);
    border-top-right-radius: var(--round-corners); */
 
-  transition: var(--transition);
-  box-shadow: -1px 0px 0px 0px var(--outline), 1px 0px 0px 0px var(--outline), 0px 1px 0px 0px var(--navbar-color);
+   box-shadow: -1px 0px 0px 0px var(--outline), 1px 0px 0px 0px var(--outline), 0px -1px 0px 0px var(--nord5), inset 0px -1px 0px 0px var(--outline);
 }
 
 /* TAB ITEMS */
@@ -59,8 +53,6 @@
   height: 15px;
 
   margin-right: var(--tab-padding);
-
-  transition: var(--transition);
 }
 
 img[src="//:0"] {
@@ -72,29 +64,30 @@ img[src="//:0"] {
   font-size: 13px;
   white-space: nowrap;
   overflow: hidden;
-  position: relative;
 }
 
 .tab-label:after {
   content: '';
-  background: linear-gradient(90deg, transparent, var(--navbar-color));
+  background: linear-gradient(90deg, transparent, var(--nord4));
 
-  width: 20px;
-  height: 100%;
+  width: 30px;
+  height: 98%;
 
   position: absolute;
-  top: 0px; right: 0px;
+  top: 0px; right: 28px;
 }
 
-.tab:hover > .tab-close { opacity: 0.75; }
+.tab.selected > .tab-label:after {
+  background: linear-gradient(90deg, transparent, var(--nord5));
+}
 
 .tab-close {
-  opacity: 0;
+  opacity: 0.75;
 
   width: 12px;
   height: 12px;
 
-  margin: 1px 4px 0px 7px;
+  margin: 0px 4px 0px 7px;
   margin-left: auto;
   padding: 6px;
 
@@ -110,10 +103,10 @@ img[src="//:0"] {
 /* NEW TAB BUTTON */
 
 #new-tab {
-  margin-left: 3px;
+  margin-left: 5px;
 
-  width: 25px;
-  height: 25px;
+  width: 24px;
+  height: 24px;
 
   display: flex;
   justify-content: center;
@@ -130,59 +123,3 @@ img[src="//:0"] {
 #new-tab > img {
   width: 15px;
 }
-
-/* DRAGGABLE REGION */
-
-#drag-region {
-  flex-grow: 1;
-  -webkit-app-region: drag;
-}
-
-/* WINDOW CONTROLS */
-
-#window-controls {
-  display: grid;
-  grid-template-columns: repeat(3, 40px);
-  top: 0;
-  right: 0;
-  font-size: 14px;
-
-  -webkit-app-region: no-drag;
-}
-
-#window-controls .button {
-  grid-row: 1 / span 1;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-
-  height: inherit;
-}
-
-#window-controls .button img {
-  width: 15px;
-  height: 15px;
-}
-
-#window-controls .button {
-  user-select: none;
-  cursor: default;
-  color: #050708;
-
-  transition: var(--transition);
-}
-
-#window-controls .button:hover{ background: var(--darker-1); }
-
-#window-controls #min-button { grid-column: 1; }
-#window-controls #max-button,
-#window-controls #restore-button { grid-column: 2; }
-#window-controls #close-button {
-  grid-column: 3;
-  transition: var(--transition);
-}
-
-#window-controls #restore-button { display: none; }
-
-#window-controls #close-button:hover { background: #e81123; }
-#window-controls #close-button:hover > img { filter: invert(1); }

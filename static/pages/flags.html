@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>Experiments</title>
+    <link rel="stylesheet" href="assets://global.css">
+    <script src="assets://jquery.js"></script>
+
+    <style>
+      * { border-color: var(--foreground) !important; }
+
+      table {
+        position: absolute;
+        width: 50%;
+        top: 10rem;
+        left: 0;
+        right: 0;
+        margin: auto;
+
+        border: 1px solid;
+        border-bottom: none;
+        border-radius: var(--round-corners);
+        border-spacing: 0rem;
+      }
+
+      th {
+        background: var(--foreground);
+        color: var(--background);
+        padding: 7px;
+      }
+
+      td {
+        border-bottom: 1px solid;
+        padding: 20px 20px;
+      }
+
+      .flag-selected { background: var(--accent); }
+      .flag-selected > td { color: var(--foreground-secondary) }
+
+      #search {
+        top: 6.5rem;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- <input id="search" class="form-control" type="text" placeholder="Search..." autofocus> -->
+    <table>
+      <thead>
+      	<tr>
+      		<th>Flag</th>
+      		<th>Description</th>
+      	</tr>
+    	</thead>
+      <tbody>
+    		<tr>
+    			<td>--enable-smooth-scrolling</td>
+    			<td>Enables smooth scroll animation.</td>
+    		</tr>
+    		<tr>
+    			<td>--dns-prefetch-disable</td>
+    			<td>Disables DNS prefetching service.</td>
+    		</tr>
+    		<tr>
+    			<td>--no-pings</td>
+    			<td>Prevents pings on a browser-wide level.</td>
+    		</tr>
+    		<tr>
+    			<td>--no-referrers</td>
+    			<td>Blocks referrers on a browser-wide level.</td>
+    		</tr>
+    		<tr>
+    			<td>--no-crash-upload</td>
+    			<td>Force disable Google's crash upload service.</td>
+    		</tr>
+    		<tr>
+    			<td>--no-default-browser-check</td>
+    			<td>Force disable Google's Default Browser Check telemetry.</td>
+    		</tr>
+    		<tr>
+    			<td>--disable-breakpad</td>
+    			<td>Force disable Google's breakpad.</td>
+    		</tr>
+    		<tr>
+    			<td>--disable-plugins</td>
+    			<td>Force disable external plugins (like Flash).</td>
+    		</tr>
+        <tr>
+          <td>--do-not-track</td>
+          <td>Send a Do Not Track request to all websites.</td>
+        </tr>
+    	</tbody>
+    </table>
+  </body>
+  <script type="text/javascript">
+    let flags = sendSync('flags.js', 'get');
+
+    let theme = sendSync('getTheme');
+    if(theme != 'light') document.querySelector("head").innerHTML += '<link rel="stylesheet" href="assets://themes/' + theme + '.css">';
+
+    $('tr').click(async e => {
+      let flag = $(e.currentTarget).children().first().text();
+      if($(e.currentTarget).hasClass('flag-selected')) {
+        flags.splice(flags.indexOf(flag), 1);
+      } else {
+        flags.push(flag);
+      }
+      send('flags.js', 'set', flags)
+      $(e.currentTarget).toggleClass('flag-selected')
+    });
+
+    function enableFlags(flagList) {
+      let td = $('td');
+      for (let i = 0; i < td.length; i++) {
+        if(flagList.includes( $(td[i]).text() )) $(td[i]).parent().addClass('flag-selected');
+      }
+    }
+
+    enableFlags(flags);
+  </script>
+</html>
