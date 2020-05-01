@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>New Tab</title>
+
+    <link rel="stylesheet" href="https://storage.googleapis.com/non-spec-apps/mio-icons/latest/outline.css">
+
+    <link rel="stylesheet" href="assets://global.css">
+
+    <script src="assets://jquery.js"></script>
+    <style>
+
+      html {
+        --background-soft: rgba(255,255,255,0.05);
+        --background-firm: rgba(255,255,255,0.1);
+        --background-hard: rgba(255,255,255,0.15);
+      }
+
+      * { box-sizing: border-box; z-index: 2; }
+
+      body {
+        position: relative;
+        background: var(--background); margin: 0px;
+        z-index: 0 !important; overflow: hidden;
+      }
+
+      .gradient::after {
+        content: "";
+        display: inline-block;
+        position: absolute;
+        top: 0px;
+        right: 0px;
+        left: 0px;
+        bottom: 0px;
+        z-index: 1;
+        opacity: 0.75;
+        background: linear-gradient( rgba(0,0,0,0.8), rgba(0,0,0,0) 35%, rgba(0,0,0,0) 80%, rgba(0,0,0,0.6) 100% );
+      }
+
+      header {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        width: 100%;
+        height: -webkit-fill-available;
+      }
+
+      footer {
+        display: flex;
+        position: absolute;
+        bottom: 60px;
+        left: 50%;
+        transform: translateX(-50%);
+        align-items: center;
+      }
+
+      #separator {
+        width: 1px;
+        background: white;
+        margin-left: 15px;
+        margin-right: 10px;
+        height: 25px;
+        opacity: 0.75;
+      }
+
+      #peacock {
+        color: white;
+        font-weight: bold;
+        font-size: 50px;
+
+        position: absolute;
+        top: 35px;
+      }
+
+      .icon {
+        border-radius: 10px;
+        display: inline-block;
+        width: 35px; height: 35px;
+        background-repeat: no-repeat !important;
+        background-size: contain !important;
+        filter: contrast(4) invert(1);
+        fill: black !important;
+      }
+
+      .icon-container {
+        background: transparent;
+        border: none;
+        border-radius: 5px;
+
+        cursor: pointer;
+
+        display: flex;
+        justify-content: center;
+        align-items: center;
+
+        padding: 8px;
+        margin-left: 5px;
+
+        opacity: 0.9;
+      }
+
+      .icon-container:hover {
+        backdrop-filter: blur(3px);
+        background: rgba(0,0,0,0.1);
+        opacity: 1;
+      }
+
+      #grid {
+        display: flex;
+        flex-direction: row;
+
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        margin: auto;
+
+        width: 90%;
+        max-width: 1300px;
+        height: 230px;
+      }
+
+      .item {
+        flex-grow: 1;
+        background: var(--background-soft);
+        margin-left: 20px;
+        border-radius: 5px;
+        transition: var(--transition);
+
+        backdrop-filter: blur(3px);
+
+        display: flex;
+        justify-content: center;
+        align-items: center;
+
+        cursor: pointer;
+
+        position: relative;
+        border: 2px solid rgba(0,0,0,0.075);
+      }
+
+      .item:hover {
+        background: var(--background-firm);
+        transform: translateY(-5px);
+      }
+
+      .item:hover > .remove-item {
+        opacity: 0.9;
+      }
+
+      #welcome {
+        position: fixed;
+        top: 25%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+      }
+
+      #time {
+        color: white;
+        font-weight: bold;
+        font-size: 50px;
+
+        position: absolute;
+        margin: 0px;
+        top: 35px;
+        left: 35px;
+      }
+
+      .favicon {
+        filter: contrast(1) invert(0);
+        opacity: 1;
+      }
+
+      .remove-item {
+        opacity: 0;
+        transition: var(--transition);
+
+        border: none;
+        background: none;
+        border-radius: 5px;
+
+        position: absolute;
+        top: 5px;
+        right: 5px;
+        height: 35px;
+        padding: 5px;
+      }
+
+      .remove-item:hover {
+        cursor: pointer;
+        background: var(--background-firm);
+      }
+
+      .remove-item svg {
+        fill: var(--nord4);
+        opacity: 0.9;
+      }
+
+      #recently-visited {
+        position: absolute;
+        transform: translateX(20px);
+        top: -60px;
+
+        opacity: 0.95;
+        color: white;
+        font-weight: 400;
+
+        text-shadow: black 0px 0px 50px;
+      }
+
+      #bg {
+        width: 100%;
+        height: 100%;
+        position: absolute;
+        top: 0px; bottom: 0px;
+        right: 0px; left: 0px;
+        z-index: 1 !important;
+        opacity: 0;
+        object-fit: cover;
+        transform: scale(1.2);
+      }
+
+      /* ASIDE */
+
+      aside {
+        position: absolute;
+        bottom: 50px;
+        left: 50px;
+
+        width: fit-content;
+        min-width: 150px;
+        height: 100px;
+
+        background: var(--background);
+        border-radius: var(--round-corners);
+
+        flex-direction: column;
+      }
+
+      aside button {
+        border: none;
+        background: none;
+      }
+
+      /* TOP */
+
+      aside #top { width: 100%; display: flex; height: 30px; }
+      aside #top button { width: 50%; height: 30px; }
+
+      aside #top .tab { outline: none; box-shadow: none; }
+
+      aside #top .tab:not(.selected) {
+        color: white;
+        background: var(--foreground-secondary);
+        transition: var(--transition);
+      }
+
+      aside #top .tab.selected {
+        background: var(--accent);
+        color: var(--background);
+      }
+
+      /* BOTTOM */
+
+      aside #bottom {
+        height: 100%;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        padding: 0px 10px;
+      }
+
+      aside #bottom #save {
+        color: white;
+        background: var(--foreground-secondary);
+        border-radius: var(--round-corners);
+        transition: var(--transition);
+
+        padding: 10px 15px;
+        height: 35px;
+      }
+
+      aside #bottom #theme {
+        display: flex;
+        flex-direction: column;
+
+        height: 35px;
+
+        margin-right: 10px;
+      }
+
+      aside #bottom #theme > * {
+        border: none;
+        background: var(--foreground-secondary);
+        padding: 10px;
+        height: 100%;
+        color: white;
+        border-radius: var(--round-corners);
+      }
+
+      aside #bottom #theme * svg {
+        fill: white;
+        margin-top: -4px;
+      }
+    </style>
+  </head>
+  <body onload="startTime()">
+    <img id="bg"></img>
+    <p id="time"></p>
+
+    <header>
+      <h1 id="peacock">Peacock</h1>
+    </header>
+
+    <div id="grid">
+      <h2 id="recently-visited">Speed Dial</h2>
+
+      <div class="item">
+        <img class="icon">
+      </div>
+      <div class="item">
+        <img class="icon">
+      </div>
+      <div class="item">
+        <img class="icon">
+      </div>
+      <div class="item">
+        <img class="icon">
+      </div>
+      <div class="item">
+        <img class="icon">
+      </div>
+    </div>
+
+    <aside style="display: none;">
+      <div id="top">
+        <button class="tab selected">Unsplash</button>
+        <button class="tab">Image</button>
+      </div>
+      <div id="bottom">
+        <div id="theme">
+          <input placeholder="Theme (eg. nature)">
+        </div>
+        <button id="save">Save</button>
+      </div>
+    </aside>
+
+    <footer>
+      <button id="palette-btn" class="icon-container">
+        <svg viewBox="0 0 24 24" class="icon">
+          <path fill="none" d="M0 0h24v24H0z"></path>
+          <path d="M12 2c5.522 0 10 3.978 10 8.889a5.558 5.558 0 0 1-5.556 5.555h-1.966c-.922 0-1.667.745-1.667
+          1.667 0 .422.167.811.422 1.1.267.3.434.689.434 1.122C13.667 21.256 12.9 22 12 22 6.478 22 2 17.522 2
+          12S6.478 2 12 2zm-1.189 16.111a3.664 3.664 0 0 1 3.667-3.667h1.966A3.558 3.558 0 0 0 20 10.89C20 7.139
+          16.468 4 12 4a8 8 0 0 0-.676 15.972 3.648 3.648 0 0 1-.513-1.86zM7.5 12a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0
+          1 0 3zm9 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zM12 9a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3z"></path>
+        </svg>
+      </button>
+      <p id="separator"></p>
+      <a href="peacock://settings" id="settings-btn" class="icon-container">
+        <svg viewBox="0 0 24 24" class="icon">
+          <path fill="none" d="M0 0h24v24H0z"></path>
+          <path d="M3.34 17a10.018 10.018 0 0 1-.978-2.326 3 3 0 0 0 .002-5.347A9.99 9.99 0 0 1 4.865 4.99a3 3 0
+          0 0 4.631-2.674 9.99 9.99 0 0 1 5.007.002 3 3 0 0 0 4.632 2.672c.579.59 1.093 1.261 1.525 2.01.433.749.757
+          1.53.978 2.326a3 3 0 0 0-.002 5.347 9.99 9.99 0 0 1-2.501 4.337 3 3 0 0 0-4.631 2.674 9.99 9.99 0 0
+          1-5.007-.002 3 3 0 0 0-4.632-2.672A10.018 10.018 0 0 1 3.34 17zm5.66.196a4.993 4.993 0 0 1 2.25 2.77c.499.047
+          1 .048 1.499.001A4.993 4.993 0 0 1 15 17.197a4.993 4.993 0 0 1 3.525-.565c.29-.408.54-.843.748-1.298A4.993
+          4.993 0 0 1 18 12c0-1.26.47-2.437 1.273-3.334a8.126 8.126 0 0 0-.75-1.298A4.993 4.993 0 0 1 15 6.804a4.993
+          4.993 0 0 1-2.25-2.77c-.499-.047-1-.048-1.499-.001A4.993 4.993 0 0 1 9 6.803a4.993 4.993 0 0 1-3.525.565 7.99
+          7.99 0 0 0-.748 1.298A4.993 4.993 0 0 1 6 12c0 1.26-.47 2.437-1.273 3.334a8.126 8.126 0 0 0 .75 1.298A4.993
+          4.993 0 0 1 9 17.196zM12 15a3 3 0 1 1 0-6 3 3 0 0 1 0 6zm0-2a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"></path>
+        </svg>
+      </a>
+      <a href="peacock://bookmarks" id="bookmarks-btn" class="icon-container">
+        <svg viewBox="0 0 24 24" class="icon">
+          <path fill="none" d="M0 0h24v24H0z"></path>
+          <path d="M3 18.5V5a3 3 0 0 1 3-3h14a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H6.5A3.5 3.5 0 0 1 3 18.5zM19 20v-3H6.5a1.5
+          1.5 0 0 0 0 3H19zM10 4H6a1 1 0 0 0-1 1v10.337A3.486 3.486 0 0 1 6.5 15H19V4h-2v8l-3.5-2-3.5 2V4z"></path>
+        </svg>
+      </a>
+      <a href="peacock://history" id="history-btn" class="icon-container">
+        <svg viewBox="0 0 24 24" class="icon">
+          <path fill="none" d="M0 0H24V24H0z"></path>
+          <path d="M12 2c5.523 0 10 4.477 10 10s-4.477 10-10 10S2 17.523 2 12h2c0 4.418 3.582 8 8 8s8-3.582 8-8-3.582-8-8-8C9.25
+          4 6.824 5.387 5.385 7.5H8v2H2v-6h2V6c1.824-2.43 4.729-4 8-4zm1 5v4.585l3.243 3.243-1.415 1.415L11 12.413V7h2z"></path>
+        </svg>
+      </a>
+    </footer>
+  </body>
+  <script>
+    let theme = sendSync('getTheme');
+    if(theme != 'light') document.querySelector("head").innerHTML += `<link rel="stylesheet" href="assets://themes/${ theme }.css">`;
+
+    let add = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='24' height='24'%3E%3Cpath fill='none'
+      d='M0 0h24v24H0z'/%3E%3Cpath d='M11 11V5h2v6h6v2h-6v6h-2v-6H5v-2z'/%3E%3C/svg%3E`;
+
+    let earth = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='24' height='24'%3E%3Cpath fill='none'
+    d='M0 0h24v24H0z'/%3E%3Cpath fill="white" d='M6.235 6.453a8 8 0 0 0 8.817 12.944c.115-.75-.137-1.47-.24-1.722-.23-.56-.988-1.517-2.253-2.844-.338-.355-.316-.628-.195-1.437l.013-.091c.082-.554.22-.882 2.085-1.178.948-.15 1.197.228 1.542.753l.116.172c.328.48.571.59.938.756.165.075.37.17.645.325.652.373.652.794.652 1.716v.105c0 .391-.038.735-.098 1.034a8.002 8.002 0 0 0-3.105-12.341c-.553.373-1.312.902-1.577 1.265-.135.185-.327 1.132-.95 1.21-.162.02-.381.006-.613-.009-.622-.04-1.472-.095-1.744.644-.173.468-.203 1.74.356 2.4.09.105.107.3.046.519-.08.287-.241.462-.292.498-.096-.056-.288-.279-.419-.43-.313-.365-.705-.82-1.211-.96-.184-.051-.386-.093-.583-.135-.549-.115-1.17-.246-1.315-.554-.106-.226-.105-.537-.105-.865 0-.417 0-.888-.204-1.345a1.276 1.276 0 0 0-.306-.43zM12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z'/%3E%3C/svg%3E`;
+
+    let backgroundTheme = sendSync('newTab', 'getBackgroundTheme') || "robots";
+
+    function startTime() {
+      var today = new Date();
+      var h = today.getHours();
+      var m = today.getMinutes();
+      m = (m < 10) ? "0" + m : m;
+
+      if($('#time').text() != h + ":" + m) {
+        $('#time').text(h + ":" + m);
+      }
+
+      var t = setTimeout(startTime, 1000);
+    }
+
+    let items = $('.item');
+
+    for (let i = 0; i < items.length; i++) {
+      let item = $(items[i]);
+      item.children().first().attr('src', add);
+      item.click(async (e) => {
+        if(item.attr('data-url')) {
+          window.location = item.attr('data-url');
+        } else {
+          setItem(item, prompt('Enter slot url:'));
+        }
+      });
+    }
+
+    function setItem(item, domain) {
+      if(!domain || domain == '') return;
+      if(item.length == 0) return;
+
+      try { new URL(domain) }
+      catch (e) {
+        try {
+          domain = 'https://' + domain;
+          new URL(domain);
+        } catch (e) {
+          alert('Invalid URL.');
+          return;
+        }
+      }
+
+      if(!domain.startsWith('http')) domain = 'https://' + domain;
+
+      let icon = item.children().first();
+      item.attr('data-url', domain);
+      item.attr('title', domain);
+      icon.attr('class', 'icon favicon');
+
+      try {
+        let origin = (new URL(domain)).origin;
+        icon.attr('src', `${origin}/favicon.ico`);
+      } catch (e) {
+        icon.attr('src', earth);
+      }
+
+      icon.on("error", () => { icon.attr('src', earth); });
+
+      let element = item[0];
+      let index = Array.from(element.parentNode.children).indexOf(element) - 1;
+      send('newTab', 'saveItem', {id: index, domain: domain});
+
+      item.append('<button class="remove-item"><svg width="24" height="24" viewBox="0 0 24 24"><path fill="none" d="M0 0h24v24H0V0z"/><path d="M18.3 5.71c-.39-.39-1.02-.39-1.41 0L12 10.59 7.11 5.7c-.39-.39-1.02-.39-1.41 0-.39.39-.39 1.02 0 1.41L10.59 12 5.7 16.89c-.39.39-.39 1.02 0 1.41.39.39 1.02.39 1.41 0L12 13.41l4.89 4.89c.39.39 1.02.39 1.41 0 .39-.39.39-1.02 0-1.41L13.41 12l4.89-4.89c.38-.38.38-1.02 0-1.4z"/></svg></button>');
+      item.children().eq(1).click(async (e) => {
+        e.stopPropagation();
+        clearItem(item);
+        send('newTab', 'saveItem', {id: index, domain: ""});
+      });
+    }
+
+    function clearItem(item) {
+      if(item.attr('data-url')) { item.removeAttr('data-url'); item.removeAttr('title'); }
+      if(item.children().first().attr('style')) item.children().first().removeAttr('style');
+      item.children().first().attr('class', 'icon');
+      item.children().first().attr('src', add);
+
+      if(item.children().length > 1) item.children().eq(1).remove();
+    }
+
+    function clearItems() {
+      for (let i = 0; i < items.length; i++) {
+        clearItem($(items[i]));
+      }
+    }
+
+    function listSites(sites) {
+      for (var i = 0; i < sites.length; i++) {
+        if($('.item').eq(i) && sites[i]) {
+          setItem($('.item').eq(i), sites[i]);
+        }
+      }
+    }
+
+    function setBackground(bg) {
+      if(bg.startsWith('#')) {
+        $('body').css('background', bg);
+        $('body').removeClass('gradient');
+        $('#bg').css('opacity', '0');
+      } else {
+        $('#bg').attr('src', bg).on('load', function() {
+          $('#bg').animate({ opacity: 1, transform: 'scale(1)' }, { duration: 500 });
+          $('body').addClass('gradient');
+
+          $('html')[0].style.setProperty("--background-soft", "rgba(0,0,0,0.25)");
+          $('html')[0].style.setProperty("--background-firm", "rgba(0,0,0,0.35)");
+          $('html')[0].style.setProperty("--background-hard", "rgba(0,0,0,0.5)");
+        });
+      }
+    }
+
+    $('#palette-btn').click(async e => { toggleAside() });
+
+    $('aside #top .tab').click(async e => {
+      if(e.target.innerHTML == 'Image') {
+        $('aside #bottom #theme').html(`<input id="static" placeholder="Image URL (eg. png, jpg, gif)">`);
+      } else {
+        $('aside #bottom #theme').html(`<input id="unsplash" placeholder="Theme (eg. nature, peacock)">`);
+      }
+      $('.selected').removeClass('selected');
+      $(e.target).addClass('selected');
+    });
+
+    $('aside #bottom #save').click(async e => {
+      if($('aside #bottom #theme input').val().length > 0) {
+        let val = $('aside #bottom #theme input').val();
+
+        if($('aside #bottom #theme input').attr('id') == 'static') backgroundTheme = val;
+        else backgroundTheme = 'https://source.unsplash.com/featured/1280x720/?' + val;
+
+        send('newTab', 'setBackgroundTheme', backgroundTheme);
+        setBackground(backgroundTheme);
+
+        toggleAside();
+      }
+    });
+
+    async function toggleAside () {
+      if ($('aside').css('display') == 'none') $('aside').css('display', 'flex');
+      else if ($('aside').css('display') == 'flex') $('aside').css('display', 'none');
+    }
+
+    try { send('newTab', 'focusSearchbar'); } catch (e) {}
+
+    setBackground(backgroundTheme);
+
+    listSites(sendSync('newTab', 'loadItems'));
+  </script>
+</html>

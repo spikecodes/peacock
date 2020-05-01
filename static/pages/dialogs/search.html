@@ -1,0 +1,96 @@
+<html>
+
+<head>
+	<title>Peacock Search</title>
+	<link href="assets://global.css" rel="stylesheet" type="text/css">
+	<style>
+		main {
+			height: 100%;
+			width: 100%;
+			flex-direction: column;
+			border-radius: var(--border-radius);
+		}
+
+		button {
+			width: 100%;
+			height: 35px;
+			padding: 20px 25px;
+			display: flex;
+			flex-direction: row;
+			background: var(--background);
+		}
+
+		button:hover,
+		#suggestionSelected {
+			background: var(--foreground-secondary);
+		}
+	</style>
+</head>
+
+<body>
+	<main></main>
+</body>
+<style>
+	body, html { background: transparent !important; }
+</style>
+<script>
+	let {
+		remote,
+		ipcRenderer
+	} = require('electron');
+
+	let results = document.getElementsByTagName('main')[0];
+
+	var selectItem = async (item) => {
+		if(document.getElementById('suggestionSelected')) document.getElementById('suggestionSelected').id = '';
+	}
+
+	var fetchTheme = async () => {
+		let theme = ipcRenderer.sendSync('getTheme');
+		let existing = document.querySelector('head link[href*="assets://themes"]');
+		if (existing) existing.remove();
+		if (theme != 'light') document.querySelector("head").innerHTML +=
+			`<link rel="stylesheet" href="assets://themes/${ theme }.css">`;
+	};
+
+	var fetchAutoCompleteResults = async query => {
+		var request = new XMLHttpRequest();
+		request.onreadystatechange = async e => {
+			if (request.readyState == 4 && request.status == 200) {
+				results.innerHTML = '';
+				let values = JSON.parse(request.responseText)[1];
+				if (!values) return;
+				for (let i = 0; i < (values.length <= 6 ? values.length : 6); i++) {
+					let button = document.createElement('button');
+					button.innerText = values[i];
+					button.onclick = async e => {
+						ipcRenderer.send('loadPage', values[i])
+					};
+
+					results.appendChild(button);
+				}
+
+				selectItem(results.firstChild);
+			}
+		}
+		request.open("GET", `https://ac.duckduckgo.com/ac/?q=${ query }&type=list`, true); // true for asynchronous 
+		request.send(null);
+	}
+
+	// document.addEventListener('keydown', function (e) {
+	// 	if (e.which === 40) {
+	// 		selectItem(document.getElementById('suggestionSelected').nextElementSibling);
+	// 	} else if (e.which === 38) {
+	// 		selectItem(document.getElementById('suggestionSelected').previousElementSibling);
+	// 	}
+	// });
+
+	// document.addEventListener('keyup', doc_keyUp, false);
+
+	ipcRenderer.on('update', async (e, text) => {
+		fetchTheme();
+		fetchAutoCompleteResults(text);
+	});
+</script>
+
+</html>

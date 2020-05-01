@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>Peacock Shield</title>
+    <link href="assets://global.css" rel="stylesheet" type="text/css">
+    <style>
+      body { padding: 0px; margin: 0px; }
+      #main {
+        background: #2B2B2B;
+        border-radius: 10px;
+
+        width: 100%; height: 75px;
+        padding: 5px 10px; margin: 0px;
+
+        padding-top: 3px;
+
+        box-shadow: 0 1px 5px 1px #00000063;
+      }
+
+      #text { float: left; }
+      #toggle { float: right; }
+
+      * { box-sizing: border-box; z-index: 2; }
+      h1 { margin: 0px; padding: 0px; letter-spacing: 0.5px; }
+
+      #peacock { color: #FFD563; }
+      #shield { color: white; margin-top: -9px; }
+
+      #toggle {
+        position: relative;
+        right: 0px; top: 15px;
+
+        text-align: center;
+
+        width: 75px;
+
+        cursor: pointer;
+      }
+
+      #count {
+        position: absolute;
+        left: 50%; top: -50%;
+        transform: translateX(-90%);
+
+        font-weight: bold;
+        font-size: 21px;
+
+        color: #2b2b2b;
+      }
+
+      #icon { width: 100%; height: auto; }
+    </style>
+  </head>
+  <body>
+    <div id="main">
+      <div id="text">
+        <h1 id="peacock">Peacock</h1>
+        <h1 id="shield">Shield</h1>
+      </div>
+      <div id="toggle">
+        <p id="count">43</p>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 26 11" id="icon" data-state="enabled">
+          <path id="Subtraction_28" data-name="Subtraction 28" d="M20.5,11H5.5a5.5,5.5,0,0,1,0-11h15a5.5,5.5,0,1,1,0,11Zm.006-9.35a3.7,3.7,0,0,0-3.714,3.667,
+            3.715,3.715,0,0,0,7.429,0A3.7,3.7,0,0,0,20.507,1.651Z" transform="translate(-0.001 -0.002)" fill="#fff"/>
+        </svg>
+      </div>
+    </div>
+  </body>
+  <script type="text/javascript">
+    const { ipcRenderer } = require('electron');
+
+    let toggle_enabled = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 26.22 11" id="icon" data-state="enabled">
+      <g id="Group_540" data-name="Group 540" transform="translate(-108.001 -91)">
+        <g id="Rectangle_181" data-name="Rectangle 181" transform="translate(108.001 91)" fill="#fff" stroke="#fff" stroke-width="1.75">
+          <rect width="26" height="11" rx="5.5" stroke="none"/>
+          <rect x="0.875" y="0.875" width="24.25" height="9.25" rx="4.625" fill="none"/>
+        </g>
+        <g id="Ellipse_242" data-name="Ellipse 242" transform="translate(123.793 91.5)" fill="#2b2b2b" stroke="#fff" stroke-width="1.75">
+          <ellipse cx="5.214" cy="5.166" rx="5.214" ry="5.166" stroke="none"/>
+          <ellipse cx="5.214" cy="5.166" rx="4.339" ry="4.291" fill="none"/>
+        </g>
+      </g>
+    </svg>`;
+
+    let toggle_disabled = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 26 11" id="icon" data-state="disabled">
+      <g id="Group_539" data-name="Group 539" transform="translate(-108.001 -91)">
+        <g id="Rectangle_181" data-name="Rectangle 181" transform="translate(108.001 91)" fill="none" stroke="#fff" stroke-width="1.75">
+          <rect width="26" height="11" rx="5.5" stroke="none"/>
+          <rect x="0.875" y="0.875" width="24.25" height="9.25" rx="4.625" fill="none"/>
+        </g>
+        <g id="Ellipse_242" data-name="Ellipse 242" transform="translate(108.793 91.5)" fill="none" stroke="#fff" stroke-width="1.75">
+          <ellipse cx="5.214" cy="5.166" rx="5.214" ry="5.166" stroke="none"/>
+          <ellipse cx="5.214" cy="5.166" rx="4.339" ry="4.291" fill="none"/>
+        </g>
+      </g>
+    </svg>`;
+
+    async function enableToggle(send=true) {
+      document.getElementById('count').style.display = 'block';
+      document.getElementById('icon').outerHTML = toggle_enabled;
+
+      if(send) ipcRenderer.send('shield-toggle', true);
+    }
+
+    async function disableToggle(send=true) {
+      document.getElementById('count').style.display = 'none';
+      document.getElementById('icon').outerHTML = toggle_disabled;
+
+      if(send) ipcRenderer.send('shield-toggle', false);
+    }
+
+    document.getElementById('toggle').addEventListener('click', e => {
+      if(document.getElementById('icon').getAttribute('data-state') == 'enabled') { // If enabled
+        // Disable toggle
+        disableToggle();
+      } else {
+        // Enable toggle
+        enableToggle();
+      }
+
+      document.getElementById('count').innerHTML = '';
+    });
+
+    ipcRenderer.on('count', async (e, num, toggle) => {
+      document.getElementById('count').innerHTML = num;
+      if(toggle) { enableToggle(false) }
+      else { disableToggle(false) }
+    });
+  </script>
+</html>

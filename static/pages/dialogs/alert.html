@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title></title>
+    <script>window.$ = window.jQuery = require('jquery');</script>
+
+    <link rel="stylesheet" href="assets://global.css">
+    <style>
+      #ok-btn {
+        position: fixed;
+        right: 20px;
+        bottom: 20px;
+        border: 0;
+        border-radius: 5px;
+        background: var(--accent);
+        color: var(--foreground-secondary);
+        font-weight: 500;
+        padding: 10px 25px;
+      }
+
+      #cancel-btn {
+        position: fixed;
+        right: 100px;
+        color: white;
+        bottom: 20px;
+        border: 0;
+        border-radius: 5px;
+        background: rgba(1,1,1,0.5);
+        font-weight: 500;
+        padding: 10px 25px;
+      }
+
+      #message {
+        opacity: 0.75;
+        line-height: 20px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      #url {
+        font-size: 16px;
+        line-height: 10px;
+        font-weight: 500;
+        margin-bottom: 10px;
+        margin-top: 15px;
+      }
+
+      main {
+        padding-left: 20px;
+        padding-top: 10px;
+        height: 55% !important;
+        width: 95%;
+        position: absolute;
+        display: flex;
+        flex-direction: column;
+      }
+
+      body {
+        font-size: 16px;
+      }
+
+      input {
+        background: transparent;
+        border: var(--accent) 2px solid;
+        border-radius: 5px;
+        padding: 7px;
+        margin-top: 15px;
+        width: 92%;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <p id="url">www.google.com says</h2>
+      <p id="message">noodle</p>
+      <button id="ok-btn" type="button" id="btn" autofocus>OK</button>
+    </main>
+  </body>
+
+  <script type="text/javascript">
+    let { remote, ipcRenderer } = require('electron');
+
+    ipcRenderer.on('load', (e, alertInfo) => {
+      let url;
+
+      $('body').html(`<main>
+        <p id="url">www.google.com says</h2>
+        <p id="message">noodle</p>
+        <button id="ok-btn" type="button" id="btn" autofocus>OK</button>
+      </main>`);
+
+      if(alertInfo.bg != 'light') {
+        $("head").append('<link rel="stylesheet" href="assets://themes/' + alertInfo.bg + '.css">');
+      } else {
+        $('link[href*="themes"]').remove();
+      }
+
+      try {
+        url = (new URL(alertInfo.url)).hostname;
+      } catch (e) {
+        url = alertInfo.url;
+      }
+
+      $('#url').text(url + ' says');
+      $('#message').text(alertInfo.message);
+      $('#message').attr('title', alertInfo.message);
+
+      switch (alertInfo.type) {
+        case 'alert':
+          document.title = 'Alert';
+          $('#ok-btn').click(async e => remote.getCurrentWindow().hide());
+          $('#ok-btn').focus();
+          break;
+        case 'confirm':
+          $('main').append('<button id="cancel-btn" type="button" id="btn">Cancel</button>');
+
+          document.title = 'Confirm';
+
+          $('#ok-btn').click(async e => {
+            ipcRenderer.send('alert-reply', true);
+            remote.getCurrentWindow().hide();
+          });
+
+          $('#cancel-btn').click(async e =>  {
+            ipcRenderer.send('alert-reply', false);
+            remote.getCurrentWindow().hide();
+          });
+
+          $('#ok-btn').focus();
+          break;
+        case 'prompt':
+          $('main').append('<button id="cancel-btn" type="button" id="btn">Cancel</button>');
+
+          $('#message').after('<input>');
+
+          document.title = 'Prompt';
+
+          $('#ok-btn').click(async e => {
+            ipcRenderer.send('alert-reply', $('input').val());
+            remote.getCurrentWindow().hide();
+          });
+
+          $('input').on("keyup", function(event) {
+            event.preventDefault();
+            if (event.keyCode === 13) {
+              $("ok-btn").click();
+            }
+          });
+
+          $('#cancel-btn').click(async e =>  {
+            ipcRenderer.send('alert-reply', null);
+            remote.getCurrentWindow().hide();
+          });
+
+          $('input').focus();
+          break;
+        default:
+          break;
+      }
+    });
+  </script>
+</html>

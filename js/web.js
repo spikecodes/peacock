@@ -1,4 +1,3 @@
-var document;
 var firstTime = true;
 
 window.$ = window.jQuery = require('jquery');
@@ -19,7 +18,7 @@ function setURLBar(url) {
         bar.select();
       } else {
         let protocol = (new URL(url)).protocol;
-        bar.val(protocol.startsWith('http') ? url.substr(protocol.length + 2) : url);
+        if(!protocol.startsWith('file')) bar.val(protocol.startsWith('http') ? url.substr(protocol.length + 2) : url); // 
       }
     } catch (e) {}
   } else {
@@ -86,7 +85,7 @@ exports.loadStop = function(view, extensions) {
     .then(r => {
       if(r > 0) {
         view.webContents.executeJavaScript(`document.querySelector('link[rel="shortcut icon"]').href`)
-          .then(u => view.tab.setIcon(r));
+          .then(u => view.tab.setIcon(u));
       } else {
         let origin = new URL(view.webContents.getURL()).origin;
         view.tab.setIcon(origin + '/favicon.ico');
@@ -170,10 +169,10 @@ exports.domReady = function (view, storage) {
   if(window.theme == 'dark') {
     view.webContents.insertCSS(`
       ::-webkit-scrollbar { width: 17px; }
-      ::-webkit-scrollbar-track { background-color: #181A1B;}
-      ::-webkit-scrollbar-thumb { background-color: #2A2C2E;}
-      ::-webkit-scrollbar-thumb:hover { background-color: #323537;}
-      ::-webkit-scrollbar-corner { background-color: transparent;}`);
+      ::-webkit-scrollbar-track { background-color: #2E3440;}
+      ::-webkit-scrollbar-thumb { background-color: #3B4252;}
+      ::-webkit-scrollbar-thumb:hover { background-color: #434C5E;}
+      ::-webkit-scrollbar-corner { display: none; }`);
   }
 
   switch (view.webContents.getURL()) {

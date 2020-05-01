@@ -43,3 +43,11 @@ exports.isBookmarked = async function (url) {
   }
   return exists;
 }
+
+exports.renameBookmark = async function (id, name) {
+  let renamedArray = (await this.getBookmarks()).map(item => {
+    if(item.id == id) { item.title=name; return item }
+    else { return item }
+  });
+  return set('bookmarks', renamedArray);
+}

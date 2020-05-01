@@ -6,7 +6,7 @@
     <title>Peacock</title>
 
     <script>window.$ = window.jQuery = require('jquery');</script>
-    <link href="https://fonts.googleapis.com/css?family=Roboto&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/fonts/circular_std.css">
 
     <link rel="stylesheet" href="css/global.css">
     <link rel="stylesheet" href="css/base.css">
@@ -22,19 +22,50 @@
         <button id="home"><img src="images/home.svg"></button>
       </div>
 
+      <div id="drag-region"></div>
+
       <div id="nav-center">
         <button id="site-info">
           <img src="images/lock.svg">
         </button>
+        
         <input id="url" spellcheck="false" autocomplete="false" autofocus type="text" placeholder="Search Google or type URL">
+
         <button id="bookmark">
           <img src="images/bookmark.svg">
         </button>
       </div>
 
+      <div id="drag-region"></div>
+
       <div class="nav-group">
-        <button><img id="shield" class="extension" src="images/Peacock Shield.svg"></button>
+        <!-- <button><img id="shield" class="extension" src="images/Peacock Shield.svg"></button> -->
         <button id="menu"><img src="images/menu.svg"></button>
+      </div>
+
+
+      <div id="window-controls">
+        <div class="button" id="min-button">
+          <svg version="1.1" viewBox="0 0 24 24">
+            <path d="M20,19H4v-2h16V19z"/>
+          </svg>
+        </div>
+        <div class="button" id="max-button">
+          <svg version="1.1" viewBox="0 0 24 24">
+            <path d="M18.8,4H5.2C4.6,4,4,4.6,4,5.2v13.5C4,19.4,4.6,20,5.2,20h13.5c0.7,0,1.2-0.6,1.2-1.2V5.2C20,4.6,19.4,4,18.8,4
+            	z M18,18H6V6h12V18z"/>
+          </svg>
+        </div>
+        <div class="button" id="restore-button">
+          <svg version="1.1" viewBox="0 0 24 24">
+            <path d="M4,8H8V4H20V16H16V20H4V8M16,8V14H18V6H10V8H16M6,12V18H14V12H6Z"/>
+          </svg>
+        </div>
+        <div class="button" id="close-button">
+          <svg version="1.1" viewBox="0 0 24 24">
+            <path d="M20,5.6L18.4,4L12,10.4L5.6,4L4,5.6l6.4,6.4L4,18.4L5.6,20l6.4-6.4l6.4,6.4l1.6-1.6L13.6,12L20,5.6z"/>
+          </svg>
+        </div>
       </div>
     </nav>
 
@@ -45,26 +76,9 @@
         </div>
       </div>
 
-      <div id="drag-region"></div>
-
-      <div id="window-controls">
-        <div class="button" id="min-button">
-          <img src="images/minimize.svg">
-        </div>
-        <div class="button" id="max-button">
-          <img src="images/maximize.svg">
-        </div>
-        <div class="button" id="restore-button">
-          <img src="images/restore.svg">
-        </div>
-        <div class="button" id="close-button">
-          <img src="images/close.svg">
-        </div>
-      </div>
     </header>
   </body>
   <script>
-    // You can also require other files to run in this process
     let renderer = require('./renderer.js');
     let titlebar = require('./js/titlebar.js');
 

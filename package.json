@@ -1,7 +1,7 @@
 {
 	"name": "peacock",
 	"productName": "Peacock",
-	"version": "2.3.5",
+	"version": "2.4.0-beta.1",
 	"description": "Open source privacy-first browser that hosts your data on the blockchain.",
 	"main": "main.js",
 	"repository": {
@@ -31,7 +31,7 @@
 			"target": [
 				"dmg"
 			],
-			"icon": "images/peacock.png"
+			"icon": "images/peacock.icns"
 		},
 		"linux": {
 			"target": [
@@ -45,7 +45,8 @@
 			"allowToChangeInstallationDirectory": "true",
 			"perMachine": "true"
 		},
-		"fileAssociations": [{
+		"fileAssociations": [
+			{
 				"name": "Peacock HTML Document",
 				"description": "Peacock",
 				"ext": "html",
@@ -65,22 +66,23 @@
 	"author": "Spike Raxstone <spike@peacock.link>",
 	"license": "MIT",
 	"devDependencies": {
-		"electron": "^9.0.0-beta.13",
-		"electron-builder": "^22.3.1"
+		"electron": "^9.0.0-beta.20",
+		"electron-builder": "^22.5.1"
 	},
 	"dependencies": {
-		"@cliqz/adblocker-electron": "^1.13.1",
-		"blockstack": "^21.0.0",
+		"@cliqz/adblocker-electron": "^1.14.2",
 		"child_process": "^1.0.2",
 		"cors": "^2.8.5",
 		"cross-fetch": "^3.0.4",
 		"discord-rpc": "^3.1.0",
-		"electron-context-menu": "^0.16.0",
+		"electron-context-menu": "^2.0.0",
+		"electron-process-manager": "^1.0.0",
 		"electron-store": "^5.1.1",
-		"electron-updater": "^4.2.5",
+		"electron-updater": "^4.3.1",
 		"express": "^4.17.1",
-		"jquery": "^3.4.1",
+		"jquery": "^3.5.0",
 		"sortablejs": "^1.10.2",
-		"uuid": "^7.0.3"
+		"uuid": "^7.0.3",
+		"v8-compile-cache": "^2.1.0"
 	}
 }

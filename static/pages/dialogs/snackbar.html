@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title></title>
+    <script>window.$ = window.jQuery = require('jquery');</script>
+
+    <link href="assets://global.css" rel="stylesheet" type="text/css">
+    <style>
+      * {overflow: hidden !important;}
+
+      #snackbar {
+        box-shadow: 0 1px 5px 1px #00000063;
+        background-color: #292A2D;
+        color: white !important;
+        border-radius: 3px;
+
+        z-index: 10;
+        position: absolute;
+        top: 0px; left: 0px;
+        margin: 0px;
+        width: 320px; height: 130px;
+
+        padding: 22px 15px;
+        box-sizing: border-box;
+      }
+
+      #snackbar #close-snackbar {
+        position: absolute;
+        right: 4px;
+        top: 4px;
+        background: transparent;
+        color: white;
+        border: none;
+        font-size: 20px;
+        padding: 1px 7px;
+        box-sizing: border-box;
+        border-radius: 20px;
+      }
+
+      #snackbar #close-snackbar:hover{
+        background: rgba(255,255,255,0.075) !important;
+      }
+
+      #snackbar div button:hover {
+        background: rgba(255,255,255,0.05);
+      }
+
+      #snackbar div button:focus {
+        background: rgba(255,255,255,0.1);
+      }
+
+      #snackbar p {
+        color: white;
+        font-size: 14px;
+        margin: 0px;
+      }
+
+      #snackbar ul {
+        margin-top: 15px;
+        margin-left: 30px;
+      }
+
+      #snackbar ul li {
+        color: white;
+        font-size: 12px;
+      }
+
+      #snackbar div {
+        position: absolute;
+        right: 15px;
+        bottom: 15px;
+      }
+
+      #snackbar div button {
+        background: transparent;
+        border: 1px solid rgba(255,255,255,0.1);
+        color: #FFD563;
+        border-radius: 4px;
+        width: 65px;
+        height: 33px;
+        margin-left: 4px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="snackbar">
+      <button id="close-snackbar">×</button>
+      <p>duckduckgo.com wants to</p>
+      <ul></ul>
+      <div></div>
+    </div>
+  </body>
+  <script type="text/javascript">
+    let { ipcRenderer } = require('electron');
+
+    ipcRenderer.on('permission-request', (event, text, items, buttons) => {
+      $('#snackbar p').text(text);
+
+      $('#snackbar ul').empty();
+      if(items != []){
+        items.forEach((item, index) => {
+          $('#snackbar ul').append(`<li>Access your ${item}</li>`);
+        });
+      }
+
+      $('#snackbar div').empty();
+      if(buttons != []){
+        buttons.forEach((button, index) => {
+          $('#snackbar div').append(`<button type="button" name="button">${button}</button>`);
+          $('#snackbar div button:last').click(async () => {
+            event.sender.send('permission-reply', button);
+          });
+        });
+      }
+
+      $('#close-snackbar').click(async () => {
+        event.sender.send('permission-reply', 'close');
+      });
+    });
+  </script>
+</html>

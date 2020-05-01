@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8" />
+    <title>Peacock Settings</title>
+
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <script src="assets://jquery.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+
+    <link rel="stylesheet" href="assets://global.css">
+    <style>
+      html, body { height: 100%; width: 100%; }
+
+      #content {
+        padding-top: 100px;
+        padding-left: 100px;
+        padding-right: 75px;
+        margin-top: 0px;
+      }
+
+      #title {
+        margin-top: 50px;
+        font-size: 40px;
+        font-weight: 700;
+      }
+
+      #titlebar {
+        top: 0;
+      }
+
+      #header-icon {
+        width: 35px;
+        height: auto;
+      }
+
+      .heading {
+        margin-top: 35px;
+        font-size: 19px;
+      }
+
+      .heading-title {
+        font-weight: 500;
+        opacity: 0.9;
+        margin-bottom: 20px;
+      }
+
+      .heading-element {
+        justify-content: left;
+        align-items: center;
+        padding-left: 50px;
+        height: 50px;
+        width: 500px;
+      }
+
+      .dropdown {
+        float: right;
+      }
+
+      .dropdown-toggle {
+        font-size: 17px;
+        font-weight: 400;
+      }
+
+      .dropdown-toggle:focus {
+        border-radius: 4px;
+      }
+
+      .btn, .btn:hover, .btn:focus {
+        border-radius: 4px;
+        border: none;
+        background-color: var(--foreground-secondary);
+        transition: var(--transition);
+        opacity: 0.9;
+        font-weight: 500;
+      }
+
+      .dropdown-toggle::after {
+        cursor: inherit !important;
+      }
+
+      .label {
+        display: inline-block;
+        font-size: 22px;
+        opacity: 0.9;
+      }
+
+      .list-group {
+        margin-bottom: 35px;
+      }
+
+      .search-engine-icon {
+        width: 23px;
+        height: 23px;
+        float: left;
+        transition: all 0.1s;
+        transform: translateY(4%);
+        margin-right: 10px;
+      }
+
+      .note {
+        font-size: 16px;
+        text-align: right;
+        white-space: nowrap;
+      }
+
+      .dropdown-menu {
+        background: var(--background);
+        width: max-content;
+        border: 2px solid var(--foreground-secondary);
+        border-radius: 0px 4px 4px 4px;
+        margin-top: -2px;
+      }
+
+      .dropdown-item {
+        padding: .25rem 1rem;
+        font-weight: 500;
+        margin: 0px !important;
+      }
+
+      .dropdown-item:hover {
+        cursor: pointer;
+        background-color: rgba(0, 0, 0, 0.05);
+      }
+
+      .dropdown-item:focus, .dropdown-item:active {
+        background: var(--accent);
+      }
+
+      footer {
+        position: absolute;
+        right: 20px;
+        bottom: 20px;
+      }
+
+      footer #version {
+        color: var(--foreground);
+        margin: 0px;
+      }
+    </style>
+  </head>
+  <body style="display: none;" id="settings_body">
+    <div id="content">
+      <h1 locale-key="settings_title" id="title">Settings</h1>
+      <div class="tab-content" id="pills-tabContent">
+        <div class="tab-pane fade show active" id="pills-customization" role="tabpanel" aria-labelledby="pills-customization-tab">
+          <section class="heading">
+            <h2 locale-key="" class="heading-title">Customization</h2>
+            <div class="heading-element" data-key="search_engine">
+              <p locale-key="search_engine_label" class="label">Search Engine</p>
+              <div class="dropdown">
+                <button
+                  class="btn btn-secondary dropdown-toggle"
+                  data-toggle="dropdown"
+                  type="button"
+                  id="dropdownMenuButton"
+                  data-toggle="dropdown"
+                  aria-haspopup="true"
+                  aria-expanded="false"
+                >
+                  Google
+                </button>
+                <div class="dropdown-menu search-engines-menu" aria-labelledby="dropdownMenuButton">
+                  <p locale-key="no_search_engines" class="dropdown-item" href="#">No search engines found.</p>
+                </div>
+              </div>
+            </div>
+            <div class="heading-element" data-key="theme">
+              <p locale-key="theme_heading" class="label">Theme</p>
+              <div class="dropdown">
+                <button
+                  locale-key="default_theme"
+                  class="btn btn-secondary dropdown-toggle"
+                  data-toggle="dropdown"
+                  type="button"
+                  id="dropdownMenuButton"
+                  data-toggle="dropdown"
+                  aria-haspopup="true"
+                  aria-expanded="false"
+                >
+                  Default
+                </button>
+                <div class="dropdown-menu theme-dropdown-menu" aria-labelledby="dropdownMenuButton">
+                  <p locale-key="default_theme" class="dropdown-item" href="#">Default</p>
+                  <p locale-key="light_theme" class="dropdown-item" href="#">Light</p>
+                </div>
+              </div>
+            </div>
+            <div class="heading-element" data-key="rich_presence">
+              <p locale-key="rich_presence_heading" class="label">Discord Rich Presence</p>
+              <div class="dropdown">
+                <button
+                  locale-key="locally_item"
+                  class="btn btn-secondary dropdown-toggle"
+                  data-toggle="dropdown"
+                  type="button"
+                  id="dropdownMenuButton"
+                  data-toggle="dropdown"
+                  aria-haspopup="true"
+                  aria-expanded="false"
+                >
+                  Disabled
+                </button>
+                <div class="dropdown-menu rich_presence-dropdown-menu" aria-labelledby="dropdownMenuButton">
+                  <p locale-key="enabled_item" class="dropdown-item" href="#">Enabled</p>
+                  <p locale-key="disabled_item" class="dropdown-item" href="#">Disabled</p>
+                </div>
+              </div>
+            </div>
+          </section>
+          <section class="heading">
+            <h2 class="heading-title">Downloads</h2>
+            <div class="heading-element" data-key="save_location">
+              <p locale-key="save_location_heading" class="label">Save Location</p>
+              <div class="dropdown">
+                <button
+                  class="btn btn-secondary dropdown-toggle"
+                  data-toggle="dropdown"
+                  type="button"
+                  id="dropdownMenuButton"
+                  data-toggle="dropdown"
+                  aria-haspopup="true"
+                  aria-expanded="false"
+                >
+                  Downloads
+                </button>
+                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                  <p class="dropdown-item" href="#">Downloads</p>
+                  <p class="dropdown-item" href="#">Use Save As Window</p>
+                </div>
+              </div>
+              <p class="note"><b>Note:</b> Requires browser relaunch.</p>
+            </div>
+          </section>
+        </div>
+      </div>
+    </div>
+    <aside id="user">
+
+    </aside>
+    <footer>
+      <p id="version">Peacock</p>
+    </footer>
+  </body>
+  <script>
+    const store = {
+      get: name => sendSync('store', 'get', name),
+      set: (name, val) => send('store', 'set', name, val)
+    };
+
+    $('#version').text('Peacock v' + sendSync('getVersions').peacock);
+
+    window.darkMode = sendSync('getDarkmode'); loadTheme();
+
+    function saveSettings(input) {
+      let data = store.get('settings');
+      for (var key in input){ data[key] = input[key]; }
+
+      store.set('settings', data);
+
+      console.log("Updated Settings!");
+    }
+
+    let settings = store.get('settings');
+    for (var SKey in settings){ $('div[data-key=' + SKey + ']').find('.dropdown').find(".dropdown-toggle").text(settings[SKey]); }
+
+    let engines = store.get('searchEngines');
+    $(".search-engines-menu").empty();
+    engines.forEach(item => {
+      let icon = new URL(item.url).origin + '/favicon.ico';
+      $(".search-engines-menu").append(`<p class="dropdown-item" href="#"><img class="search-engine-icon"
+        src="${icon}"/>${item.name}</p>`);
+    });
+
+    $('.dropdown').on('show.bs.dropdown', function() {
+      $(this).find('.dropdown-menu').first().stop(true, true).slideDown(100);
+    });
+
+    $('.dropdown').on('hide.bs.dropdown', function() {
+      $(this).find('.dropdown-menu').first().stop(true, true).slideUp(100);
+    });
+
+    sendSync('getThemes').forEach(theme => {
+     $('.theme-dropdown-menu').append(`<p class="dropdown-item" href="#">${theme}</p>`);
+
+     let elem = $('.theme-dropdown-menu').children().last();
+     elem.attr('locale-key', theme.toLowerCase());
+    });
+
+    function loadTheme() {
+      let theme = store.get('settings.theme').toLowerCase();
+      let newTheme = theme;
+
+      if(window.darkMode && theme == 'default') newTheme = 'dark';
+
+      if (window.theme != newTheme) {
+        if (theme === "light") {
+          window.theme = 'light';
+          if($('head link[href*="assets://themes"]').length > 0){
+            $('head link[href*="assets://themes"]').remove();
+          }
+        } else if (theme === "default") {
+          if (window.darkMode) {
+            // If Dark Mode
+            window.theme = 'dark';
+            $("head").append('<link rel="stylesheet" href="assets://themes/dark.css">');
+          } else {
+            // If Light Mode
+            window.theme = 'light';
+            if($('head link[href*="assets://themes"]').length > 0){
+      				$('head link[href*="assets://themes"]').remove();
+      			}
+          }
+        } else {
+          window.theme = 'dark';
+          $("head").append('<link rel="stylesheet" href="assets://themes/' + theme + '.css">');
+        }
+        $('body').css('display', 'block');
+      }
+    }
+
+    $('.dropdown-item').click(function(event) {
+      let text = $(this).text();
+      let key = $(this).parent().parent().parent().attr("data-key");
+    	$(this).parent().siblings(".dropdown-toggle").text(text);
+    	saveSettings({ [key]: text });
+      if(key === "theme") { loadTheme(); send('loadTheme'); }
+    });
+  </script>
+</html>
