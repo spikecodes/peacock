@@ -52,11 +52,11 @@ window.storage = storage;
 
 if (!store.get("settings")) {
   let data = {
-    search_engine: "DuckDuckGo",
+    search_engine: "Google",
     theme: "Default",
     save_location: "Downloads",
     storage: "Locally",
-    newTab: { backgroundTheme: "https://source.unsplash.com/featured/1280x720/?peacock", items: ["", "", "", "", ""] },
+    newTab: { backgroundTheme: "https://source.unsplash.com/featured/1280x720/?nature", items: ["", "", "", "", ""] },
     rich_presence: "Enabled"
   };
   store.set("settings", data);
@@ -68,6 +68,9 @@ store.set("searchEngines", [
   { name: "Bing", url: "https://www.bing.com/search?q=" },
   { name: "Yahoo", url: "https://search.yahoo.com/search?p=" }
 ]);
+
+
+
 
 if (!store.get("blocked")) store.set("blocked", 0);
 if (!store.get("bookmarks")) store.set("bookmarks", []);

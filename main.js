@@ -1,6 +1,7 @@
 const { ipcMain, app, screen,
 	BrowserWindow, nativeTheme } = require('electron');
 
+
 const { openProcessManager } = require('electron-process-manager');
 
 const { format } = require('url');
@@ -88,3 +89,6 @@ app.on('activate', async () => {
 	// dock icon is clicked and there are no other windows open.
 	if (mainWindow === null) createWindow();
 });
+
+
+

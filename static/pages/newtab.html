@@ -4,6 +4,7 @@
     <meta charset="utf-8">
     <title>New Tab</title>
 
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css">
     <link rel="stylesheet" href="https://storage.googleapis.com/non-spec-apps/mio-icons/latest/outline.css">
 
     <link rel="stylesheet" href="assets://global.css">
@@ -119,8 +120,8 @@
         margin: auto;
 
         width: 90%;
-        max-width: 1300px;
-        height: 230px;
+        max-width: 1000px;
+        height: 130px;
       }
 
       .item {
@@ -307,6 +308,72 @@
         fill: white;
         margin-top: -4px;
       }
+
+
+      .modal {
+  position: fixed;
+  font-family: 'Quicksand', sans-serif;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0);
+  transition: 200ms ease-in-out;
+  border: 1px solid black;
+  border-radius: 10px;
+  z-index: 10;
+  background-color: white;
+  width: 500px;
+  max-width: 80%;
+}
+
+.modal.active {
+  transform: translate(-50%, -50%) scale(1);
+}
+
+.modal-header {
+  padding: 10px 15px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid black;
+}
+
+.modal-header .title {
+  font-size: 1.25rem;
+  font-weight: bold;
+  color: black;
+}
+
+.modal-header .close-button {
+  cursor: pointer;
+  border: none;
+  outline: none;
+  background: none;
+  font-size: 1.25rem;
+  font-weight: bold;
+  color: red;
+}
+
+.modal-body {
+  padding: 10px 15px;
+  color: black;
+}
+
+#overlay {
+  position: fixed;
+  opacity: 0;
+  transition: 200ms ease-in-out;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, .5);
+  pointer-events: none;
+}
+
+#overlay.active {
+  opacity: 1;
+  pointer-events: all;
+}
     </style>
   </head>
   <body onload="startTime()">
@@ -314,11 +381,12 @@
     <p id="time"></p>
 
     <header>
-      <h1 id="peacock">Peacock</h1>
+      <h1 id="peacock">
+        <span id="greeting"></span>
+        </h1>
     </header>
 
     <div id="grid">
-      <h2 id="recently-visited">Speed Dial</h2>
 
       <div class="item">
         <img class="icon">
@@ -351,6 +419,10 @@
     </aside>
 
     <footer>
+      <a data-modal-target="#modal" class="icon-container">
+        <svg class="icon" height="533pt" viewBox="-79 -16 533 533.33257" width="533pt" xmlns="http://www.w3.org/2000/svg"><path d="m315.808594 33.949219h-80.355469c-9.105469-20.632813-29.535156-33.949219-52.089844-33.949219-22.558593 0-42.988281 13.316406-52.09375 33.949219h-80.359375c-30.3125.035156-54.875 24.601562-54.910156 54.914062v356.222657c.035156 30.3125 24.597656 54.878906 54.910156 54.914062h264.898438c30.3125-.035156 54.878906-24.601562 54.914062-54.914062v-356.222657c-.035156-30.3125-24.601562-54.878906-54.914062-54.914062zm-175.496094 25c5.867188 0 10.945312-4.082031 12.207031-9.820313 3.070313-13.976562 16.042969-24.128906 30.84375-24.128906s27.769531 10.152344 30.839844 24.128906c1.257813 5.738282 6.335937 9.820313 12.210937 9.820313h24.785157v10.96875c-.019531 16.511719-13.398438 29.890625-29.910157 29.910156h-75.855468c-16.515625-.019531-29.894532-13.398437-29.914063-29.910156v-10.96875zm205.410156 386.136719c-.015625 16.515624-13.398437 29.898437-29.914062 29.914062h-264.898438c-16.511718-.015625-29.890625-13.398438-29.910156-29.914062v-356.222657c.019531-16.515625 13.398438-29.894531 29.910156-29.914062h39.609375v10.96875c.035157 30.3125 24.601563 54.875 54.914063 54.910156h75.855468c30.3125-.035156 54.875-24.597656 54.910157-54.910156v-10.96875h39.609375c16.515625.019531 29.894531 13.398437 29.914062 29.914062zm0 0"/><path d="m245.226562 230.957031-82.0625 80.125-41.671874-40.675781c-4.902344-4.796875-12.753907-4.738281-17.59375.121094-4.835938 4.863281-4.855469 12.714844-.039063 17.597656l.167969.164062 50.398437 49.210938c4.859375 4.742188 12.613281 4.742188 17.46875 0l90.792969-88.648438c4.910156-4.828124 4.988281-12.714843.183594-17.640624-4.8125-4.925782-12.695313-5.035157-17.644532-.246094zm0 0"/></svg>
+      </a>
+      <p id="separator"></p>
       <button id="palette-btn" class="icon-container">
         <svg viewBox="0 0 24 24" class="icon">
           <path fill="none" d="M0 0h24v24H0z"></path>
@@ -391,6 +463,18 @@
         </svg>
       </a>
     </footer>
+
+
+    <div class="modal" id="modal">
+      <div class="modal-header">
+        <div class="title">Todo</div>
+        <button data-close-button class="close-button">&times;</button>
+      </div>
+      <div class="modal-body">
+      COMING SOON!
+        </div>
+    </div>
+    <div id="overlay"></div>
   </body>
   <script>
     let theme = sendSync('getTheme');
@@ -550,5 +634,68 @@
     setBackground(backgroundTheme);
 
     listSites(sendSync('newTab', 'loadItems'));
+
+    // greeting
+
+    const greeting = document.getElementById('peacock');
+
+    function setBgGreet() {
+  let today = new Date(),
+  hour = today.getHours();
+
+  if (hour < 12) {
+
+    greeting.textContent = 'Good Morning';
+  } else if (hour < 18) {
+    
+    greeting.textContent = 'Good Afternoon';
+  } else {
+   
+    greeting.textContent = 'Good Evening';
+    document.body.style.color = 'white';
+  }
+}
+
+setBgGreet();
+
+
+// modal for todo
+
+const openModalButtons = document.querySelectorAll('[data-modal-target]')
+const closeModalButtons = document.querySelectorAll('[data-close-button]')
+const overlay = document.getElementById('overlay')
+
+openModalButtons.forEach(button => {
+  button.addEventListener('click', () => {
+    const modal = document.querySelector(button.dataset.modalTarget)
+    openModal(modal)
+  })
+})
+
+overlay.addEventListener('click', () => {
+  const modals = document.querySelectorAll('.modal.active')
+  modals.forEach(modal => {
+    closeModal(modal)
+  })
+})
+
+closeModalButtons.forEach(button => {
+  button.addEventListener('click', () => {
+    const modal = button.closest('.modal')
+    closeModal(modal)
+  })
+})
+
+function openModal(modal) {
+  if (modal == null) return
+  modal.classList.add('active')
+  overlay.classList.add('active')
+}
+
+function closeModal(modal) {
+  if (modal == null) return
+  modal.classList.remove('active')
+  overlay.classList.remove('active')
+}
   </script>
 </html>
