@@ -13,7 +13,7 @@ const win = remote.getCurrentWindow();
 const topbarHeight = 70;
 
 let Sortable = require('sortablejs');
-var sortable = new Sortable($('#tabs')[0]);
+var sortable = new Sortable(document.getElementById('tabs'));
 
 console.colorLog = (msg, color) => { console.log("%c" + msg, "color:" + color + ";font-weight:bold;") }
 
@@ -24,28 +24,6 @@ var closedTabs = [];
 var activeTab;
 
 var downloadWindow;
-
-$.fn.fadeSlideLeft = function() {
-  $(this).css('opacity', '0');
-  $(this).css('width', '0px');
-  // return $(this).animate({
-  //   'opacity' : 0,
-  //   'width' : '0px'
-  // },speed || 400,function() {
-  //   $.isFunction(fn) && fn.call(this);
-  // });
-}
-
-$.fn.fadeSlideRight = function() {
-  $(this).css('opacity', '1');
-  $(this).css('width', '250px');
-  // return $(this).animate({
-  //   'opacity' : 1,
-  //   'width' : '250px'
-  // },speed || 400,function() {
-  //   $.isFunction(fn) && fn.call(this);
-  // });
-}
 
 exports.initDownloads = async () => {
   downloadWindow = new BrowserWindow({
@@ -149,7 +127,6 @@ exports.initBrowserView = async (view) => {
   view.webContents.on('did-fail-load', async (e, ec, ed, vu) => {web.failLoad(e, view, ec, ed, vu); });
   view.webContents.on('enter-html-full-screen', async () => { web.enterFllscrn(view, remote.screen) });
   view.webContents.on('leave-html-full-screen', async () => { web.leaveFllscrn(view, win.getBounds().height) });
-  view.webContents.on('update-target-url', async (e, url) => { web.updateTargetURL(e, url) });
   view.webContents.on('dom-ready', async () => { web.domReady(view, storage) });
   view.webContents.on('new-window', async (e, url, f, disposition) => {
     switch (disposition) {
@@ -170,9 +147,6 @@ exports.initBrowserView = async (view) => {
   view.webContents.on('certificate-error', async (e, url, err) => {
     e.preventDefault();
     console.log(err);
-  });
-  view.webContents.on('found-in-page', async (e) => {
-    $('#matches').text(e.result.activeMatchOrdinal.toString() + ' of ' + e.result.matches.toString() + ' matches');
   });
 }
 
@@ -209,13 +183,15 @@ exports.activate = function (view) {
     if(views[i].type == 'tab') win.removeBrowserView(views[i]);
   }
   win.addBrowserView(view);
-  $('#url').val('');
+  document.getElementById('url').value = '';
 
   this.viewActivated(view);
 
-  if($('.selected').length > 0) $('.selected').removeClass('selected');
+  if(document.getElementsByClassName('selected')[0]) {
+    document.getElementsByClassName('selected')[0].classList.remove('selected');
+  }
 
-  view.tab.element.addClass('selected');
+  view.tab.element.classList.add('selected');
   activeTab = view;
 }
 
@@ -245,11 +221,6 @@ exports.close = async (view) => {
   
   this.viewClosed(view);
   view.destroy();
-
-  // $(tab).css('transition', 'all 0.1s !important');
-  // $(tab).fadeSlideLeft();
-
-  // $(tab).css('transition', 'all 0.0s !important');
 }
 
 exports.newView = function (url='peacock://newtab', active=true) {
@@ -444,29 +415,38 @@ exports.newView = function (url='peacock://newtab', active=true) {
     showInspectElement: true
   });
 
-  $('#new-tab').before(`<div class="tab">
-    <img class="tab-icon" src="//:0">
+  function createElementFromHTML(htmlString) {
+    var div = document.createElement('div');
+    div.innerHTML = htmlString.trim();
+  
+    // Change this to div.childNodes to support multiple top-level nodes
+    return div.firstChild; 
+  }
+
+  var tabEl = document.createElement('div');
+  tabEl.classList.add('tab');
+  tabEl.innerHTML = `<img class="tab-icon" src="//:0">
     <p class="tab-label">Loading...</p>
-    <img class="tab-close" src="images/close.svg">
-  </div>`);
+    <img class="tab-close" src="images/close.svg">`.trim();
+
+  document.getElementById('new-tab').insertAdjacentElement('beforebegin', tabEl);
 
   view.tab = {
-    element: $('#new-tab').prev(),
+    element: document.getElementById('new-tab').previousElementSibling,
     setIcon: async (icon) => {
-      view.tab.icon.on("error", () => { view.tab.icon.attr('src', `//:0`) });
-      view.tab.icon.attr('src', icon);
+      view.tab.icon.addEventListener("error", () => { view.tab.icon.src = '//:0' });
+      view.tab.icon.src = icon;
     },
-    setTitle: async (title) => { view.tab.title.text(title); },
+    setTitle: async (title) => { view.tab.title.innerText = title; },
     close: async () => { view.tab.element.remove(); }
   };
 
-  view.tab.element.css('opacity', '0');
-  view.tab.element.css('width', '60px');
-  view.tab.element.fadeSlideRight(100);
+  view.tab.element.style.opacity = '1';
+  view.tab.element.style.width = '250px';
 
-  view.tab.icon = view.tab.element.children().eq(0);
-  view.tab.title = view.tab.element.children().eq(1);
-  view.tab.button = view.tab.element.children().eq(2);
+  view.tab.icon = view.tab.element.children[0];
+  view.tab.title = view.tab.element.children[1];
+  view.tab.button = view.tab.element.children[2];
 
   // TAB MENU
 
@@ -478,7 +458,7 @@ exports.newView = function (url='peacock://newtab', active=true) {
     { label:'Close', click: async() => this.close(view) }
   ];
 
-  view.tab.element.mousedown(async (e) => {
+  view.tab.element.addEventListener('mousedown', async (e) => {
     switch (e.which) {
       case 1:
         this.activate(view);
@@ -494,7 +474,7 @@ exports.newView = function (url='peacock://newtab', active=true) {
     }
   });
 
-  view.tab.button.click(async (e) => {
+  view.tab.button.addEventListener('click', async (e) => {
     e.stopPropagation();
     this.close(view);
   });
@@ -545,7 +525,7 @@ exports.showDialog = async (text) => {
   remote.getCurrentWindow().addBrowserView(view);
 }
 
-$('#new-tab').click(async () => this.newView('file:///C:/Users/spike/Desktop/report.txt'));
+document.getElementById('new-tab').addEventListener('click', async () => this.newView('peacock://newtab'));
 
 remote.app.on('certificate-error', (event, webContents, url, error, certificate, callback) => {
   console.log(certificate, error);
