@@ -40,11 +40,24 @@ const menuTemplate = [
         }
       },
       {
-        label: 'Toggle Customization Mode',
-        accelerator: 'CmdOrCtrl+Alt+C',
-        click: async () => {
-          keyboardShortcut('toggleCustomization');
-        }
+        label: 'Open History',
+        accelerator: 'CmdOrCtrl+H',
+        click: async () => keyboardShortcut('openHistory')
+      },
+      {
+        label: 'Open Bookmarks',
+        accelerator: 'CmdOrCtrl+Shift+B',
+        click: async () => keyboardShortcut('openBookmarks')
+      },
+      {
+        label: 'Open Settings',
+        accelerator: 'CmdOrCtrl+Shift+S',
+        click: async () => keyboardShortcut('openSettings')
+      },
+      {
+        label: 'Open Peacock Task Manager',
+        accelerator: 'Shift+Esc',
+        click: async () => keyboardShortcut('openTaskManager')
       }
     ]
   },
@@ -74,7 +87,7 @@ const menuTemplate = [
       },
       {
         label: 'Reset Zoom',
-        accelerator: 'CmdOrCtrl+Shift+-',
+        accelerator: 'CmdOrCtrl+0',
         click: async () => {
           keyboardShortcut('resetZoom');
         }
@@ -112,13 +125,6 @@ const menuTemplate = [
         accelerator: 'CmdOrCtrl+F5',
         click: async () => {
           keyboardShortcut('forceReload');
-        }
-      },
-      {
-        label: 'Find in Page',
-        accelerator: 'CmdOrCtrl+F',
-        click: async () => {
-          keyboardShortcut('findInPage');
         }
       },
       {

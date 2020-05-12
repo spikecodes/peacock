@@ -62,3 +62,9 @@ typings/
 
 # VS Code
 .vscode/
+
+# SAHL files
+*.sahl
+
+# Dist
+dist/*

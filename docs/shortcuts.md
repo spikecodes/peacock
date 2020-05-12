@@ -8,6 +8,10 @@ Open DevTools | `Ctrl/⌘ + Alt + I`
 Restart Peacock | `Ctrl/⌘ + Alt + R`
 Focus Searchbar | `Ctrl/⌘ + L`, `Ctrl/⌘ + E`
 Toggle Customization Mode | `Ctrl/⌘ + Alt + C`
+Open History | `Ctrl/⌘ + H`
+Open Bookmarks | `Ctrl/⌘ + Shift + B`
+Open Settings | `Ctrl/⌘ + Shift + S`
+Open Peacock Task Manager | `Shift + Esc`
 
 ### Website
 
