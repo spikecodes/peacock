@@ -4,7 +4,6 @@
     <meta charset="utf-8">
     <title>Experiments</title>
     <link rel="stylesheet" href="assets://global.css">
-    <script src="assets://jquery.js"></script>
 
     <style>
       * { border-color: var(--foreground) !important; }
@@ -101,21 +100,21 @@
     let theme = sendSync('getTheme');
     if(theme != 'light') document.querySelector("head").innerHTML += '<link rel="stylesheet" href="assets://themes/' + theme + '.css">';
 
-    $('tr').click(async e => {
-      let flag = $(e.currentTarget).children().first().text();
-      if($(e.currentTarget).hasClass('flag-selected')) {
+    document.querySelector('tr').addEventListener('click', async e => {
+      let flag = e.currentTarget.firstElementChild.innerText;
+      if(e.currentTarget.classList.contains('flag-selected')) {
         flags.splice(flags.indexOf(flag), 1);
       } else {
         flags.push(flag);
       }
       send('flags.js', 'set', flags)
-      $(e.currentTarget).toggleClass('flag-selected')
+      e.currentTarget.classList.toggle('flag-selected')
     });
 
     function enableFlags(flagList) {
-      let td = $('td');
+      let td = document.querySelector('td');
       for (let i = 0; i < td.length; i++) {
-        if(flagList.includes( $(td[i]).text() )) $(td[i]).parent().addClass('flag-selected');
+        if(flagList.includes(td[i].innerText)) td[i].parentElement.classList.add('flag-selected');
       }
     }
 

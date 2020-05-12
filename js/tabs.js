@@ -415,14 +415,6 @@ exports.newView = function (url='peacock://newtab', active=true) {
     showInspectElement: true
   });
 
-  function createElementFromHTML(htmlString) {
-    var div = document.createElement('div');
-    div.innerHTML = htmlString.trim();
-  
-    // Change this to div.childNodes to support multiple top-level nodes
-    return div.firstChild; 
-  }
-
   var tabEl = document.createElement('div');
   tabEl.classList.add('tab');
   tabEl.innerHTML = `<img class="tab-icon" src="//:0">
