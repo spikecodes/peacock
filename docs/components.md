@@ -49,8 +49,6 @@ Our list uses GitHub repository links for open source projects and website links
   - Manages storage of data (bookmarks, history, flags, settings). This information never leaves your device.
 - [electron-updater](https://github.com/electron-userland/electron-builder) [[MIT](https://github.com/electron-userland/electron-builder/blob/master/LICENSE)]
   - Provides auto update for Peacock.
-- [jquery](https://github.com/jquery/jquery) [[MIT](https://github.com/jquery/jquery/blob/master/LICENSE.txt)]
-  - We are in the process of switching from jQuery to standard Javascript to improve performance.
 - [sortablejs](https://github.com/SortableJS/Sortable) [[MIT](https://github.com/SortableJS/Sortable/blob/master/LICENSE)]
   - Powers tab dragging functionality.
 - [uuid](https://github.com/uuidjs/uuid) [[MIT](https://github.com/uuidjs/uuid/blob/master/LICENSE.md)]

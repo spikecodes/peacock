@@ -1,7 +1,5 @@
 var firstTime = true;
 
-window.$ = window.jQuery = require('jquery');
-
 let { remote } = require('electron');
 function webContents(webview) { return remote.webContents.fromId(webview.getWebContentsId()); }
 exports.webContents = webContents;
@@ -54,7 +52,7 @@ exports.setSearchIcon = setSearchIcon;
 exports.init = function (doc) { document = doc }
 
 exports.loadStart = function(view, extensions) {
-  // view.tab.icon[0].outerHTML = `<div class='spinner'><svg class='svg' viewBox='22 22 44 44'>
+  // view.tab.icon.outerHTML = `<div class='spinner'><svg class='svg' viewBox='22 22 44 44'>
   //   <circle class='circle' cx='44' cy='44' r='20.2' stroke-width='3.6' fill='none'>
   //   </circle></svg></div>`;
 
@@ -156,7 +154,7 @@ exports.faviconUpdated = function (view, favicons) {
 
 exports.titleUpdated = function (view, event, title) {
   view.tab.setTitle(title);
-  view.tab.title.attr('title', title);
+  view.tab.title.title = title;
 }
 
 exports.changeTab = function (view, storage) {
