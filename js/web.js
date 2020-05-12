@@ -65,10 +65,10 @@ exports.loadStart = function(view, extensions) {
 exports.loadStop = function(view, extensions) {
   document.getElementById('refresh').firstElementChild.src = 'images/refresh.svg';
 
-  view.webContents.executeJavaScript(`document.querySelectorAll('link[rel='shortcut icon']').length`)
+  view.webContents.executeJavaScript(`document.querySelectorAll('link[rel="shortcut icon"]').length`)
     .then(r => {
       if(r > 0) {
-        view.webContents.executeJavaScript(`document.querySelector('link[rel='shortcut icon']').href`)
+        view.webContents.executeJavaScript(`document.querySelector('link[rel="shortcut icon"]').href`)
           .then(u => view.tab.setIcon(u));
       } else {
         let origin = new URL(view.webContents.getURL()).origin;

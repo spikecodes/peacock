@@ -5,7 +5,6 @@
     <title>History</title>
 
     <link rel="stylesheet" href="assets://global.css">
-    <script src="assets://jquery.js"></script>
 
     <style id="global">
       body { width: 100%; height: 100%; margin: 0px; position: absolute; }
@@ -93,9 +92,9 @@
   <script>
     let theme = sendSync('getTheme');
     let history = sendSync('getHistory');
-    let list = $('#list');
+    let list = document.getElementById('list');
 
-    if(theme != 'light') $("head").append('<link rel="stylesheet" href="assets://themes/' + theme + '.css">');
+    if(theme != 'light') document.head.innerHTML += '<link rel="stylesheet" href="assets://themes/' + theme + '.css">';
 
     history.forEach((historyItem, i) => {
       let close = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
@@ -105,39 +104,50 @@
 
       let icon = historyItem.url.startsWith('peacock:') ? '//:0' : `https://external-content.duckduckgo.com/ip3/${ new URL(historyItem.url).host }.ico`;
 
-      list.append(`<li title="${ historyItem.url }" id="${ historyItem.id }">
-        <img src="${ icon }">
+      var itemEl = document.createElement('li');
+      itemEl.title = historyItem.url;
+      itemEl.id = historyItem.id;
+      itemEl.innerHTML = `<img src="${ icon }">
         <p title="${ historyItem.title }">${ historyItem.title }</p>
         <p id="stamp">${ new Date(historyItem.time).toJSON().slice(0,10).split('-').reverse().join('/') }</p>
-        ${ close }
-      </li>`);
+        ${ close }`.trim();
+        
+      list.appendChild(itemEl);
 
-      let item = list.children().last();
+      let item = list.lastElementChild;
 
-      item.click(async e => {
+      item.addEventListener('click', async e => {
         e.stopPropagation();
         if(e.target.tagName == 'path' || e.target.tagName == 'svg') {
           item.remove();
           send('removeHistoryItem', historyItem.id);
 
-          if(list.children().length == 0) $('#nothing-here').css('display', 'block');
+          if(list.children.length == 0) { document.getElementById('nothing-here').style.display = 'block'; }
         } else {
-          if(item.hasClass('selected')) {
+          if(item.classList.contains('selected')) {
             location.href = historyItem.url;
           } else {
-            if($('.selected').length == 1) $('.selected').removeClass('selected');
+            if(document.getElementsByClassName('selected')[0]) {
+              document.getElementsByClassName('selected')[0].classList.remove('selected');
+            }
 
-            item.addClass('selected');
+            item.classList.add('selected');
           }
         }
       });
     });;
 
-    if(list.children().length == 0) $('#nothing-here').css('display', 'block');
+    if(list.children.length == 0) document.getElementById('nothing-here').style.display = 'block';
 
-    $('body').click(async e => { if($('.selected').length == 1) $('.selected').removeClass('selected'); });
+    document.body.addEventListener('click', async e => {
+      if(document.getElementsByClassName('selected')[0]) {
+        document.getElementsByClassName('selected')[0].classList.remove('selected');
+      }
+    });
 
-    $('#clear').click(async e => { send('clearHistory'); list.html(''); $('#nothing-here').css('display', 'block') });
-
+    document.getElementById('clear').addEventListener('click', async e => {
+      send('clearHistory'); list.innerHTML = '';
+      document.getElementById('nothing-here').style.display = 'block';
+    });
   </script>
 </html>

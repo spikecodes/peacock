@@ -4,7 +4,6 @@
     <meta charset="utf-8">
     <title>Bookmarks</title>
 
-    <script src="assets://jquery.js"></script>
     <link rel="stylesheet" href="assets://global.css">
     
     <style>
@@ -64,9 +63,9 @@
   <script>
     let theme = sendSync('getTheme');
     let bookmarks = sendSync('getBookmarks');
-    let list = $('#list');
+    let list = document.getElementById('list');
 
-    if(theme != 'light') $("head").append('<link rel="stylesheet" href="assets://themes/' + theme + '.css">');
+    if(theme != 'light') document.head.innerHTML += '<link rel="stylesheet" href="assets://themes/' + theme + '.css">';
 
     bookmarks.forEach((bookmark, i) => {
       let close = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
@@ -76,35 +75,44 @@
 
       let icon = bookmark.url.startsWith('peacock:') ? '//:0' : `https://external-content.duckduckgo.com/ip3/${ new URL(bookmark.url).host }.ico`;
 
-      list.append(`<li title="${ bookmark.url }" id="${ bookmark.id }">
-        <img src="${ icon }">
+      var itemEl = document.createElement('li');
+      itemEl.title = bookmark.url;
+      itemEl.id = bookmark.id;
+      itemEl.innerHTML = `<img src="${ icon }">
         <p title="${ bookmark.title }">${ bookmark.title }</p>
-        ${ close }
-      </li>`);
+        ${ close }`.trim();
+        
+      list.appendChild(itemEl);
 
-      let item = list.children().last();
+      let item = list.lastElementChild;
 
-      item.click(async e => {
+      item.addEventListener('click', async e => {
         e.stopPropagation();
         if(e.target.tagName == 'path' || e.target.tagName == 'svg') {
           item.remove();
           send('removeBookmark', bookmark.id);
 
-          if(list.children().length == 0) $('#nothing-here').css('display', 'block');
+          if(list.children.length == 0) document.getElementById('nothing-here').style.display = 'block';
         } else {
-          if(item.hasClass('selected')) {
+          if(item.classList.contains('selected')) {
             location.href = bookmark.url;
           } else {
-            if($('.selected').length == 1) $('.selected').removeClass('selected');
+            if(document.getElementsByClassName('selected')[0]) {
+              document.getElementsByClassName('selected')[0].classList.remove('selected');
+            }
 
-            item.addClass('selected');
+            item.classList.add('selected');
           }
         }
       });
     });
 
-    if(list.children().length == 0) $('#nothing-here').css('display', 'block');
+    if(list.children.length == 0) document.getElementById('nothing-here').style.display = 'block';
 
-    $('body').click(async e => { if($('.selected').length == 1) $('.selected').removeClass('selected'); });
+    document.body.addEventListener('click', async e => {
+      if(document.getElementsByClassName('selected')[0]) {
+        document.getElementsByClassName('selected')[0].classList.remove('selected');
+      }
+    });
   </script>
 </html>

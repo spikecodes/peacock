@@ -3,7 +3,6 @@
   <head>
     <meta charset="utf-8">
     <title></title>
-    <script>window.$ = window.jQuery = require('jquery');</script>
 
     <link rel="stylesheet" href="assets://global.css">
     <style>
@@ -85,16 +84,16 @@
     ipcRenderer.on('load', (e, alertInfo) => {
       let url;
 
-      $('body').html(`<main>
+      document.body.innerHTML = `<main>
         <p id="url">www.google.com says</h2>
         <p id="message">noodle</p>
         <button id="ok-btn" type="button" id="btn" autofocus>OK</button>
-      </main>`);
+      </main>`;
 
       if(alertInfo.bg != 'light') {
-        $("head").append('<link rel="stylesheet" href="assets://themes/' + alertInfo.bg + '.css">');
+        document.head.innerHTML += '<link rel="stylesheet" href="assets://themes/' + alertInfo.bg + '.css">';
       } else {
-        $('link[href*="themes"]').remove();
+        document.querySelector('link[href*="themes"]').remove();
       }
 
       try {
@@ -103,58 +102,59 @@
         url = alertInfo.url;
       }
 
-      $('#url').text(url + ' says');
-      $('#message').text(alertInfo.message);
-      $('#message').attr('title', alertInfo.message);
+      document.getElementById('url').innerText = url + ' says';
+      document.getElementById('message').innerText = alertInfo.message;
+      document.getElementById('message').title = alertInfo.message;
 
       switch (alertInfo.type) {
         case 'alert':
           document.title = 'Alert';
-          $('#ok-btn').click(async e => remote.getCurrentWindow().hide());
-          $('#ok-btn').focus();
+          document.getElementById('ok-btn').addEventListener('click', async e => remote.getCurrentWindow().hide());
+          document.getElementById('ok-btn').focus();
           break;
         case 'confirm':
-          $('main').append('<button id="cancel-btn" type="button" id="btn">Cancel</button>');
+          documnet.querySelector('main').innerHTML += '<button id="cancel-btn" type="button" id="btn">Cancel</button>';
 
           document.title = 'Confirm';
 
-          $('#ok-btn').click(async e => {
+          document.getElementById('ok-btn').addEventListener('click', async e => {
             ipcRenderer.send('alert-reply', true);
             remote.getCurrentWindow().hide();
           });
 
-          $('#cancel-btn').click(async e =>  {
+          document.getElementById('cancel-btn').addEventListener('click', async e =>  {
             ipcRenderer.send('alert-reply', false);
             remote.getCurrentWindow().hide();
           });
 
-          $('#ok-btn').focus();
+          document.getElementById('ok-btn').focus();
           break;
         case 'prompt':
-          $('main').append('<button id="cancel-btn" type="button" id="btn">Cancel</button>');
+          document.querySelector('main').innerHTML += '<button id="cancel-btn" type="button" id="btn">Cancel</button>';
 
-          $('#message').after('<input>');
+          let input = document.createElement('input');
+          document.getElementById('message').insertAdjacentElement('afterend', input);
 
           document.title = 'Prompt';
 
-          $('#ok-btn').click(async e => {
-            ipcRenderer.send('alert-reply', $('input').val());
+          document.getElementById('ok-btn').addEventListener('click', async e => {
+            ipcRenderer.send('alert-reply', input.value);
             remote.getCurrentWindow().hide();
           });
 
-          $('input').on("keyup", function(event) {
+          input.addEventListener("keyup", async event => {
             event.preventDefault();
             if (event.keyCode === 13) {
-              $("ok-btn").click();
+              document.getElementById('ok-btn').click();
             }
           });
 
-          $('#cancel-btn').click(async e =>  {
+          document.getElementById('cancel-btn').addEventListener('click', async e =>  {
             ipcRenderer.send('alert-reply', null);
             remote.getCurrentWindow().hide();
           });
 
-          $('input').focus();
+          input.focus();
           break;
         default:
           break;

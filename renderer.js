@@ -425,7 +425,7 @@ async function loadTheme() {
         // If Dark Mode
         window.theme = 'dark';
         if(document.querySelector('link[href="css/themes/dark.css"]')) document.querySelector('link[href="css/themes/dark.css"]').remove();
-        document.querySelector('head').innerHTML += '<link rel="stylesheet" href="css/themes/dark.css">';
+        document.head.innerHTML += '<link rel="stylesheet" href="css/themes/dark.css">';
       } else {
         // If Light Mode
         window.theme = 'light';
@@ -434,7 +434,7 @@ async function loadTheme() {
     } else {
       window.theme = 'dark';
       document.querySelector('link[href="css/themes/' + themeObj + '.css"]').remove();
-      document.querySelector('head').innerHTML += '<link rel="stylesheet" href="css/themes/' + themeObj + '.css">';
+      document.head.innerHTML += '<link rel="stylesheet" href="css/themes/' + themeObj + '.css">';
     }
   }
 }
@@ -482,6 +482,8 @@ async function initAlert() {
   });
 
   alertWin.loadURL(address);
+
+  alertWin.openDevTools({ mode: 'detach' });
 
   alertWin.on('page-title-updated', async () => {
     alertWin.show();
