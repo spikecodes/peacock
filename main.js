@@ -1,5 +1,5 @@
-const { ipcMain, app, screen,
-	BrowserWindow, nativeTheme } = require('electron');
+const { ipcMain, app,
+	BrowserWindow, contentTracing } = require('electron');
 
 const { openProcessManager } = require('electron-process-manager');
 
@@ -10,24 +10,24 @@ let mainWindow;
 
 process.noDeprecation = true;
 
-ipcMain.on('setGlobal', (e, globalVal) => {
-	global[globalVal[0]] = globalVal[1];
-});
-
 ipcMain.on('openProcessManager', async e => {
 	openProcessManager();
 });
 
-async function sendToRenderer(channel, message) {
-	try { mainWindow.webContents.send(channel, message); }
-	catch (e) { console.log(e); }
-}
+app.disableHardwareAcceleration();
 
 async function createWindow() {
-	process.env['ELECTRON_DISABLE_SECURITY_WARNINGS'] = 'true';
+	// (async () => {
+  //   await contentTracing.startRecording({
+  //     include_categories: ['*']
+  //   })
+  //   console.log('Tracing started')
+  //   await new Promise(resolve => setTimeout(resolve, 5000))
+  //   const path = await contentTracing.stopRecording()
+  //   console.log('Tracing data recorded to ' + path)
+  // })()
 
-	// Create the browser window.
-	var screenSize = screen.getPrimaryDisplay().size;
+	process.env['ELECTRON_DISABLE_SECURITY_WARNINGS'] = 'true';
 
   mainWindow = new BrowserWindow({
 		title: 'Peacock',
@@ -37,7 +37,8 @@ async function createWindow() {
 		backgroundColor: '#FFFFFF',
 		webPreferences: {
 			nodeIntegration: true,
-			enableRemoteModule: true
+			enableRemoteModule: true,
+			backgroundThrottling: false
 		},
 		width: 1280,
 		height: 720,

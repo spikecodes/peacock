@@ -188,9 +188,9 @@ exports.savePage = function(contents) {
     filters: filters
   };
 
-  dialog.showSaveDialog(options).then((details) => {
-    if(!details.cancelled){
-      let path = details.filePath;
+  dialog.showSaveDialog(options).then((det) => {
+    if(!det.cancelled){
+      let path = det.filePath;
       let saveType;
       if(path.endsWith('htm')) saveType = 'HTMLComplete';
       if(path.endsWith('html')) saveType = 'HTMLOnly';
@@ -206,7 +206,7 @@ exports.activate = function (view) {
   let win = remote.getCurrentWindow()
   let views = win.getBrowserViews();
   for (let i = 0; i < views.length; i++) {
-    if(views[i].tab) win.removeBrowserView(views[i]);
+    if(views[i].type == 'tab') win.removeBrowserView(views[i]);
   }
   win.addBrowserView(view);
   $('#url').val('');
@@ -219,7 +219,14 @@ exports.activate = function (view) {
   activeTab = view;
 }
 
-exports.close = function (view) {
+exports.dialog = function () {
+  let view = new BrowserView();
+  view.setBounds({ x: 200, y: 200, width: 300, height: 4000 });
+  remote.getCurrentWindow().addBrowserView(view);
+  return view;
+}
+
+exports.close = async (view) => {
   view = view || this.current();
 
   if(activeTab == view) {
@@ -232,18 +239,17 @@ exports.close = function (view) {
     this.activate(nextTab);
   }
 
-  closedTabs.push(view.webContents.getURL());
-
-  let tab = view.tab.element;
-
-  this.viewClosed(view);
-
-  $(tab).css('transition', 'all 0.1s !important');
-  $(tab).fadeSlideLeft();
-
   view.tab.element.remove();
+  
+  closedTabs.push(view.webContents.getURL());
+  
+  this.viewClosed(view);
   view.destroy();
-  $(tab).css('transition', 'all 0.0s !important');
+
+  // $(tab).css('transition', 'all 0.1s !important');
+  // $(tab).fadeSlideLeft();
+
+  // $(tab).css('transition', 'all 0.0s !important');
 }
 
 exports.newView = function (url='peacock://newtab', active=true) {
@@ -263,6 +269,10 @@ exports.newView = function (url='peacock://newtab', active=true) {
 
   view.webContents.setUserAgent(userAgent);
 
+  // WEBRTC IP HANDLING POLICY
+
+  view.webContents.setWebRTCIPHandlingPolicy('disable_non_proxied_udp');
+
   // SYNCHRONIZE VIEW SIZE WITH PARENT WINDOW SIZE
 
   view.setBounds({x:0, y:topbarHeight, width:win.getContentBounds().width, height:win.getContentBounds().height - topbarHeight });
@@ -273,11 +283,14 @@ exports.newView = function (url='peacock://newtab', active=true) {
 
   // HEADER CONFIGURATION
 
-  tabSession.webRequest.onBeforeSendHeaders(async (details, callback) => {
-    if('Content-Type' in details.requestHeaders && store.get('flags').includes('--no-pings')) {
-      if(details.requestHeaders['Content-Type'][0] == 'text/ping') callback({ cancel: true });
+  tabSession.webRequest.onBeforeSendHeaders(async (det, callback) => {
+    if(det.url.substr(0,5) == 'http:' && store.get('flags').includes('--https-only')) {
+      callback({ cancel: true });
+      if(det.resourceType == 'mainFrame') view.webContents.loadURL('https' + det.url.substr(4));
+    } else if('Content-Type' in det.requestHeaders && store.get('flags').includes('--no-pings')) {
+      if(det.requestHeaders['Content-Type'][0] == 'text/ping') callback({ cancel: true });
     } else {
-      let headers = details.requestHeaders;
+      let headers = det.requestHeaders;
       if(store.get('flags').includes('--no-referrers')) headers['Referer'] = '';
       if(store.get('flags').includes('--do-not-track')) headers['DNT'] = '1';
       headers['Accept-Language'] = 'en-US,en;q=0.9';
@@ -310,10 +323,14 @@ exports.newView = function (url='peacock://newtab', active=true) {
     if(!rem) {
       let split = cookie.domain.split('.');
       let domain = split[split.length - 2] + '.' + split[split.length - 1];
-      split = (new URL(view.webContents.getURL())).host.split('.');
-      let host = split[split.length - 2] + '.' + split[split.length - 1];
-      if(domain != host) {
-        tabSession.cookies.remove(view.webContents.getURL(), cookie.name);
+      try {
+        split = (new URL(view.webContents.getURL())).host.split('.');
+        let host = split[split.length - 2] + '.' + split[split.length - 1];
+        if(domain != host) {
+          tabSession.cookies.remove(view.webContents.getURL(), cookie.name);
+        }
+      } catch (error) {
+        console.log('### COOKIE OOF')
       }
     }
   });
@@ -327,16 +344,16 @@ exports.newView = function (url='peacock://newtab', active=true) {
 
   // PDF READER
 
-  tabSession.webRequest.onResponseStarted(async (details) => {
-    let type = details.responseHeaders['Content-Type'] || details.responseHeaders['content-type'];
-    let resource = details.resourceType;
+  tabSession.webRequest.onResponseStarted(async (det) => {
+    let type = det.responseHeaders['Content-Type'] || det.responseHeaders['content-type'];
+    let resource = det.resourceType;
 
-    if(type && type[0] == 'application/json') console.log(type[0]);
-  
     if(!resource || !type) return;
+    let query = '?url=' + encodeURIComponent(det.url);
     if(resource == 'mainFrame' && type[0].includes('application/json')) {
-      let query = '?url=' + encodeURIComponent(details.url);
       view.webContents.loadURL(join(__dirname, '..', 'static', 'json-viewer', 'index.html') + query);
+    } else if (resource == 'mainFrame' && type[0].includes('application/pdf')) {
+      view.webContents.loadURL(join(__dirname, '..', 'static', 'pdf', 'index.html') + query);
     }
   });
 
@@ -428,10 +445,10 @@ exports.newView = function (url='peacock://newtab', active=true) {
   });
 
   $('#new-tab').before(`<div class="tab">
-        <img class="tab-icon" src="//:0">
-        <p class="tab-label">Loading...</p>
-        <img class="tab-close" src="images/close.svg">
-      </div>`);
+    <img class="tab-icon" src="//:0">
+    <p class="tab-label">Loading...</p>
+    <img class="tab-close" src="images/close.svg">
+  </div>`);
 
   view.tab = {
     element: $('#new-tab').prev(),
@@ -528,7 +545,7 @@ exports.showDialog = async (text) => {
   remote.getCurrentWindow().addBrowserView(view);
 }
 
-$('#new-tab').click(async () => this.newView('peacock://newtab'));
+$('#new-tab').click(async () => this.newView('file:///C:/Users/spike/Desktop/report.txt'));
 
 remote.app.on('certificate-error', (event, webContents, url, error, certificate, callback) => {
   console.log(certificate, error);
@@ -536,4 +553,4 @@ remote.app.on('certificate-error', (event, webContents, url, error, certificate,
   callback(true);
 });
 
-this.initDownloads();
+// this.initDownloads();

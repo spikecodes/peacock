@@ -9,16 +9,16 @@ exports.webContents = webContents;
 const topbarHeight = 70;
 
 function setURLBar(url) {
-  let bar = $('#url');
+  let bar = document.getElementById('url');
   if(!firstTime) {
     try {
       if(url == 'peacock://newtab') {
-        bar.val('');
+        bar.value = '';
         bar.focus();
         bar.select();
       } else {
         let protocol = (new URL(url)).protocol;
-        if(!protocol.startsWith('file')) bar.val(protocol.startsWith('http') ? url.substr(protocol.length + 2) : url); // 
+        if(!protocol.startsWith('file')) bar.value = protocol.startsWith('http') ? url.substr(protocol.length + 2) : url;
       }
     } catch (e) {}
   } else {
@@ -28,24 +28,24 @@ function setURLBar(url) {
 exports.setURLBar = setURLBar;
 
 function setSearchIcon(url) {
-  $('#site-info').attr('style', '');
+  document.getElementById('site-info').style = '';
 
   try {
     let protocol = (new URL(url)).protocol;
 
     if(protocol == 'http:') {
-      $('#site-info').removeClass('secure');
-      $('#site-info').addClass('insecure');
-      $('#site-info > img').attr('src', 'images/alert.svg');
+      document.getElementById('site-info').classList.remove('secure');
+      document.getElementById('site-info').classList.add('insecure');
+      document.querySelector('site-info > img').src = 'images/alert.svg';
     }
     else if(protocol == 'https:') {
-      $('#site-info').removeClass('insecure');
-      $('#site-info').addClass('secure');
-      $('#site-info > img').attr('src', 'images/lock.svg');
+      document.getElementById('site-info').classList.remove('insecure');
+      document.getElementById('site-info').classList.add('secure');
+      document.getElementById('site-info > img').src = 'images/lock.svg';
     } else {
-      $('#site-info').removeClass('secure');
-      $('#site-info').removeClass('insecure');
-      $('#site-info > img').attr('src', 'images/search.svg');
+      document.getElementById('site-info').classList.remove('secure');
+      document.getElementById('site-info').classList.remove('insecure');
+      document.querySelector('site-info > img').src = 'images/search.svg';
     }
   } catch (e) {}
 }
@@ -60,31 +60,17 @@ exports.loadStart = function(view, extensions) {
 
   view.tab.setTitle('Loading...');
 
-  $('#bookmark').css('visibility', 'hidden');
-  $('#refresh').children().first().attr('src','images/close.svg');
-
-  if(!extensions) return;
-
-  extensions.forEach(function (item, index) {
-    if(item.run_at == 'document_start'){
-      item.content.forEach(function (script, index) {
-        let js = require('fs').readFileSync(script).toString();
-        js = js.replace('chrome.runtime.onMessage.addListener', '');
-        view.webContents.executeJavaScript(js).then((result) => {
-          console.log(result);
-        });
-      });
-    }
-  });
+  document.getElementById('bookmark').style.visibility = 'hidden';
+  document.getElementById('refresh').firstElementChild.src = 'images/close.svg';
 }
 
 exports.loadStop = function(view, extensions) {
-  $('#refresh').children().first().attr('src', 'images/refresh.svg');
+  document.getElementById('refresh').firstElementChild.src = 'images/refresh.svg';
 
-  view.webContents.executeJavaScript(`document.querySelectorAll('link[rel="shortcut icon"]').length`)
+  view.webContents.executeJavaScript(`document.querySelectorAll('link[rel='shortcut icon']').length`)
     .then(r => {
       if(r > 0) {
-        view.webContents.executeJavaScript(`document.querySelector('link[rel="shortcut icon"]').href`)
+        view.webContents.executeJavaScript(`document.querySelector('link[rel='shortcut icon']').href`)
           .then(u => view.tab.setIcon(u));
       } else {
         let origin = new URL(view.webContents.getURL()).origin;
@@ -93,33 +79,6 @@ exports.loadStop = function(view, extensions) {
     });
 
   view.tab.setTitle(view.webContents.getTitle());
-
-  if(!extensions) return;
-
-  extensions.forEach(function (item, index) {
-    if(item.run_at == 'document_end'){
-      item.content.forEach(function (script, index) {
-        let js = require('fs').readFileSync(script).toString();
-        view.webContents.executeJavaScript(js);
-        view.webContents.executeJavaScript(`
-          let output;
-          function queueOutput(input) {
-            output = input;
-          }
-
-          function returnOutput() {
-            return output;
-          }
-
-          chrome.runtime.onMessage({'action': 'process-page'}, this, queueOutput);`)
-          .then(() => {
-            view.webContents.executeJavaScript(`returnOutput()`).then((result) => {
-              console.log(result);
-            });
-          });
-      });
-    }
-  });
 }
 
 exports.failLoad = function(event, view, errorCode, errorDescription, validatedURL) {
@@ -159,12 +118,14 @@ exports.domReady = function (view, storage) {
   view.webContents.insertCSS('input::-webkit-calendar-picker-indicator {display: none;}');
 
   storage.isBookmarked(view.webContents.getURL()).then((result) => {
-    $('#bookmark').css('visibility', 'visible');
-    $('#bookmark').children().first().attr('src', result ? 'images/bookmark-saved.svg' : 'images/bookmark.svg');
+    document.getElementById('bookmark').style.visibility = 'visible';
+    document.getElementById('bookmark').firstElementChild.src = result ? 'images/bookmark-saved.svg' : 'images/bookmark.svg';
   });
 
-  if (view.webContents.canGoBack()) { $("#back").removeAttr("disabled") } else { $("#back").attr("disabled", true) }
-  if (view.webContents.canGoForward()){$("#forward").removeAttr("disabled")}else{$("#forward").attr("disabled", true)}
+  if (view.webContents.canGoBack()) { document.getElementById('back').removeAttribute('disabled') }
+  else { document.getElementById('back').setAttribute('disabled', true) }
+  if (view.webContents.canGoForward()) { document.getElementById('forward').removeAttribute('disabled') }
+  else { document.getElementById('forward').setAttribute('disabled', true) }
 
   if(window.theme == 'dark') {
     view.webContents.insertCSS(`
@@ -182,15 +143,6 @@ exports.domReady = function (view, storage) {
       break;
     default:
       break;
-  }
-}
-
-exports.updateTargetURL = function (event, url) {
-  if (url && url != '') {
-    $('#target').css('opacity', '0.95');
-    $('#target').text(url);
-  } else {
-    $('#target').css('opacity', '0');
   }
 }
 
@@ -212,8 +164,8 @@ exports.changeTab = function (view, storage) {
   setSearchIcon(view.webContents.getURL());
 
   storage.isBookmarked(view.webContents.getURL()).then((result) => {
-    $('#bookmark').css('visibility', 'visible');
-    $('#bookmark').attr('src', result ? 'images/bookmark-saved.svg' : 'images/bookmark.svg');
+    document.getElementById('bookmark').style.visibility = 'visible';
+    document.getElementById('bookmark').src = result ? 'images/bookmark-saved.svg' : 'images/bookmark.svg';
   });
 
   try {
@@ -222,8 +174,10 @@ exports.changeTab = function (view, storage) {
   } catch (e) {}
 
   try {
-    if (view.webContents.canGoBack()) { $("#back").removeAttr("disabled") } else { $("#back").attr("disabled", true) }
-    if (view.webContents.canGoForward()){$("#forward").removeAttr("disabled")}else{$("#forward").attr("disabled", true)}
+    if (view.webContents.canGoBack()) { document.getElementById('back').removeAttribute('disabled') }
+    else { document.getElementById('back').setAttribute('disabled', true) }
+    if (view.webContents.canGoForward()) { document.getElementById('forward').removeAttribute('disabled') }
+    else { document.getElementById('forward').setAttribute('disabled', true) }
   } catch (e) {}
 }
 
