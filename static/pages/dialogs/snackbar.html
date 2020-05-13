@@ -95,12 +95,16 @@
     let { ipcRenderer } = require('electron');
 
     ipcRenderer.on('permission-request', (event, text, items, buttons) => {
-      $('#snackbar p').text(text);
+      document.querySelector('snackbar p').innerText = text;
 
-      $('#snackbar ul').empty();
+      let ul = document.querySelector('#snackbar ul');
+      while(ul.firstChild) ul.removeChild(ul.firstChild);
+
       if(items != []){
         items.forEach((item, index) => {
-          $('#snackbar ul').append(`<li>Access your ${item}</li>`);
+          let li = document.createElement('li');
+          li.innerText = `Access your ${item}`;
+          ul.appendChild(li);
         });
       }
 
