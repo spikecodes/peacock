@@ -1,4 +1,8 @@
+// PACKAGES
+
 const {	ipcRenderer, remote } = require('electron');
+
+// ANTI-FINGERPRINTING
 
 async function modifyDefault (defaultVar, name, value) {
 	if (Object.defineProperty) {
@@ -22,6 +26,8 @@ modifyDefault(screen, 'colorDepth', Math.round(Math.random()) == 0 ? 24 : 32);
 window.close = e => { ipcRenderer.send('closeCurrentTab', remote.getCurrentWebContents().id); };
 navigator.getBattery = () => {};
 if(navigator.mediaDevices) navigator.mediaDevices.enumerateDevices = ()=>{return new Promise((r)=>{r(undefined)})}
+
+// DIALOG HANDLERS
 
 global.alert = window.alert = (message) => {
 	let url = (window.location.href.startsWith('peacock')) ? 'Peacock' : window.location.href;
@@ -52,6 +58,8 @@ global.prompt = window.prompt = (message) => {
 		url: url
 	});
 }
+
+// FULLSCREEN HANDLERS
 
 let esc_pointer = event => { if (event.keyCode === 27) { document.exitPointerLock(); } };
 let esc_fullscreen = event => { if (event.keyCode === 27) { document.exitFullscreen(); } };
