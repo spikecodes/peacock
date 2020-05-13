@@ -16,8 +16,8 @@
 - 🔐 Anonymize your browsing with strong fingerprint randomization.<br>
 - 🚅 Blazing fast browser based on [degoogled] Chromium 83!<br>
 - 🕵️ No browsing data leaves your device. No ads. No analytics whatsoever.<br>
-- ⛔ Features a powerful and speedy adblocker<br>
-- 🎨 Beautiful and customizable themes. Peacock uses <a href="https://www.nordtheme.com/">Nord</a> by default.<br><br>
+- ⛔ Powerful and speedy adblocker<br>
+- 🎨 Beautiful customizable themes, uses <a href="https://www.nordtheme.com/">Nord</a> by default.<br><br>
 
 ### Screenshots
 New screenshots coming very soon with the new Nord theme!
@@ -36,10 +36,10 @@ Both Firefox and Brave are spectacular and every day, Peacock gets closer and cl
 Peacock is built around on open source technologies and therefore we love transparency. You're welcome to perform your own audits on our entirely open source code!
 
 #### Just how experimental is Peacock really? Can I process any sensitive data on it yet?
-I'd suggest holding off on doing anything too sensitive on Peacock for now, it's still in development and bugs are getting patched every day but like all apps, some may be missed along the way.
+I'd suggest holding off on doing anything too sensitive on Peacock for now, it's still in development and bugs are getting patched all the time, but like all apps, some may be missed along the way.
 
 #### Why use Electron?
-Some people are skeptical about [Electron](https://www.electronjs.org/) for it's generally high memory usage but Electron makes the development process incredibly simple. Electron lets us build a desktop app using web technologies. Eventually, we may switch to something more practical like forking Chromium but for now, there are few downsides so we'll be staying with Electron.
+Some people are skeptical about [Electron](https://www.electronjs.org/) for its generally high memory usage, but Electron makes the development process incredibly simple. Electron lets us build a desktop app using web technologies. Eventually, we may switch to something more practical like forking Chromium, but for now, the downsides are very low, so we'll be staying with Electron.
 
 #### How to bypass security warnings?
 On Windows, apps are deemed as insecure if they haven't been code-signed with a certificate. Sigining certificates are expensive and therefore, Peacock doesn't have one (yet). This means that Peacock may show up to antiviruses or Windows Defender as a 'suspicious application' but can be easily bypsased using this GIF:
