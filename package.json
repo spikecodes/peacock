@@ -66,7 +66,7 @@
 	"author": "Spike Raxstone <spike@peacock.link>",
 	"license": "MIT",
 	"devDependencies": {
-		"electron": "^9.0.0-beta.22",
+		"electron": "^9.0.0-beta.24",
 		"electron-builder": "^22.5.1"
 	},
 	"dependencies": {

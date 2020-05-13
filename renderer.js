@@ -483,7 +483,7 @@ async function initAlert() {
 
   alertWin.loadURL(address);
 
-  alertWin.openDevTools({ mode: 'detach' });
+  // alertWin.openDevTools({ mode: 'detach' });
 
   alertWin.on('page-title-updated', async () => {
     alertWin.show();
@@ -803,9 +803,10 @@ let menuTemp = [
 document.getElementById('back').addEventListener('click', async () => keyboardShortcut('backPage'));
 document.getElementById('forward').addEventListener('click', async () => keyboardShortcut('forwardPage'));
 document.getElementById('refresh').addEventListener('mousedown', async e => {
+ 
   switch (e.which) {
-    case 1:
-      if (document.getElementById('refresh').firstElementChild.src == 'images/refresh.svg') {
+    case 1:    
+      if (document.getElementById('refresh').firstElementChild.src.endsWith('refresh.svg')) {
         tabs.current().webContents.reload();
       } else {
         tabs.current().webContents.stop();
