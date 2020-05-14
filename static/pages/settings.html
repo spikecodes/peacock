@@ -17,6 +17,7 @@
     height: 100%;
     transition: width 0.2s ease-in-out, left 0.2s ease-in-out;
     overflow: hidden;
+    z-index: 10;
   }
   .sidebar:hover {
     width: 250px;
@@ -24,6 +25,10 @@
   .logo {
     text-align: center;
     margin-top: 20px;
+  }
+  label {
+    color: var(--nord5);
+    font-size: 16px;
   }
 
   .panels {
@@ -99,6 +104,8 @@
 <html>
   <head>
     <link rel="stylesheet" type="text/css" href="assets://global.css">
+    <script type="text/javascript" src="assets://easydropdown.js"></script>
+    <link rel="stylesheet" type="text/css" href="assets://dropdown.css">
     <title>Peacock Settings</title>
   </head>
 
@@ -155,118 +162,189 @@
     <!--  GENERAL -->
     <div class="panels" id="general">
       <div class="panel">
-        <h1 class="panel-heading"></h1>
+        <h1 class="panel-heading">Default Browser</h1>
         <div class="panel-body">
+          <p>Coming soon</p>
         </div>
       </div>
       <div class="panel">
-        <h1 class="panel-heading"></h1>
+        <h1 class="panel-heading">Language</h1>
         <div class="panel-body">
+          <select>
+            <option value="" data-placeholder>Select language</option>
+            <option value="1">English (UK)</option>
+            <option value="2">English (US)</option>
+          </select>
         </div>
       </div>
       <div class="panel">
-        <h1 class="panel-heading"></h1>
+        <h1 class="panel-heading">Viewers</h1>
         <div class="panel-body">
+          <input type="checkbox" id="json" name="json" value="json">
+          <label for="json">Enable JSON viewer</label>
+          <br>
+          <input type="checkbox" id="pdf" name="pdf" value="pdf">
+          <label for="pdf">Enable PDF viewer</label>
         </div>
       </div>
       <div class="panel">
-        <h1 class="panel-heading"></h1>
+        <h1 class="panel-heading">Start up</h1>
         <div class="panel-body">
+          <p>Coming soon</p>
         </div>
       </div>
     </div>
 
     <!--  APPEARANCE -->
-    <div class="panels" id="general">
+    <div class="panels" id="appearance">
       <div class="panel">
-        <h1 class="panel-heading"></h1>
+        <h1 class="panel-heading">Window Settings</h1>
         <div class="panel-body">
+          <input type="checkbox" id="full" name="full" value="full">
+          <label for="full">Start window fullscreen</label>
+          <br>
+          <input type="checkbox" id="native" name="native" value="native">
+          <label for="native">Use native window (requires restart)</label>
         </div>
       </div>
       <div class="panel">
-        <h1 class="panel-heading"></h1>
+        <h1 class="panel-heading">Navbar Settings</h1>
         <div class="panel-body">
+          <input type="checkbox" id="home" name="home" value="home">
+          <label for="home">Show home button</label>
+          <br>
+          <input type="checkbox" id="ss" name="ss" value="ss">
+          <label for="ss">Allow search suggestions</label>
         </div>
       </div>
       <div class="panel">
-        <h1 class="panel-heading"></h1>
+        <h1 class="panel-heading">Theme Settings</h1>
         <div class="panel-body">
+          <select>
+            <option value="default">Default</option>
+            <option value="dark">Dark</option>
+            <option value="light">Light</option>
+          </select>
         </div>
       </div>
       <div class="panel">
-        <h1 class="panel-heading"></h1>
+        <h1 class="panel-heading">Tab Settings</h1>
         <div class="panel-body">
+          <label for="tab-location" style="position: relative; top: -10px; margin-right: 10px;">Tab position</label>
+          <select id="tab-location">
+            <option value="top">Top</option>
+            <option value="bottom">Bottom</option>
+            <option value="left">Left</option>
+          </select>
+          <br>
+          <label for="tab-location" style="position: relative; top: -10px; margin-right: 10px;">Tab animations</label>
+          <select id="tab-location">
+            <option value="on">On</option>
+            <option value="off">Off</option>
+          </select>
         </div>
       </div>
     </div>
 
     <!--  CUSTOMIZATION -->
-    <div class="panels" id="general">
+    <div class="panels" id="customization">
       <div class="panel">
-        <h1 class="panel-heading"></h1>
+        <h1 class="panel-heading">Search Engine Settings</h1>
         <div class="panel-body">
+          <input type="checkbox" id="urlbar" name="urlbar" value="urlbar">
+          <label for="urlbar">Allow searching through the url bar</label>
+          <hr style="margin-top: 10px; opacity: 0;">
+          <label for="se" style="position: relative; top: -10px; margin-right: 8px;">Search engine</label>
+          <select id="se">
+            <option value="duckduckgo">Duckduckgo</option>
+            <option value="startpage">Startpage</option>
+            <option value="whoogle">Whoogle</option>
+            <option value="bing">Bing</option>
+            <option value="google">Google</option>
+          </select>
         </div>
       </div>
       <div class="panel">
-        <h1 class="panel-heading"></h1>
+        <h1 class="panel-heading">Download Settings</h1>
         <div class="panel-body">
+          <input type="checkbox" id="dlbar" name="dlbar" value="dlbar">
+          <label for="dlbar">Show downloads bar</label>
+          <hr style="margin-top: 10px; opacity: 0;">
+          <label for="download-location" style="position: relative; top: -10px; margin-right: 8px;">Location</label>
+          <select id="download-location">
+            <option value="duckduckgo">Save As Window</option>
+            <option value="startpage">Downloads folder</option>
+          </select>
         </div>
       </div>
       <div class="panel">
-        <h1 class="panel-heading"></h1>
+        <h1 class="panel-heading">New Tab Settings</h1>
         <div class="panel-body">
+          <label for="ntp" style="position: relative; top: -10px; margin-right: 8px;">New tab page</label>
+          <select id="ntp">
+            <option value="ntp">New tab page</option>
+            <option value="se">Search engine</option>
+          </select>
+          <hr style="margin-top: 10px; opacity: 0;">
+          <label for="image" style="position: relative; top: -10px; margin-right: 8px;">Image source</label>
+          <select id="image">
+            <option value="unsplash">Unsplash</option>
+            <option value="built-in">Built-in</option>
+          </select>
         </div>
       </div>
       <div class="panel">
-        <h1 class="panel-heading"></h1>
+        <h1 class="panel-heading">Input Settings</h1>
         <div class="panel-body">
+          <input type="checkbox" id="kbs" name="kbs" value="kbs">
+          <label for="kbs">Enable keyboard shortcuts</label>
         </div>
       </div>
     </div>
 
     <!--  PRIVACY -->
-    <div class="panels" id="general">
+    <div class="panels" id="privacy">
       <div class="panel">
-        <h1 class="panel-heading"></h1>
+        <h1 class="panel-heading">History Settings</h1>
         <div class="panel-body">
         </div>
       </div>
       <div class="panel">
-        <h1 class="panel-heading"></h1>
+        <h1 class="panel-heading">Cookie Settings</h1>
         <div class="panel-body">
         </div>
       </div>
       <div class="panel">
-        <h1 class="panel-heading"></h1>
+        <h1 class="panel-heading">Tracker Settings</h1>
         <div class="panel-body">
         </div>
       </div>
       <div class="panel">
-        <h1 class="panel-heading"></h1>
+        <h1 class="panel-heading">Adblocker Settings</h1>
         <div class="panel-body">
         </div>
       </div>
     </div>
 
     <!--  SECURITY -->
-    <div class="panels" id="general">
+    <div class="panels" id="security">
       <div class="panel">
-        <h1 class="panel-heading"></h1>
+        <h1 class="panel-heading">Website Permissions</h1>
         <div class="panel-body">
         </div>
       </div>
       <div class="panel">
-        <h1 class="panel-heading"></h1>
+        <h1 class="panel-heading">404 Handling</h1>
         <div class="panel-body">
         </div>
       </div>
       <div class="panel">
-        <h1 class="panel-heading"></h1>
+        <h1 class="panel-heading">Protocol Settings</h1>
         <div class="panel-body">
         </div>
       </div>
       <div class="panel">
-        <h1 class="panel-heading"></h1>
+        <h1 class="panel-heading">Password Manager</h1>
         <div class="panel-body">
         </div>
       </div>
@@ -307,6 +385,11 @@ let version = document.getElementById('version');
 version.innerHTML = sendSync('getVersions').peacock;
 
 function switchMenu(toggle) {
+  let views = document.querySelectorAll('.panels');
+  for (let i = 0; i < views.length; i++) {
+    views[i].style.display = 'none';
+  }
+  document.getElementById(toggle).style.display = 'block';
   switch(toggle) {
     case 'general':
       for (let i = 0; i < 5; i++) {
@@ -346,6 +429,8 @@ function switchMenu(toggle) {
   }
 }
 
-switchMenu('general');
+switchMenu('customization');
+
+easydropdown.all();
 
 </script>
