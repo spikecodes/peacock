@@ -433,7 +433,8 @@ async function loadTheme() {
       }
     } else {
       window.theme = 'dark';
-      document.querySelector('link[href="css/themes/' + themeObj + '.css"]').remove();
+      let themeEl = document.querySelector('link[href="css/themes/' + themeObj + '.css"]');
+      if(themeEl) themeEl.remove();
       document.head.innerHTML += '<link rel="stylesheet" href="css/themes/' + themeObj + '.css">';
     }
   }
