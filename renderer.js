@@ -609,7 +609,7 @@ async function loadFlags() {
   }
 }
 
-// SITE INFO
+// SITE INFO & DIALOGS
 
 let siteInfo;
 async function toggleSiteInfo() {
@@ -914,6 +914,8 @@ remote.getCurrentWindow().on('move', async () => {
   search.hide();
   document.getElementById('url').blur();
 });
+
+// Initialize First Tab
 
 tabs.newView(remote.process.argv[2] && (remote.process.argv[2].startsWith('http') ||
   remote.process.argv[2].startsWith('peacock')) ? remote.process.argv[2] : 'peacock://newtab');
