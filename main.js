@@ -17,16 +17,6 @@ ipcMain.on('openProcessManager', async e => {
 app.disableHardwareAcceleration();
 
 async function createWindow() {
-	// (async () => {
-  //   await contentTracing.startRecording({
-  //     include_categories: ['*']
-  //   })
-  //   console.log('Tracing started')
-  //   await new Promise(resolve => setTimeout(resolve, 5000))
-  //   const path = await contentTracing.stopRecording()
-  //   console.log('Tracing data recorded to ' + path)
-  // })()
-
 	process.env['ELECTRON_DISABLE_SECURITY_WARNINGS'] = 'true';
 
   mainWindow = new BrowserWindow({
