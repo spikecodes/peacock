@@ -1,3 +1,22 @@
+.droplabel {
+  height: 35px;
+  display: inline-table;
+}
+
+.droplabel > label {
+  display: table-cell;
+  vertical-align: middle;
+  clear: both;
+  text-align: left;
+  width: 50%;
+}
+
+.droplabel > select {
+  display: table-cell;
+  vertical-align: middle;
+  width: 50%;
+}
+
 .edd-root,
 .edd-root *,
 .edd-root *::before,
@@ -14,10 +33,15 @@
 .edd-root {
     display: inline-block;
     position: relative;
-    width: 160px;
     user-select: none;
     font-weight: 300;
     font-size: 16px;
+    height: 35px;
+    width: 170px;
+}
+
+.droplabel > .edd-root {
+  margin-left: 10px;
 }
 
 .edd-root-disabled {
