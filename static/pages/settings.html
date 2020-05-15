@@ -3,6 +3,14 @@
   body {
     background-color: var(--nord0) !important;
   }
+  button {
+    background-color: var(--nord3) !important;
+    text-align: center;
+    color: var(--nord4);
+    padding: 10px;
+    font-size: 17px;
+    border-radius: var(--round-corners);
+  }
   .title {
     color: var(--nord2);
     font-size: 20px;
@@ -58,7 +66,7 @@
     margin-bottom: 7px;
   }
   .panel-body {
-    border-radius: 20px;
+    border-radius: var(--round-corners);
     background-color: var(--nord1);
     font-size: 20px;
     padding: 15px;
@@ -98,6 +106,20 @@
   .entry {
     width: 250px;
     cursor: pointer;
+  }
+
+  .tbl {
+    width: 300px;
+    height: 35px;
+    display: inline-table;
+  }
+
+  .col {
+    margin: 1%;
+    display: table-cell;
+    vertical-align: middle;
+    clear: both;
+    width: 48%;
   }
 </style>
 
@@ -182,7 +204,7 @@
         <div class="panel-body">
           <input type="checkbox" id="json" name="json" value="json">
           <label for="json">Enable JSON viewer</label>
-          <br>
+          <hr style="margin-top: 10px; opacity: 0;">
           <input type="checkbox" id="pdf" name="pdf" value="pdf">
           <label for="pdf">Enable PDF viewer</label>
         </div>
@@ -202,7 +224,7 @@
         <div class="panel-body">
           <input type="checkbox" id="full" name="full" value="full">
           <label for="full">Start window fullscreen</label>
-          <br>
+          <hr style="margin-top: 10px; opacity: 0;">
           <input type="checkbox" id="native" name="native" value="native">
           <label for="native">Use native window (requires restart)</label>
         </div>
@@ -212,7 +234,7 @@
         <div class="panel-body">
           <input type="checkbox" id="home" name="home" value="home">
           <label for="home">Show home button</label>
-          <br>
+          <hr style="margin-top: 10px; opacity: 0;">
           <input type="checkbox" id="ss" name="ss" value="ss">
           <label for="ss">Allow search suggestions</label>
         </div>
@@ -230,18 +252,22 @@
       <div class="panel">
         <h1 class="panel-heading">Tab Settings</h1>
         <div class="panel-body">
-          <label for="tab-location" style="position: relative; top: -10px; margin-right: 10px;">Tab position</label>
-          <select id="tab-location">
-            <option value="top">Top</option>
-            <option value="bottom">Bottom</option>
-            <option value="left">Left</option>
-          </select>
-          <br>
-          <label for="tab-location" style="position: relative; top: -10px; margin-right: 10px;">Tab animations</label>
-          <select id="tab-location">
-            <option value="on">On</option>
-            <option value="off">Off</option>
-          </select>
+          <div class="droplabel">
+            <label for="tab-location">Tab position</label>
+            <select id="tab-location">
+              <option value="top">Top</option>
+              <option value="bottom">Bottom</option>
+              <option value="left">Left</option>
+            </select>
+          </div>
+          <hr style="margin-top: 10px; opacity: 0;">
+          <div class="droplabel">
+            <label for="tab-location">Tab animations</label>
+            <select id="tab-location">
+              <option value="on">On</option>
+              <option value="off">Off</option>
+            </select>
+          </div>
         </div>
       </div>
     </div>
@@ -254,14 +280,16 @@
           <input type="checkbox" id="urlbar" name="urlbar" value="urlbar">
           <label for="urlbar">Allow searching through the url bar</label>
           <hr style="margin-top: 10px; opacity: 0;">
-          <label for="se" style="position: relative; top: -10px; margin-right: 8px;">Search engine</label>
-          <select id="se">
-            <option value="duckduckgo">Duckduckgo</option>
-            <option value="startpage">Startpage</option>
-            <option value="whoogle">Whoogle</option>
-            <option value="bing">Bing</option>
-            <option value="google">Google</option>
-          </select>
+          <div class="droplabel">
+            <label for="se">Search engine</label>
+            <select id="se">
+              <option value="duckduckgo">Duckduckgo</option>
+              <option value="startpage">Startpage</option>
+              <option value="whoogle">Whoogle</option>
+              <option value="bing">Bing</option>
+              <option value="google">Google</option>
+            </select>
+          </div>
         </div>
       </div>
       <div class="panel">
@@ -270,27 +298,33 @@
           <input type="checkbox" id="dlbar" name="dlbar" value="dlbar">
           <label for="dlbar">Show downloads bar</label>
           <hr style="margin-top: 10px; opacity: 0;">
-          <label for="download-location" style="position: relative; top: -10px; margin-right: 8px;">Location</label>
-          <select id="download-location">
-            <option value="duckduckgo">Save As Window</option>
-            <option value="startpage">Downloads folder</option>
-          </select>
+          <div class="droplabel">
+            <label for="download-location">Location</label>
+            <select id="download-location">
+              <option value="duckduckgo">Save As Window</option>
+              <option value="startpage">Downloads folder</option>
+            </select>
+          </div>
         </div>
       </div>
       <div class="panel">
         <h1 class="panel-heading">New Tab Settings</h1>
         <div class="panel-body">
-          <label for="ntp" style="position: relative; top: -10px; margin-right: 8px;">New tab page</label>
-          <select id="ntp">
-            <option value="ntp">New tab page</option>
-            <option value="se">Search engine</option>
-          </select>
+          <div class="droplabel">
+            <label for="ntp">New tab page</label>
+            <select id="ntp">
+              <option value="ntp">New tab page</option>
+              <option value="se">Search engine</option>
+            </select>
+          </div>
           <hr style="margin-top: 10px; opacity: 0;">
-          <label for="image" style="position: relative; top: -10px; margin-right: 8px;">Image source</label>
-          <select id="image">
-            <option value="unsplash">Unsplash</option>
-            <option value="built-in">Built-in</option>
-          </select>
+          <div class="droplabel">
+            <label for="image">Image source</label>
+            <select id="image">
+              <option value="unsplash">Unsplash</option>
+              <option value="built-in">Built-in</option>
+            </select>
+          </div>
         </div>
       </div>
       <div class="panel">
@@ -307,21 +341,57 @@
       <div class="panel">
         <h1 class="panel-heading">History Settings</h1>
         <div class="panel-body">
+          <input type="checkbox" id="history-in-search" name="history-in-search" value="history-in-search">
+          <label for="history-in-search">Allow history in suggestions</label>
+          <hr style="margin-top: 10px; opacity: 0;">
+          <div class="droplabel">
+            <label for="auto-history">Keep for</label>
+            <select id="auto-history">
+              <option value="dont-keep">Don't keep</option>
+              <option value="1-hour">1 Hour</option>
+              <option value="1-day">1 Day</option>
+              <option value="1-week">1 Week</option>
+              <option value="1-month">1 Month</option>
+              <option value="1-year">1 Year</option>
+              <option value="dont-clear">Don't clear</option>
+            </select>
+          </div>
         </div>
       </div>
       <div class="panel">
         <h1 class="panel-heading">Cookie Settings</h1>
         <div class="panel-body">
+          <div class="droplabel">
+            <label for="auto-cookies">Keep for</label>
+            <select id="auto-cookies">
+              <option value="dont-keep">Don't keep</option>
+              <option value="1-hour">1 Hour</option>
+              <option value="1-day">1 Day</option>
+              <option value="1-week">1 Week</option>
+              <option value="1-month">1 Month</option>
+              <option value="1-year">1 Year</option>
+              <option value="dont-clear">Don't clear</option>
+            </select>
+          </div>
+          <hr style="margin-top: 10px; opacity: 0;">
+          <div class="tbl">
+            <button class="col">Clear cookies</button>
+            <button class="col">Show cookies</button>
+          </div>
         </div>
       </div>
       <div class="panel">
         <h1 class="panel-heading">Tracker Settings</h1>
         <div class="panel-body">
+          <input type="checkbox" id="no-track" name="no-track" value="no-track">
+          <label for="no-track">Eliminate all tracking and analytics</label>
         </div>
       </div>
       <div class="panel">
         <h1 class="panel-heading">Adblocker Settings</h1>
         <div class="panel-body">
+          <input type="checkbox" id="ad" name="ad" value="ad">
+          <label for="ad">Eliminate all adverts</label>
         </div>
       </div>
     </div>
@@ -331,21 +401,88 @@
       <div class="panel">
         <h1 class="panel-heading">Website Permissions</h1>
         <div class="panel-body">
+          <div class="droplabel">
+            <label for="perm-camera">Camera access</label>
+            <select id="perm-camera">
+              <option value="ask">Always ask</option>
+              <option value="deny">Always deny</option>
+              <option value="allow">Always allow</option>
+            </select>
+          </div>
+          <hr style="margin-top: 10px; opacity: 0;">
+          <div class="droplabel">
+            <label for="perm-microphone">Microphone access</label>
+            <select id="perm-microphone">
+              <option value="ask">Always ask</option>
+              <option value="deny">Always deny</option>
+              <option value="allow">Always allow</option>
+            </select>
+          </div>
+          <hr style="margin-top: 10px; opacity: 0;">
+          <div class="droplabel">
+            <label for="perm-flash">Flash</label>
+            <select id="perm-flash">
+              <option value="ask">Always ask</option>
+              <option value="deny">Always deny</option>
+              <option value="allow">Always allow</option>
+            </select>
+          </div>
+          <hr style="margin-top: 10px; opacity: 0;">
+          <div class="droplabel">
+            <label for="perm-location">Know your location</label>
+            <select id="perm-location">
+              <option value="ask">Always ask</option>
+              <option value="deny">Always deny</option>
+              <option value="allow">Always allow</option>
+            </select>
+          </div>
+          <hr style="margin-top: 10px; opacity: 0;">
+          <div class="droplabel">
+            <label for="perm-js">Run javascript</label>
+            <select id="perm-js">
+              <option value="ask">Always ask</option>
+              <option value="deny">Always deny</option>
+              <option value="allow">Always allow</option>
+            </select>
+          </div>
         </div>
       </div>
       <div class="panel">
         <h1 class="panel-heading">404 Handling</h1>
         <div class="panel-body">
+          <div class="droplabel">
+            <label for="404">Method</label>
+            <select id="404">
+              <option value="wayback">Wayback machine</option>
+              <option value="nothing">Nothing</option>
+            </select>
+          </div>
         </div>
       </div>
       <div class="panel">
         <h1 class="panel-heading">Protocol Settings</h1>
         <div class="panel-body">
+          <input type="checkbox" id="https" name="https" value="https">
+          <label for="https">Always redirect to HTTPS</label>
         </div>
       </div>
       <div class="panel">
         <h1 class="panel-heading">Password Manager</h1>
         <div class="panel-body">
+          <input type="checkbox" id="passwd" name="passwd" value="passwd">
+          <label for="passwd">Enable password manager</label>
+          <hr style="margin-top: 10px; opacity: 0;">
+          <input type="checkbox" id="passwd" name="passwd" value="passwd">
+          <label for="passwd">Autocomplete in forms</label>
+          <hr style="margin-top: 10px; opacity: 0;">
+          <div class="droplabel">
+            <label for="saving">Password saving</label>
+            <select id="saving">
+              <option value="always">Always save</option>
+              <option value="ask">Ask to save</option>
+              <option value="never">Never save</option>
+            </select>
+          </div>
         </div>
       </div>
     </div>
@@ -430,8 +567,6 @@ function switchMenu(toggle) {
 }
 
 switchMenu('general');
-
-easydropdown.all();
 
 easydropdown.all();
 
