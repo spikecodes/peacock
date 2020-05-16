@@ -898,10 +898,14 @@ getSearchEngine(async e => {
   document.getElementById('url').setAttribute('data-placeholder', `Search ${e.name} or type a URL`);
 });
 
+// INITIALIZE WINDOWS
+
 initCertDialog();
 initAlert();
 
 loadFlags();
+
+// WINDOW HANDLERS
 
 remote.getCurrentWindow().on('closed', async () => {
   remote
@@ -915,7 +919,7 @@ remote.getCurrentWindow().on('move', async () => {
   document.getElementById('url').blur();
 });
 
-// Initialize First Tab
+// INITIALIZE FIRST TAB
 
 tabs.newView(remote.process.argv[2] && (remote.process.argv[2].startsWith('http') ||
   remote.process.argv[2].startsWith('peacock')) ? remote.process.argv[2] : 'peacock://newtab');
