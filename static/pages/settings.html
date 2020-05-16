@@ -113,7 +113,6 @@
     height: 35px;
     display: inline-table;
   }
-
   .col {
     margin: 1%;
     display: table-cell;
@@ -121,13 +120,187 @@
     clear: both;
     width: 48%;
   }
+  
+  .droplabel {
+    height: 35px;
+    display: inline-table;
+  }
+  .droplabel > label {
+    display: table-cell;
+    vertical-align: middle;
+    clear: both;
+    text-align: left;
+    width: 50%;
+  }
+  .droplabel > select {
+    display: table-cell;
+    vertical-align: middle;
+    width: 50%;
+  }
+  .edd-root,
+  .edd-root *,
+  .edd-root *::before,
+  .edd-root *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      background-color: #4c566a;
+      color: white !important;
+  }
+  .edd-root {
+      display: inline-block;
+      position: relative;
+      user-select: none;
+      font-weight: 300;
+      font-size: 16px;
+      height: 35px;
+      width: 170px;
+  }
+  .droplabel > .edd-root {
+    margin-left: 10px;
+  }
+  .edd-root-disabled {
+      color: #ccc;
+      cursor: not-allowed;
+  }
+  .edd-root::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: #45bce7;
+      transition: transform 150ms ease-out;
+      transform: scaleX(0);
+  }
+  .edd-root.edd-root-focused::after,
+  .edd-root.edd-root-invalid::after {
+      transform: scaleX(1);
+  }
+  .edd-root.edd-root-invalid::after {
+      background: rgb(255, 105, 105);
+  }
+  .edd-head {
+      position: relative;
+      overflow: hidden;
+      border: 0px solid grey;
+      transition: border-color 200ms;
+      padding-left: 10px;
+  }
+  .edd-root:not(.edd-root-disabled) .edd-head:hover {
+      border-color: #81a1c1;
+  }
+  .edd-value {
+      width: 100%;
+      display: inline-block;
+      vertical-align: middle;
+      padding: 8px 25px 8px 0;
+  }
+  .edd-arrow {
+      position: absolute;
+      width: 14px;
+      height: 10px;
+      top: calc(50% - 5px);
+      right: 3px;
+      transition: transform 150ms;
+      pointer-events: none;
+      color: white;
+  }
+  .edd-arrow::before {
+      content: '';
+      position: absolute;
+      width: 8px;
+      height: 8px;
+      border-right: 2px solid currentColor;
+      border-bottom: 2px solid currentColor;
+      top: 0;
+      right: 2px;
+      transform: rotate(45deg);
+      transform-origin: 50% 25%;
+  }
+  .edd-root-open .edd-arrow {
+      transform: rotate(180deg);
+  }
+  .edd-value,
+  .edd-option,
+  .edd-group-label {
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      overflow: hidden;
+  }
+  .edd-root:not(.edd-root-disabled) .edd-value,
+  .edd-option {
+      cursor: pointer;
+      color: #202128;
+  }
+  .edd-select {
+      position: absolute;
+      opacity: 0;
+      width: 100%;
+      left: -100%;
+      top: 0;
+  }
+  .edd-root-native .edd-select {
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+  }
+  .edd-body {
+      opacity: 0;
+      position: absolute;
+      left: 0;
+      right: 0;
+      pointer-events: none;
+      overflow: hidden;
+      z-index: 999;
+      background: white;
+      box-shadow: 0 0 6px rgba(0, 0, 0, 0.08);
+      border-top: 0;
+      border-right: 0;
+  }
+  .edd-root-open .edd-body {
+      opacity: 1;
+      pointer-events: all;
+      transform: scale(1);
+      transition: opacity 200ms, transform 100ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+  .edd-root-open-above .edd-body {
+      bottom: 100%;
+  }
+  .edd-root-open-below .edd-body {
+      top: 100%;
+  }
+  .edd-items-list {
+      overflow: auto;
+      max-height: 0;
+      transition: max-height 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      -webkit-overflow-scrolling: touch;
+  }
+  .edd-option {
+      position: relative;
+      padding: 4px 8px 4px 22px;
+  }
+  .edd-option-selected::before {
+      content: '';
+      position: absolute;
+      width: 8px;
+      height: 4px;
+      border-bottom: 2px solid #4ac5f1;
+      border-left: 2px solid #4ac5f1;
+      left: 6px;
+      top: calc(50% - 4px);
+      transform: rotate(-45deg);
+  }
 </style>
 
 <html>
   <head>
     <link rel="stylesheet" type="text/css" href="assets://global.css">
     <script type="text/javascript" src="assets://easydropdown.js"></script>
-    <link rel="stylesheet" type="text/css" href="assets://dropdown.css">
     <title>Peacock Settings</title>
   </head>
 
