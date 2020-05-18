@@ -49,10 +49,7 @@ search.initialize(searchBounds());
 // STORAGE
 
 const Store = require('electron-store');
-const store = new Store();
-
-window.store = store;
-window.storage = storage;
+window.store = new Store();
 
 if (!store.get('settings')) {
   let data = {
@@ -73,8 +70,6 @@ store.set('searchEngines', [
 ]);
 
 if (!store.get('blocked')) store.set('blocked', 0);
-if (!store.get('bookmarks')) store.set('bookmarks', []);
-if (!store.get('history')) store.set('history', []);
 if (!store.get('permissions')) store.set('permissions', {});
 if (!store.get('flags')) store.set('flags', [
   // '--disable-reading-from-canvas'
@@ -90,7 +85,6 @@ if (!store.get('flags')) store.set('flags', [
 ]);
 
 web.init(document);
-storage.init(store);
 shortcuts.init(keyboardShortcut, n => { if (tabs.get(n-1)) tabs.activate(tabs.get(n-1)) });
 
 console.colorLog = (msg, color) => { console.log('%c' + msg, 'color:' + color + ';font-weight:bold;') }

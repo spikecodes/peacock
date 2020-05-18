@@ -177,7 +177,7 @@ exports.savePage = function(contents) {
 }
 
 exports.activate = function (view) {
-  let win = remote.getCurrentWindow()
+  let win = remote.getCurrentWindow();
   let views = win.getBrowserViews();
   for (let i = 0; i < views.length; i++) {
     if(views[i].type == 'tab') win.removeBrowserView(views[i]);

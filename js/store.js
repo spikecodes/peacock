@@ -1,42 +1,52 @@
+const Store = require('electron-store');
 const { v1 } = require('uuid');
 
-var store;
+const history = new Store({ name: 'history' });
+const bookmarks = new Store({ name: 'bookmarks' });
 
-exports.init = st => { store = st }
+history.set('app', 'peacock');
+bookmarks.set('app', 'peacock');
 
-async function set (key, value) { store.set(key, value); }
+history.delete('app');
+bookmarks.delete('app');
 
-exports.getHistory = async () => store.get('history');
-exports.getBookmarks = async () => store.get('bookmarks');
+window.hist = history;
+
+exports.getHistory = async () => history.get();
+exports.getBookmarks = async () => bookmarks.get();
 
 exports.removeHistoryItem = async function (id) {
-  let removed = (await this.getHistory()).filter(item => item.id !== id)
-  return set('history', removed);
+  return history.delete(id);
 }
 
 exports.removeBookmark = async function (id) {
-  let fixed = (await this.getBookmarks()).filter(item => item.id !== id);
-  return set('bookmarks', fixed);
+  return bookmarks.delete(id);
 }
 
 exports.clearHistory = async function () {
-  return set('history', []);
+  return history.clear();
 }
 
 exports.logHistory = async function (site, title) {
-  let curr = await this.getHistory();
-  curr.push({ "url": site, "title": title, "id": v1(), "time": + new Date() });
-  return set('history', curr);
+  console.log('history being set!');
+  
+  let id = v1();
+  let item = { "url": site, "title": title, "time": + new Date() };
+  return history.set(id, item);
 }
 
 exports.addBookmark = async function (site, title) {
-  let curr = await this.getBookmarks();
-  curr.push({ "url": site, "title": title, "id": v1() });
-  return set('bookmarks', curr);
+  let id = v1();
+  let item = { "url": site, "title": title };
+  return bookmarks.set(id, item);
 }
 
 exports.isBookmarked = async function (url) {
-  let bookmarks = await this.getBookmarks();
+  try {
+    let bookmarks = bookmarks.get();
+  } catch (error) {
+    return false;
+  }
   var exists = false;
   for (var i = 0; i < bookmarks.length; i++) {
     if(bookmarks[i].url === url){ exists = bookmarks[i]; break; }
@@ -45,9 +55,7 @@ exports.isBookmarked = async function (url) {
 }
 
 exports.renameBookmark = async function (id, name) {
-  let renamedArray = (await this.getBookmarks()).map(item => {
-    if(item.id == id) { item.title=name; return item }
-    else { return item }
-  });
-  return set('bookmarks', renamedArray);
+  let bookmark = history.get(id);
+  bookmark.title = name;
+  history.set(id, bookmark);
 }

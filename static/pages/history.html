@@ -94,9 +94,11 @@
     let history = sendSync('getHistory');
     let list = document.getElementById('list');
 
+    let historyIds = Object.keys(history);
+
     if(theme != 'light') document.head.innerHTML += '<link rel="stylesheet" href="assets://themes/' + theme + '.css">';
 
-    history.forEach((historyItem, i) => {
+    Object.values(history).forEach((historyItem, i) => {      
       let close = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
         <path fill="none" d="M0 0h24v24H0V0z"/><path d="M18.3 5.71c-.39-.39-1.02-.39-1.41 0L12 10.59
         7.11 5.7c-.39-.39-1.02-.39-1.41 0-.39.39-.39 1.02 0 1.41L10.59 12 5.7 16.89c-.39.39-.39 1.02 0 1.41.39.39 1.02.39 1.41
@@ -106,7 +108,7 @@
 
       var itemEl = document.createElement('li');
       itemEl.title = historyItem.url;
-      itemEl.id = historyItem.id;
+      itemEl.id = historyIds[i];
       itemEl.innerHTML = `<img src="${ icon }">
         <p title="${ historyItem.title }">${ historyItem.title }</p>
         <p id="stamp">${ new Date(historyItem.time).toJSON().slice(0,10).split('-').reverse().join('/') }</p>
@@ -120,7 +122,7 @@
         e.stopPropagation();
         if(e.target.tagName == 'path' || e.target.tagName == 'svg') {
           item.remove();
-          send('removeHistoryItem', historyItem.id);
+          send('removeHistoryItem', historyIds[i]);
 
           if(list.children.length == 0) { document.getElementById('nothing-here').style.display = 'block'; }
         } else {
@@ -135,7 +137,7 @@
           }
         }
       });
-    });;
+    });
 
     if(list.children.length == 0) document.getElementById('nothing-here').style.display = 'block';
 
