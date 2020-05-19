@@ -2,7 +2,7 @@
 	"name": "peacock",
 	"productName": "Peacock",
 	"version": "2.4.0-beta.3",
-	"description": "An open source, privacy-first browser.",
+	"description": "Open source experimental private-by-default web browser.",
 	"main": "main.js",
 	"repository": {
 		"type": "git",
