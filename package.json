@@ -1,18 +1,17 @@
 {
 	"name": "peacock",
 	"productName": "Peacock",
-	"version": "2.4.0-beta.2",
-	"description": "Open source privacy-first browser that hosts your data on the blockchain.",
+	"version": "2.4.0-beta.3",
+	"description": "Open source experimental private-by-default web browser.",
 	"main": "main.js",
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/Codiscite/peacock"
+		"url": "https://github.com/peacockweb/peacock"
 	},
 	"keywords": [
 		"browser",
 		"web",
 		"web3",
-		"blockchain",
 		"privacy",
 		"internet"
 	],

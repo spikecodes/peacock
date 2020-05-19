@@ -1,310 +1,746 @@
 <!DOCTYPE html>
-<html lang="en" dir="ltr">
+<style>
+  body {
+    background-color: var(--nord0) !important;
+  }
+  button {
+    background-color: var(--nord3) !important;
+    text-align: center;
+    color: var(--nord4);
+    padding: 10px;
+    font-size: 17px;
+    border-radius: var(--round-corners);
+  }
+  .title {
+    color: var(--nord2);
+    font-size: 20px;
+    text-align: center;
+    margin-top: 25px;
+  }
+  .sidebar {
+    background-color: var(--nord1);
+    position: fixed;
+    top: 0; left: 0;
+    width: 100px;
+    height: 100%;
+    transition: width 0.2s ease-in-out, left 0.2s ease-in-out;
+    overflow: hidden;
+    z-index: 10;
+  }
+  .sidebar:hover {
+    width: 250px;
+  }
+  .logo {
+    text-align: center;
+    margin-top: 20px;
+  }
+  label {
+    color: var(--nord5);
+    font-size: 16px;
+  }
+
+  .panels {
+    margin-top: 0px;
+    margin-left: 120px;
+    margin-right: 20px;
+    padding: 20px;
+  }
+  .panels:after {
+    content: "";
+    display: table;
+    clear: both;
+  }
+  .panel {
+    float: left;
+    width: 44%;
+    margin: 3%;
+  }
+  @media screen and (max-width: 800px) {
+    .panel {
+      width: 100%;
+    }
+  }
+  .panel-heading {
+    color: var(--nord5);
+    font-size: 30px;
+    margin-bottom: 7px;
+  }
+  .panel-body {
+    border-radius: var(--round-corners);
+    background-color: var(--nord1);
+    font-size: 20px;
+    padding: 15px;
+  }
+  p {
+    color: var(--nord4);
+  }
+  .menu {
+    padding: 5px;
+    margin-top: 25px;
+    max-width: 90px;
+  }
+  .version {
+    position: absolute;
+    text-align: center;
+    bottom: 2px; left: 0;
+    width: 100%;
+  }
+  .sideicon, .sideicon > path {
+    margin-left: 25px;
+    cursor: pointer;
+  }
+  .active {
+    filter: invert(50%);
+  }
+  .expand {
+    font-size: 20px;
+    text-align: left;
+    position: relative;
+    top: 32px; left: 85px;
+    font-weight: bold;
+    cursor: pointer;
+  }
+  .hidden {
+    display: none;
+  }
+  .entry {
+    width: 250px;
+    cursor: pointer;
+  }
+
+  .tbl {
+    width: 300px;
+    height: 35px;
+    display: inline-table;
+  }
+  .col {
+    margin: 1%;
+    display: table-cell;
+    vertical-align: middle;
+    clear: both;
+    width: 48%;
+  }
+  
+  .droplabel {
+    height: 35px;
+    display: inline-table;
+  }
+  .droplabel > label {
+    display: table-cell;
+    vertical-align: middle;
+    clear: both;
+    text-align: left;
+    width: 50%;
+  }
+  .droplabel > select {
+    display: table-cell;
+    vertical-align: middle;
+    width: 50%;
+  }
+  .edd-root,
+  .edd-root *,
+  .edd-root *::before,
+  .edd-root *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      background-color: #4c566a;
+      color: white !important;
+  }
+  .edd-root {
+      display: inline-block;
+      position: relative;
+      user-select: none;
+      font-weight: 300;
+      font-size: 16px;
+      height: 35px;
+      width: 170px;
+  }
+  .droplabel > .edd-root {
+    margin-left: 10px;
+  }
+  .edd-root-disabled {
+      color: #ccc;
+      cursor: not-allowed;
+  }
+  .edd-root::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: #45bce7;
+      transition: transform 150ms ease-out;
+      transform: scaleX(0);
+  }
+  .edd-root.edd-root-focused::after,
+  .edd-root.edd-root-invalid::after {
+      transform: scaleX(1);
+  }
+  .edd-root.edd-root-invalid::after {
+      background: rgb(255, 105, 105);
+  }
+  .edd-head {
+      position: relative;
+      overflow: hidden;
+      border: 0px solid grey;
+      transition: border-color 200ms;
+      padding-left: 10px;
+  }
+  .edd-root:not(.edd-root-disabled) .edd-head:hover {
+      border-color: #81a1c1;
+  }
+  .edd-value {
+      width: 100%;
+      display: inline-block;
+      vertical-align: middle;
+      padding: 8px 25px 8px 0;
+  }
+  .edd-arrow {
+      position: absolute;
+      width: 14px;
+      height: 10px;
+      top: calc(50% - 5px);
+      right: 3px;
+      transition: transform 150ms;
+      pointer-events: none;
+      color: white;
+  }
+  .edd-arrow::before {
+      content: '';
+      position: absolute;
+      width: 8px;
+      height: 8px;
+      border-right: 2px solid currentColor;
+      border-bottom: 2px solid currentColor;
+      top: 0;
+      right: 2px;
+      transform: rotate(45deg);
+      transform-origin: 50% 25%;
+  }
+  .edd-root-open .edd-arrow {
+      transform: rotate(180deg);
+  }
+  .edd-value,
+  .edd-option,
+  .edd-group-label {
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      overflow: hidden;
+  }
+  .edd-root:not(.edd-root-disabled) .edd-value,
+  .edd-option {
+      cursor: pointer;
+      color: #202128;
+  }
+  .edd-select {
+      position: absolute;
+      opacity: 0;
+      width: 100%;
+      left: -100%;
+      top: 0;
+  }
+  .edd-root-native .edd-select {
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+  }
+  .edd-body {
+      opacity: 0;
+      position: absolute;
+      left: 0;
+      right: 0;
+      pointer-events: none;
+      overflow: hidden;
+      z-index: 999;
+      background: white;
+      box-shadow: 0 0 6px rgba(0, 0, 0, 0.08);
+      border-top: 0;
+      border-right: 0;
+  }
+  .edd-root-open .edd-body {
+      opacity: 1;
+      pointer-events: all;
+      transform: scale(1);
+      transition: opacity 200ms, transform 100ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+  .edd-root-open-above .edd-body {
+      bottom: 100%;
+  }
+  .edd-root-open-below .edd-body {
+      top: 100%;
+  }
+  .edd-items-list {
+      overflow: auto;
+      max-height: 0;
+      transition: max-height 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      -webkit-overflow-scrolling: touch;
+  }
+  .edd-option {
+      position: relative;
+      padding: 4px 8px 4px 22px;
+  }
+  .edd-option-selected::before {
+      content: '';
+      position: absolute;
+      width: 8px;
+      height: 4px;
+      border-bottom: 2px solid #4ac5f1;
+      border-left: 2px solid #4ac5f1;
+      left: 6px;
+      top: calc(50% - 4px);
+      transform: rotate(-45deg);
+  }
+</style>
+
+<html>
   <head>
-    <meta charset="utf-8" />
+    <link rel="stylesheet" type="text/css" href="assets://global.css">
+    <script type="text/javascript" src="assets://easydropdown.js"></script>
     <title>Peacock Settings</title>
-
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
-    <script src="assets://jquery.js" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
-
-    <link rel="stylesheet" href="assets://global.css">
-    <style>
-      html, body { height: 100%; width: 100%; }
-
-      #content {
-        padding-top: 100px;
-        padding-left: 100px;
-        padding-right: 75px;
-        margin-top: 0px;
-      }
-
-      #title {
-        margin-top: 50px;
-        font-size: 40px;
-        font-weight: 700;
-      }
-
-      #titlebar {
-        top: 0;
-      }
-
-      #header-icon {
-        width: 35px;
-        height: auto;
-      }
-
-      .heading {
-        margin-top: 35px;
-        font-size: 19px;
-      }
-
-      .heading-title {
-        font-weight: 500;
-        opacity: 0.9;
-        margin-bottom: 20px;
-      }
-
-      .heading-element {
-        justify-content: left;
-        align-items: center;
-        padding-left: 50px;
-        height: 50px;
-        width: 500px;
-      }
-
-      .dropdown {
-        float: right;
-      }
-
-      .dropdown-toggle {
-        font-size: 17px;
-        font-weight: 400;
-      }
-
-      .dropdown-toggle:focus {
-        border-radius: 4px;
-      }
-
-      .btn, .btn:hover, .btn:focus {
-        border-radius: 4px;
-        border: none;
-        background-color: var(--foreground-secondary);
-        transition: var(--transition);
-        opacity: 0.9;
-        font-weight: 500;
-      }
-
-      .dropdown-toggle::after {
-        cursor: inherit !important;
-      }
-
-      .label {
-        display: inline-block;
-        font-size: 22px;
-        opacity: 0.9;
-      }
-
-      .list-group {
-        margin-bottom: 35px;
-      }
-
-      .search-engine-icon {
-        width: 23px;
-        height: 23px;
-        float: left;
-        transition: all 0.1s;
-        transform: translateY(4%);
-        margin-right: 10px;
-      }
-
-      .note {
-        font-size: 16px;
-        text-align: right;
-        white-space: nowrap;
-      }
-
-      .dropdown-menu {
-        background: var(--background);
-        width: max-content;
-        border: 2px solid var(--foreground-secondary);
-        border-radius: 0px 4px 4px 4px;
-        margin-top: -2px;
-      }
-
-      .dropdown-item {
-        padding: .25rem 1rem;
-        font-weight: 500;
-        margin: 0px !important;
-      }
-
-      .dropdown-item:hover {
-        cursor: pointer;
-        background-color: rgba(0, 0, 0, 0.05);
-      }
-
-      .dropdown-item:focus, .dropdown-item:active {
-        background: var(--accent);
-      }
-
-      footer {
-        position: absolute;
-        right: 20px;
-        bottom: 20px;
-      }
-
-      footer #version {
-        color: var(--foreground);
-        margin: 0px;
-      }
-    </style>
   </head>
-  <body style="display: none;" id="settings_body">
-    <div id="content">
-      <h1 locale-key="settings_title" id="title">Settings</h1>
-      <div class="tab-content" id="pills-tabContent">
-        <div class="tab-pane fade show active" id="pills-customization" role="tabpanel" aria-labelledby="pills-customization-tab">
-          <section class="heading">
-            <h2 locale-key="" class="heading-title">Customization</h2>
-            <div class="heading-element" data-key="search_engine">
-              <p locale-key="search_engine_label" class="label">Search Engine</p>
-              <div class="dropdown">
-                <button
-                  class="btn btn-secondary dropdown-toggle"
-                  data-toggle="dropdown"
-                  type="button"
-                  id="dropdownMenuButton"
-                  data-toggle="dropdown"
-                  aria-haspopup="true"
-                  aria-expanded="false"
-                >
-                  Google
-                </button>
-                <div class="dropdown-menu search-engines-menu" aria-labelledby="dropdownMenuButton">
-                  <p locale-key="no_search_engines" class="dropdown-item" href="#">No search engines found.</p>
-                </div>
-              </div>
-            </div>
-            <div class="heading-element" data-key="theme">
-              <p locale-key="theme_heading" class="label">Theme</p>
-              <div class="dropdown">
-                <button
-                  locale-key="default_theme"
-                  class="btn btn-secondary dropdown-toggle"
-                  data-toggle="dropdown"
-                  type="button"
-                  id="dropdownMenuButton"
-                  data-toggle="dropdown"
-                  aria-haspopup="true"
-                  aria-expanded="false"
-                >
-                  Default
-                </button>
-                <div class="dropdown-menu theme-dropdown-menu" aria-labelledby="dropdownMenuButton">
-                  <p locale-key="default_theme" class="dropdown-item" href="#">Default</p>
-                  <p locale-key="light_theme" class="dropdown-item" href="#">Light</p>
-                </div>
-              </div>
-            </div>
-          </section>
-          <section class="heading">
-            <h2 class="heading-title">Downloads</h2>
-            <div class="heading-element" data-key="save_location">
-              <p locale-key="save_location_heading" class="label">Save Location</p>
-              <div class="dropdown">
-                <button
-                  class="btn btn-secondary dropdown-toggle"
-                  data-toggle="dropdown"
-                  type="button"
-                  id="dropdownMenuButton"
-                  data-toggle="dropdown"
-                  aria-haspopup="true"
-                  aria-expanded="false"
-                >
-                  Downloads
-                </button>
-                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                  <p class="dropdown-item" href="#">Downloads</p>
-                  <p class="dropdown-item" href="#">Use Save As Window</p>
-                </div>
-              </div>
-              <p class="note"><b>Note:</b> Requires browser relaunch.</p>
-            </div>
-          </section>
+
+  <body>
+    <h1 class="title">SETTINGS</h1>
+    <div class="sidebar">
+      <div class="logo">
+        <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="70" height="70" viewBox="0 0 475 475">
+          <defs>
+            <clipPath id="clip-Tom">
+              <rect width="475" height="475"/>
+            </clipPath>
+          </defs>
+          <g id="Tom" clip-path="url(#clip-Tom)">
+            <rect width="475" height="475" fill="rgba(255,255,255,0)"/>
+            <g id="Tom-2" data-name="Tom" transform="translate(-204.873 -85.217)">
+              <path id="Path_75" data-name="Path 75" d="M8614.993,5056.311s9.433,6.629,26.689,21.727a721.4,721.4,0,0,1,83.857,87.554c58.728,72.382,103.063,199.18,103.063,199.18s-57.824-1.7-107.855-30.269-80.4-74.654-80.4-74.654-32.758-54.895-37.435-109.653S8614.993,5056.311,8614.993,5056.311Z" transform="translate(-8393 -4808.963)" fill="#63e4ff"/>
+              <path id="Path_76" data-name="Path 76" d="M8825.027,5371.808c-.765-1.277,2.245-123.1-32.481-230.835-32.461-100.711-102.855-187.924-102.855-187.924s58.563-47.832,143.7-47.832,139.835,47.955,139.835,47.955-63.06,72.259-99.971,176.949S8825.027,5371.808,8825.027,5371.808Z" transform="translate(-8389.444 -4816)" fill="#313a43"/>
+              <path id="Path_77" data-name="Path 77" d="M8825.881,5049.424a807.928,807.928,0,0,0-73.294,68.472c-24.458,25.8-50.355,57.538-71.441,89.625-54.207,82.481-80.064,157.488-80.064,157.488s48.237,2.442,90.366-15.534,63.174-33.85,91.831-63.692,53.022-87.248,57.367-135.381C8845.586,5095.644,8825.881,5049.424,8825.881,5049.424Z" transform="translate(-8165.514 -4809.2)" fill="#ffd563"/>
+              <path id="Path_78" data-name="Path 78" d="M8894.168,5200s31.388,25.232,48.28,49.171,28.346,54.283,28.346,54.283-72.937,57.735-131.511,138.646-93.268,177.257-93.268,177.257,10.214-137.4,47.251-242.239S8894.168,5200,8894.168,5200Z" transform="translate(-8310.256 -5063.125)" fill="#ff6363"/>
+              <path id="Path_79" data-name="Path 79" d="M8819.748,5199.525s-28.564,23.527-48.9,52.03-30.179,58.863-30.179,58.863,72.058,52.951,127.523,133.862,86.426,175.1,86.426,175.1-.375-138.884-35.443-243.722S8819.748,5199.525,8819.748,5199.525Z" transform="translate(-8518.822 -5063.145)" fill="#6c63ff"/>
+              <path id="Tom-3" data-name="Tom" d="M124.5,192.219c2.8-44.469-29.019-50.025-33.059-54.074s3.113-6.922,9.676-12.468c5.949-5.029,11.979-11.81,12.7-13.909,7.846-22.826,18.288-20.411,32.122-20.411s21.532,17.159,21.532,39.967-11.3,16.873-11.3,60.894,40.622,72.339,45.084,121.3c1.771,19.438-17.324,43.619-28.513,68.782-16.774,37.723-29.316,74.34-33.747,74.34-4.686,0-17.608-35.424-33.625-74.34-9.573-23.26-27.06-48.377-25.135-66.281C85.332,268.657,121.7,236.689,124.5,192.219Z" transform="translate(297.357 99.462)" fill="#fff"/>
+              <path id="Subtraction_28" data-name="Subtraction 28" d="M-7448.722-4864.651h0l-28.689-1.136a8.086,8.086,0,0,0,.19-1.6c0-.637-1-2.185-2.75-4.246a75.085,75.085,0,0,0-6.677-6.815c-3.668-3.415-5.808-5.881-6.939-8a7.553,7.553,0,0,1-.654-6.222c1.069-3.495,3.518-5.5,6.718-5.5a9.843,9.843,0,0,1,6.967,3.247,12.328,12.328,0,0,1,3.334,8.571,31.85,31.85,0,0,0,3.177,12.26c1.944,4.172,4.088,6.764,5.595,6.764a1.224,1.224,0,0,0,.394-.063c1.016-.36,1.741-1.513,2.155-3.426a26.043,26.043,0,0,0,.4-6,69.12,69.12,0,0,0-.783-8.24,63.542,63.542,0,0,1-1.967-7.044,30.425,30.425,0,0,1-.745-5.658,7.085,7.085,0,0,1,.938-4.286,7.265,7.265,0,0,1,5.892-2.922,7.3,7.3,0,0,1,5.893,2.922,7.253,7.253,0,0,1,1.006,4.309,30.121,30.121,0,0,1-.657,5.656,62.5,62.5,0,0,1-1.86,7.023c-.016.157-1.582,15.716.6,18.135a.86.86,0,0,0,.646.319c1.933,0,4.593-2.8,6.94-7.308s3.8-9.567,3.8-13.233a16.651,16.651,0,0,1,2.619-9.418,7.568,7.568,0,0,1,6.125-3.656,6.93,6.93,0,0,1,3.825,1.223,8.3,8.3,0,0,1,3.761,6.32,11.564,11.564,0,0,1-.541,4.981,11.494,11.494,0,0,1-2.751,4.465c-2.33,2.323-3,2.579-3.654,2.827-.622.237-1.209.46-3.271,2.627a147.827,147.827,0,0,0-9.677,12l.64,1.121Z" transform="translate(7900.352 5059.217)" fill="#fff"/>
+            </g>
+          </g>
+        </svg>
+        
+      </div>
+      <div class="menu">
+        <div class="entry" onclick="switchMenu('general')">
+          <p class="expand">General</p>
+          <svg class="sideicon" viewBox="0 0 24 24" width="40" height="40"><path fill="none" d="M0 0h24v24H0z"/><path fill=var(--nord4) d="M9.954 2.21a9.99 9.99 0 0 1 4.091-.002A3.993 3.993 0 0 0 16 5.07a3.993 3.993 0 0 0 3.457.261A9.99 9.99 0 0 1 21.5 8.876 3.993 3.993 0 0 0 20 12c0 1.264.586 2.391 1.502 3.124a10.043 10.043 0 0 1-2.046 3.543 3.993 3.993 0 0 0-3.456.261 3.993 3.993 0 0 0-1.954 2.86 9.99 9.99 0 0 1-4.091.004A3.993 3.993 0 0 0 8 18.927a3.993 3.993 0 0 0-3.457-.26A9.99 9.99 0 0 1 2.5 15.121 3.993 3.993 0 0 0 4 11.999a3.993 3.993 0 0 0-1.502-3.124 10.043 10.043 0 0 1 2.046-3.543A3.993 3.993 0 0 0 8 5.071a3.993 3.993 0 0 0 1.954-2.86zM12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/></svg><br><br>
+        </div>
+        <div class="entry" onclick="switchMenu('appearance')">
+          <p class="expand">Appearance</p>
+          <svg class="sideicon" viewBox="0 0 24 24" width="40" height="40"><path fill="none" d="M0 0h24v24H0z"/><path fill=var(--nord4) d="M3 3h18a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1zm17 7H4v9h16v-9zm-5-4v2h4V6h-4z"/></svg><br><br>
+        </div>
+        <div class="entry" onclick="switchMenu('customization')">
+          <p class="expand">Customization</p>
+          <svg class="sideicon" viewBox="0 0 24 24" width="40" height="40"><path fill="none" d="M0 0h24v24H0z"/><path fill=var(--nord4) d="M4 3h16a1 1 0 0 1 1 1v5a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1zm2 9h6a1 1 0 0 1 1 1v3h1v6h-4v-6h1v-2H5a1 1 0 0 1-1-1v-2h2v1zm11.732 1.732l1.768-1.768 1.768 1.768a2.5 2.5 0 1 1-3.536 0z"/></svg><br><br>
+        </div>
+        <div class="entry" onclick="switchMenu('privacy')">
+          <p class="expand">Privacy</p>
+          <svg class="sideicon" viewBox="0 0 24 24" width="40" height="40"><path fill="none" d="M0 0h24v24H0z"/><path fill=var(--nord4) d="M1.181 12C2.121 6.88 6.608 3 12 3c5.392 0 9.878 3.88 10.819 9-.94 5.12-5.427 9-10.819 9-5.392 0-9.878-3.88-10.819-9zM12 17a5 5 0 1 0 0-10 5 5 0 0 0 0 10zm0-2a3 3 0 1 1 0-6 3 3 0 0 1 0 6z"/></svg><br><br>
+        </div>
+        <div class="entry" onclick="switchMenu('security')">
+          <p class="expand">Security</p>
+          <svg class="sideicon" viewBox="0 0 24 24" width="40" height="40"><path fill="none" d="M0 0h24v24H0z"/><path fill=var(--nord4) d="M3.783 2.826L12 1l8.217 1.826a1 1 0 0 1 .783.976v9.987a6 6 0 0 1-2.672 4.992L12 23l-6.328-4.219A6 6 0 0 1 3 13.79V3.802a1 1 0 0 1 .783-.976zM12 11a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5zm-4.473 5h8.946a4.5 4.5 0 0 0-8.946 0z"/></svg><br><br>
+        </div>
+      </div>
+      <p class="version" id="version" title="dem">Peacock</p>
+    </div>
+
+    <!--  GENERAL -->
+    <div class="panels" id="general">
+      <div class="panel">
+        <h1 class="panel-heading">Default Browser</h1>
+        <div class="panel-body">
+          <p>Coming soon</p>
+        </div>
+      </div>
+      <div class="panel">
+        <h1 class="panel-heading">Language</h1>
+        <div class="panel-body">
+          <select>
+            <option value="" data-placeholder>Select language</option>
+            <option value="1">English (UK)</option>
+            <option value="2">English (US)</option>
+          </select>
+        </div>
+      </div>
+      <div class="panel">
+        <h1 class="panel-heading">Viewers</h1>
+        <div class="panel-body">
+          <input type="checkbox" id="json" name="json" value="json">
+          <label for="json">Enable JSON viewer</label>
+          <hr style="margin-top: 10px; opacity: 0;">
+          <input type="checkbox" id="pdf" name="pdf" value="pdf">
+          <label for="pdf">Enable PDF viewer</label>
+        </div>
+      </div>
+      <div class="panel">
+        <h1 class="panel-heading">Start up</h1>
+        <div class="panel-body">
+          <p>Coming soon</p>
         </div>
       </div>
     </div>
-    <aside id="user">
 
-    </aside>
-    <footer>
-      <p id="version">Peacock</p>
-    </footer>
+    <!--  APPEARANCE -->
+    <div class="panels" id="appearance">
+      <div class="panel">
+        <h1 class="panel-heading">Window Settings</h1>
+        <div class="panel-body">
+          <input type="checkbox" id="full" name="full" value="full">
+          <label for="full">Start window fullscreen</label>
+          <hr style="margin-top: 10px; opacity: 0;">
+          <input type="checkbox" id="native" name="native" value="native">
+          <label for="native">Use native window (requires restart)</label>
+        </div>
+      </div>
+      <div class="panel">
+        <h1 class="panel-heading">Navbar Settings</h1>
+        <div class="panel-body">
+          <input type="checkbox" id="home" name="home" value="home">
+          <label for="home">Show home button</label>
+          <hr style="margin-top: 10px; opacity: 0;">
+          <input type="checkbox" id="ss" name="ss" value="ss">
+          <label for="ss">Allow search suggestions</label>
+        </div>
+      </div>
+      <div class="panel">
+        <h1 class="panel-heading">Theme Settings</h1>
+        <div class="panel-body">
+          <select>
+            <option value="default">Default</option>
+            <option value="dark">Dark</option>
+            <option value="light">Light</option>
+          </select>
+        </div>
+      </div>
+      <div class="panel">
+        <h1 class="panel-heading">Tab Settings</h1>
+        <div class="panel-body">
+          <div class="droplabel">
+            <label for="tab-location">Tab position</label>
+            <select id="tab-location">
+              <option value="top">Top</option>
+              <option value="bottom">Bottom</option>
+              <option value="left">Left</option>
+            </select>
+          </div>
+          <hr style="margin-top: 10px; opacity: 0;">
+          <div class="droplabel">
+            <label for="tab-location">Tab animations</label>
+            <select id="tab-location">
+              <option value="on">On</option>
+              <option value="off">Off</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!--  CUSTOMIZATION -->
+    <div class="panels" id="customization">
+      <div class="panel">
+        <h1 class="panel-heading">Search Engine Settings</h1>
+        <div class="panel-body">
+          <input type="checkbox" id="urlbar" name="urlbar" value="urlbar">
+          <label for="urlbar">Allow searching through the url bar</label>
+          <hr style="margin-top: 10px; opacity: 0;">
+          <div class="droplabel">
+            <label for="se">Search engine</label>
+            <select id="se">
+              <option value="duckduckgo">Duckduckgo</option>
+              <option value="startpage">Startpage</option>
+              <option value="whoogle">Whoogle</option>
+              <option value="bing">Bing</option>
+              <option value="google">Google</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="panel">
+        <h1 class="panel-heading">Download Settings</h1>
+        <div class="panel-body">
+          <input type="checkbox" id="dlbar" name="dlbar" value="dlbar">
+          <label for="dlbar">Show downloads bar</label>
+          <hr style="margin-top: 10px; opacity: 0;">
+          <div class="droplabel">
+            <label for="download-location">Location</label>
+            <select id="download-location">
+              <option value="duckduckgo">Save As Window</option>
+              <option value="startpage">Downloads folder</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="panel">
+        <h1 class="panel-heading">New Tab Settings</h1>
+        <div class="panel-body">
+          <div class="droplabel">
+            <label for="ntp">New tab page</label>
+            <select id="ntp">
+              <option value="ntp">New tab page</option>
+              <option value="se">Search engine</option>
+            </select>
+          </div>
+          <hr style="margin-top: 10px; opacity: 0;">
+          <div class="droplabel">
+            <label for="image">Image source</label>
+            <select id="image">
+              <option value="unsplash">Unsplash</option>
+              <option value="built-in">Built-in</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="panel">
+        <h1 class="panel-heading">Input Settings</h1>
+        <div class="panel-body">
+          <input type="checkbox" id="kbs" name="kbs" value="kbs">
+          <label for="kbs">Enable keyboard shortcuts</label>
+        </div>
+      </div>
+    </div>
+
+    <!--  PRIVACY -->
+    <div class="panels" id="privacy">
+      <div class="panel">
+        <h1 class="panel-heading">History Settings</h1>
+        <div class="panel-body">
+          <input type="checkbox" id="history-in-search" name="history-in-search" value="history-in-search">
+          <label for="history-in-search">Allow history in suggestions</label>
+          <hr style="margin-top: 10px; opacity: 0;">
+          <div class="droplabel">
+            <label for="auto-history">Keep for</label>
+            <select id="auto-history">
+              <option value="dont-keep">Don't keep</option>
+              <option value="1-hour">1 Hour</option>
+              <option value="1-day">1 Day</option>
+              <option value="1-week">1 Week</option>
+              <option value="1-month">1 Month</option>
+              <option value="1-year">1 Year</option>
+              <option value="dont-clear">Don't clear</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="panel">
+        <h1 class="panel-heading">Cookie Settings</h1>
+        <div class="panel-body">
+          <div class="droplabel">
+            <label for="auto-cookies">Keep for</label>
+            <select id="auto-cookies">
+              <option value="dont-keep">Don't keep</option>
+              <option value="1-hour">1 Hour</option>
+              <option value="1-day">1 Day</option>
+              <option value="1-week">1 Week</option>
+              <option value="1-month">1 Month</option>
+              <option value="1-year">1 Year</option>
+              <option value="dont-clear">Don't clear</option>
+            </select>
+          </div>
+          <hr style="margin-top: 10px; opacity: 0;">
+          <div class="tbl">
+            <button class="col">Clear cookies</button>
+            <button class="col">Show cookies</button>
+          </div>
+        </div>
+      </div>
+      <div class="panel">
+        <h1 class="panel-heading">Tracker Settings</h1>
+        <div class="panel-body">
+          <input type="checkbox" id="no-track" name="no-track" value="no-track">
+          <label for="no-track">Eliminate all tracking and analytics</label>
+        </div>
+      </div>
+      <div class="panel">
+        <h1 class="panel-heading">Adblocker Settings</h1>
+        <div class="panel-body">
+          <input type="checkbox" id="ad" name="ad" value="ad">
+          <label for="ad">Eliminate all adverts</label>
+        </div>
+      </div>
+    </div>
+
+    <!--  SECURITY -->
+    <div class="panels" id="security">
+      <div class="panel">
+        <h1 class="panel-heading">Website Permissions</h1>
+        <div class="panel-body">
+          <div class="droplabel">
+            <label for="perm-camera">Camera access</label>
+            <select id="perm-camera">
+              <option value="ask">Always ask</option>
+              <option value="deny">Always deny</option>
+              <option value="allow">Always allow</option>
+            </select>
+          </div>
+          <hr style="margin-top: 10px; opacity: 0;">
+          <div class="droplabel">
+            <label for="perm-microphone">Microphone access</label>
+            <select id="perm-microphone">
+              <option value="ask">Always ask</option>
+              <option value="deny">Always deny</option>
+              <option value="allow">Always allow</option>
+            </select>
+          </div>
+          <hr style="margin-top: 10px; opacity: 0;">
+          <div class="droplabel">
+            <label for="perm-flash">Flash</label>
+            <select id="perm-flash">
+              <option value="ask">Always ask</option>
+              <option value="deny">Always deny</option>
+              <option value="allow">Always allow</option>
+            </select>
+          </div>
+          <hr style="margin-top: 10px; opacity: 0;">
+          <div class="droplabel">
+            <label for="perm-location">Know your location</label>
+            <select id="perm-location">
+              <option value="ask">Always ask</option>
+              <option value="deny">Always deny</option>
+              <option value="allow">Always allow</option>
+            </select>
+          </div>
+          <hr style="margin-top: 10px; opacity: 0;">
+          <div class="droplabel">
+            <label for="perm-js">Run javascript</label>
+            <select id="perm-js">
+              <option value="ask">Always ask</option>
+              <option value="deny">Always deny</option>
+              <option value="allow">Always allow</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="panel">
+        <h1 class="panel-heading">404 Handling</h1>
+        <div class="panel-body">
+          <div class="droplabel">
+            <label for="404">Method</label>
+            <select id="404">
+              <option value="wayback">Wayback machine</option>
+              <option value="nothing">Nothing</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="panel">
+        <h1 class="panel-heading">Protocol Settings</h1>
+        <div class="panel-body">
+          <input type="checkbox" id="https" name="https" value="https">
+          <label for="https">Always redirect to HTTPS</label>
+        </div>
+      </div>
+      <div class="panel">
+        <h1 class="panel-heading">Password Manager</h1>
+        <div class="panel-body">
+          <input type="checkbox" id="passwd" name="passwd" value="passwd">
+          <label for="passwd">Enable password manager</label>
+          <hr style="margin-top: 10px; opacity: 0;">
+          <input type="checkbox" id="passwd" name="passwd" value="passwd">
+          <label for="passwd">Autocomplete in forms</label>
+          <hr style="margin-top: 10px; opacity: 0;">
+          <div class="droplabel">
+            <label for="saving">Password saving</label>
+            <select id="saving">
+              <option value="always">Always save</option>
+              <option value="ask">Ask to save</option>
+              <option value="never">Never save</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
   </body>
-  <script>
-    const store = {
-      get: name => sendSync('store', 'get', name),
-      set: (name, val) => send('store', 'set', name, val)
-    };
-
-    $('#version').text('Peacock v' + sendSync('getVersions').peacock);
-
-    window.darkMode = sendSync('getDarkmode'); loadTheme();
-
-    function saveSettings(input) {
-      let data = store.get('settings');
-      for (var key in input){ data[key] = input[key]; }
-
-      store.set('settings', data);
-
-      console.log("Updated Settings!");
-    }
-
-    let settings = store.get('settings');
-    for (var SKey in settings){ $('div[data-key=' + SKey + ']').find('.dropdown').find(".dropdown-toggle").text(settings[SKey]); }
-
-    let engines = store.get('searchEngines');
-    $(".search-engines-menu").empty();
-    engines.forEach(item => {
-      let icon = new URL(item.url).origin + '/favicon.ico';
-      $(".search-engines-menu").append(`<p class="dropdown-item" href="#"><img class="search-engine-icon"
-        src="${icon}"/>${item.name}</p>`);
-    });
-
-    $('.dropdown').on('show.bs.dropdown', function() {
-      $(this).find('.dropdown-menu').first().stop(true, true).slideDown(100);
-    });
-
-    $('.dropdown').on('hide.bs.dropdown', function() {
-      $(this).find('.dropdown-menu').first().stop(true, true).slideUp(100);
-    });
-
-    sendSync('getThemes').forEach(theme => {
-     $('.theme-dropdown-menu').append(`<p class="dropdown-item" href="#">${theme}</p>`);
-
-     let elem = $('.theme-dropdown-menu').children().last();
-     elem.attr('locale-key', theme.toLowerCase());
-    });
-
-    function loadTheme() {
-      let theme = store.get('settings.theme').toLowerCase();
-      let newTheme = theme;
-
-      if(window.darkMode && theme == 'default') newTheme = 'dark';
-
-      if (window.theme != newTheme) {
-        if (theme === "light") {
-          window.theme = 'light';
-          if($('head link[href*="assets://themes"]').length > 0){
-            $('head link[href*="assets://themes"]').remove();
-          }
-        } else if (theme === "default") {
-          if (window.darkMode) {
-            // If Dark Mode
-            window.theme = 'dark';
-            $("head").append('<link rel="stylesheet" href="assets://themes/dark.css">');
-          } else {
-            // If Light Mode
-            window.theme = 'light';
-            if($('head link[href*="assets://themes"]').length > 0){
-      				$('head link[href*="assets://themes"]').remove();
-      			}
-          }
-        } else {
-          window.theme = 'dark';
-          $("head").append('<link rel="stylesheet" href="assets://themes/' + theme + '.css">');
-        }
-        $('body').css('display', 'block');
-      }
-    }
-
-    $('.dropdown-item').click(function(event) {
-      let text = $(this).text();
-      let key = $(this).parent().parent().parent().attr("data-key");
-    	$(this).parent().siblings(".dropdown-toggle").text(text);
-    	saveSettings({ [key]: text });
-      if(key === "theme") { loadTheme(); send('loadTheme'); }
-    });
-  </script>
 </html>
+
+<script>
+
+let sidebar = document.querySelector('.sidebar');
+let style = getComputedStyle(document.body);
+let css = style.getPropertyValue('--nord1');
+sidebar.style.backgroundColor = css+'A6'; 
+
+let sideicons = document.querySelectorAll('.sideicon');
+let expands = document.querySelectorAll('.expand');
+let entries = document.querySelectorAll('.entries');
+
+for (let i = 0; i < 5; i++) {
+  expands[i].style.opacity = 0;
+}
+
+sidebar.onmouseover = (e) => {
+  for (let i = 0; i < 5; i++) {
+    expands[i].style.opacity = 1;
+  }
+}
+
+sidebar.onmouseleave = (e) => {
+  for (let i = 0; i < 5; i++) {
+    expands[i].style.opacity = 0;
+  }
+}
+
+let version = document.getElementById('version');
+version.innerHTML = sendSync('getVersions').peacock;
+
+function switchMenu(toggle) {
+  let views = document.querySelectorAll('.panels');
+  for (let i = 0; i < views.length; i++) {
+    views[i].style.display = 'none';
+  }
+  document.getElementById(toggle).style.display = 'block';
+  switch(toggle) {
+    case 'general':
+      for (let i = 0; i < 5; i++) {
+        let item = sideicons[i];
+        if (i == 0) { item.classList.add('active'); } 
+        else { item.classList.remove('active'); }
+      }
+      break;
+    case 'appearance':
+      for (let i = 0; i < 5; i++) {
+        let item = sideicons[i];
+        if (i == 1) { item.classList.add('active'); } 
+        else { item.classList.remove('active'); }
+      }
+      break;
+    case 'customization':
+      for (let i = 0; i < 5; i++) {
+        let item = sideicons[i];
+        if (i == 2) { item.classList.add('active'); } 
+        else { item.classList.remove('active'); }
+      }
+      break;
+    case 'privacy':
+      for (let i = 0; i < 5; i++) {
+        let item = sideicons[i];
+        if (i == 3) { item.classList.add('active'); } 
+        else { item.classList.remove('active'); }
+      }
+      break;
+    case 'security':
+      for (let i = 0; i < 5; i++) {
+        let item = sideicons[i];
+        if (i == 4) { item.classList.add('active'); } 
+        else { item.classList.remove('active'); }
+      }
+      break;
+  }
+}
+
+switchMenu('general');
+
+easydropdown.all();
+
+</script>

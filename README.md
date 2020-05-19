@@ -21,7 +21,7 @@
 
 ### Screenshots
 New screenshots coming very soon with the new Nord theme!
-<img src="https://file.coffee/sq2JvhgAY.jpg"/>
+<img src="https://file.coffee/u/65o2BGmPqie.png"/>
 <img src="https://file.coffee/to-Jqlf_a.gif"/>
 
 ### Download
