@@ -20,7 +20,6 @@
 - 🎨 Beautiful customizable themes, uses <a href="https://www.nordtheme.com/">Nord</a> by default.<br><br>
 
 ### Screenshots
-New screenshots coming very soon with the new Nord theme!
 <img src="https://file.coffee/u/65o2BGmPqie.png"/>
 <img src="https://file.coffee/to-Jqlf_a.gif"/>
 
