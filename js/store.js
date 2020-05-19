@@ -1,39 +1,53 @@
-const Store = require('electron-store');
-const { v1 } = require('uuid');
+// PACKAGE LOADING
 
+const Store = require('electron-store'); // Used for readable/writable storage
+const { v1 } = require('uuid'); // Used to generate random IDs for each history item
+
+// ENCRYPTION
+
+// const keytar = require('keytar');
+// var pass = v1();
+// keytar.getPassword('peacock', 'encryptionKey').then(r => {
+//   console.log(r, pass);
+//   if(!r) keytar.setPassword('peacock', 'encryptionKey', pass);
+//   else pass = r;
+// });
+
+// STORAGE FILE INIT
+
+// Initialize the ElectronStore objects:
 const history = new Store({ name: 'history' });
 const bookmarks = new Store({ name: 'bookmarks' });
 
+// Create history.json and bookmarks.json:
 history.set('app', 'peacock');
 bookmarks.set('app', 'peacock');
 
 history.delete('app');
 bookmarks.delete('app');
 
+// Globalize history for debugging:
 window.hist = history;
 
-exports.getHistory = async () => history.get();
-exports.getBookmarks = async () => bookmarks.get();
+// FUNCTIONS
 
-exports.removeHistoryItem = async function (id) {
-  return history.delete(id);
-}
+// Manage history:
+exports.getHistory = async () => history.get(); // Returns all contents of history.json
 
-exports.removeBookmark = async function (id) {
-  return bookmarks.delete(id);
-}
+exports.removeHistoryItem = async () => history.delete(id);
 
-exports.clearHistory = async function () {
-  return history.clear();
-}
+exports.clearHistory = async () => history.clear();
 
 exports.logHistory = async function (site, title) {
-  console.log('history being set!');
-  
   let id = v1();
   let item = { "url": site, "title": title, "time": + new Date() };
   return history.set(id, item);
 }
+
+// Manage bookmarks:
+exports.getBookmarks = async () => bookmarks.get(); // Returns all contents of bookmarks.json
+
+exports.removeBookmark = async id => bookmarks.delete(id);
 
 exports.addBookmark = async function (site, title) {
   let id = v1();

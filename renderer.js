@@ -85,15 +85,13 @@ if (!store.get('flags')) store.set('flags', [
 ]);
 
 web.init(document);
-shortcuts.init(keyboardShortcut, n => { if (tabs.get(n-1)) tabs.activate(tabs.get(n-1)) });
+shortcuts.init(keyboardShortcut, n => { if (tabs.tabs[n-1]) tabs.activate(tabs.tabs[n-1]) });
 
 console.colorLog = (msg, color) => { console.log('%c' + msg, 'color:' + color + ';font-weight:bold;') }
 
 const { version } = require('./package.json');
 
-exports.getTabCount = function() {
-  return tabs.length();
-};
+exports.getTabCount = async () => tabs.tabs.length;
 exports.showAlert = showAlert;
 
 window.theme = 'light';

@@ -1,30 +1,31 @@
+// PACKAGE LOADING
+
 const { remote, ipcRenderer, nativeImage } = require('electron');
 
-var crypto = require('crypto');
+// INITIALIZE LOCAL SCRIPTS:
 
-const web = require('./web');
-const storage = require('./store');
+const web = require('./web'); // Used for managing webpage loading and websites
+const storage = require('./store'); // Manages bookmark and history storage
 
 const { BrowserView, BrowserWindow, ipcMain, Menu } = remote;
-const { join } = require('path');
+const { join } = require('path'); // Helps create full paths to local files
 
-const win = remote.getCurrentWindow();
+const win = remote.getCurrentWindow(); // Grabs the Peacock window
 
-const topbarHeight = 70;
+const topbarHeight = 70; // How high the Peacock topbar is, used in BrowserView scaling
 
-let Sortable = require('sortablejs');
-var sortable = new Sortable(document.getElementById('tabs'));
+let Sortable = require('sortablejs'); // Library for draggable/sortable elements
+var sortable = new Sortable(document.getElementById('tabs')); // Make the tabs draggable/sortable
 
-console.colorLog = (msg, color) => { console.log("%c" + msg, "color:" + color + ";font-weight:bold;") }
+exports.tabs = []; // Array of all open tabs
 
-exports.tabs = [];
+var closedTabs = []; // Array of previously closed tabs, used in the Reopen Closed Tab shortcut
 
-var closedTabs = [];
+var activeTab; // Currently selected tab
 
-var activeTab;
+var downloadWindow; // Stores the downloads window globall
 
-var downloadWindow;
-
+// Initialize the downloads window:
 exports.initDownloads = async () => {
   downloadWindow = new BrowserWindow({
     frame: false,
@@ -59,6 +60,7 @@ exports.initDownloads = async () => {
   });
 }
 
+// Decide whether file should be viewer (pdf) or downloaded:
 exports.handleDownload = async (event, item) => {
   let itemAddress = item.getURL();
   if(item.getMimeType() === 'application/pdf' && itemAddress.indexOf('blob:') !== 0 && itemAddress.indexOf('#pdfjs.action=download') === -1) {
@@ -100,6 +102,7 @@ exports.handleDownload = async (event, item) => {
   }
 }
 
+// Opens a recently closed tab:
 exports.openClosedTab = function () {
   if(closedTabs.length == 0) return;
   let item = closedTabs[closedTabs.length-1];
@@ -109,18 +112,10 @@ exports.openClosedTab = function () {
   if (index > -1) closedTabs.splice(index, 1);
 }
 
-exports.current = function () {
-  return activeTab;
-}
+// Returns the current tab:
+exports.current = async () => activeTab;
 
-exports.all = function () { return this.tabs; }
-
-exports.get = function (index) { return this.tabs[index]; }
-
-exports.length = function () {
-  return this.tabs.length;
-}
-
+// Initializes a view with bindings from web.js:
 exports.initBrowserView = async (view) => {
   view.webContents.on('did-start-loading', async () => { web.loadStart(view) });
   view.webContents.on('did-stop-loading', async () => { web.loadStop(view) });
@@ -150,6 +145,7 @@ exports.initBrowserView = async (view) => {
   });
 }
 
+// Saves an HTML page:
 exports.savePage = function(contents) {
   let filters = [
     { name: 'Webpage, Complete', extensions: ['htm', 'html'] },
@@ -176,6 +172,7 @@ exports.savePage = function(contents) {
   });
 }
 
+// Activate (select) a certain tab:
 exports.activate = function (view) {
   let win = remote.getCurrentWindow();
   let views = win.getBrowserViews();
@@ -195,13 +192,7 @@ exports.activate = function (view) {
   activeTab = view;
 }
 
-exports.dialog = function () {
-  let view = new BrowserView();
-  view.setBounds({ x: 200, y: 200, width: 300, height: 4000 });
-  remote.getCurrentWindow().addBrowserView(view);
-  return view;
-}
-
+// Close a tab:
 exports.close = async (view) => {
   view = view || this.current();
 
@@ -223,10 +214,12 @@ exports.close = async (view) => {
   view.destroy();
 }
 
+// Create a new tab:
 exports.newView = function (url='peacock://newtab', active=true) {
   // USER AGENT RANDOMIZATION
 
-  let version = Math.floor(Math.random() * (69 - 53) + 53);
+  let version = Math.floor(Math.random() * (69 - 53) + 53); // Grab a random number from 68 to 53 inclusive
+  // Use the number above as your 'Firefox version' user agent:
   var userAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:' + version + '.0) Gecko/20100101 Firefox/' + version + '.0';
 
   // BROWSERVIEW CREATION
@@ -244,8 +237,9 @@ exports.newView = function (url='peacock://newtab', active=true) {
 
   view.webContents.setWebRTCIPHandlingPolicy('disable_non_proxied_udp');
 
-  // SYNCHRONIZE VIEW SIZE WITH PARENT WINDOW SIZE
+  // BOUNDS
 
+  // Synchronize view size with parent window size:
   view.setBounds({x:0, y:topbarHeight, width:win.getContentBounds().width, height:win.getContentBounds().height - topbarHeight });
 
   win.on('resize', () => {
@@ -255,18 +249,18 @@ exports.newView = function (url='peacock://newtab', active=true) {
   // HEADER CONFIGURATION
 
   tabSession.webRequest.onBeforeSendHeaders(async (det, callback) => {
-    if(det.url.substr(0,5) == 'http:' && store.get('flags').includes('--https-only')) {
-      callback({ cancel: true });
-      if(det.resourceType == 'mainFrame') view.webContents.loadURL('https' + det.url.substr(4));
-    } else if('Content-Type' in det.requestHeaders && store.get('flags').includes('--no-pings')) {
-      if(det.requestHeaders['Content-Type'][0] == 'text/ping') callback({ cancel: true });
+    if(det.url.substr(0,5) == 'http:' && store.get('flags').includes('--https-only')) { // If request is HTTP and https-only mode is enabled
+      callback({ cancel: true }); // Cancel the request
+      if(det.resourceType == 'mainFrame') view.webContents.loadURL('https' + det.url.substr(4)); // Redirect website requests to HTTPS
+    } else if('Content-Type' in det.requestHeaders && store.get('flags').includes('--no-pings')) { // If pings are disabled
+      if(det.requestHeaders['Content-Type'][0] == 'text/ping') callback({ cancel: true }); // If this request is a ping, cancel it
     } else {
       let headers = det.requestHeaders;
-      if(store.get('flags').includes('--no-referrers')) headers['Referer'] = '';
-      if(store.get('flags').includes('--do-not-track')) headers['DNT'] = '1';
-      headers['Accept-Language'] = 'en-US,en;q=0.9';
-      headers['User-Agent'] = userAgent;
-      callback({ cancel: false, requestHeaders: headers });
+      if(store.get('flags').includes('--no-referrers')) headers['Referer'] = ''; // Omit 'Referer' header when 'no-referrers' flag is enabled
+      if(store.get('flags').includes('--do-not-track')) headers['DNT'] = '1'; // Enable DNT for 'do-not-track' flag
+      headers['Accept-Language'] = 'en-US,en;q=0.9'; // Normalize the 'Accept-Language' header to prevent browser fingerprinting
+      headers['User-Agent'] = userAgent; // Randomize the user agent to throw websites off your tracks
+      callback({ cancel: false, requestHeaders: headers }); // Don't cancel the request but use these modified headers instead
     }
   });
 
@@ -483,6 +477,7 @@ exports.newView = function (url='peacock://newtab', active=true) {
   return view;
 }
 
+// Navigate to the next tab relative to the active one:
 exports.nextTab = async () => {
   let length = this.tabs.length;
   let index = this.tabs.indexOf(activeTab);
@@ -493,6 +488,7 @@ exports.nextTab = async () => {
   else { this.activate(this.tabs[index + 1]); }
 }
 
+// Navigate to the previous tab relative to the active one:
 exports.backTab = async () => {
   let length = this.tabs.length;
   let index = this.tabs.indexOf(activeTab);
