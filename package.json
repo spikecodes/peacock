@@ -60,13 +60,15 @@
 		]
 	},
 	"scripts": {
-		"start": "electron ."
+		"start": "electron .",
+		"build-linux": "electron-builder --linux",
+    	"build-win": "electron-builder --win"
 	},
-	"author": "Spike Raxstone <spike@peacock.link>",
+	"author": "Spike Raxstone <19519553+spikecodes@users.noreply.github.com>",
 	"license": "MIT",
 	"devDependencies": {
 		"electron": "^9.0.0",
-		"electron-builder": "^22.5.1"
+		"electron-builder": "^22.6.1"
 	},
 	"dependencies": {
 		"@cliqz/adblocker-electron": "^1.14.2",
