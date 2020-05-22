@@ -16,7 +16,7 @@ build:
   artifacts:
     paths:
     - dist/*.*
-    expire_in: 60 days
+    expire_in: 1 day
   cache:
     key: build
     paths:

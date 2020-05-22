@@ -26,19 +26,26 @@
 			"icon": "images/peacock.ico"
 		},
 		"mac": {
-			"category": "books",
+			"category": "productivity",
 			"target": [
 				"dmg"
 			],
 			"icon": "images/peacock.icns"
 		},
 		"linux": {
+			"category": "Network",
 			"target": [
 				"AppImage",
 				"deb"
 			],
 			"icon": "images/peacock.png"
 		},
+		"publish": [
+			{
+				"provider": "generic",
+				"url": "https://gitlab.com"
+			}
+		],	  
 		"nsis": {
 			"oneClick": "false",
 			"allowToChangeInstallationDirectory": "true",
