@@ -3,142 +3,144 @@
 /* NORD */
 
 :root {
-  --nord0: #2e3440;
-  --nord1: #3b4252;
-  --nord2: #434c5e;
-  --nord3: #4c566a;
-  --nord4: #d8dee9;
-  --nord5: #e5e9f0;
-  --nord6: #eceff4;
-  --nord7: #8fbcbb;
-  --nord8: #88c0d0;
-  --nord9: #81a1c1;
-  --nord10: #5e81ac;
-  --nord11: #bf616a;
-  --nord12: #d08770;
-  --nord13: #ebcb8b;
-  --nord14: #a3be8c;
-  --nord15: #b48ead;
+	--nord0: #2e3440;
+	--nord1: #3b4252;
+	--nord2: #434c5e;
+	--nord3: #4c566a;
+	--nord4: #d8dee9;
+	--nord5: #e5e9f0;
+	--nord6: #eceff4;
+	--nord7: #8fbcbb;
+	--nord8: #88c0d0;
+	--nord9: #81a1c1;
+	--nord10: #5e81ac;
+	--nord11: #bf616a;
+	--nord12: #d08770;
+	--nord13: #ebcb8b;
+	--nord14: #a3be8c;
+	--nord15: #b48ead;
 }
 
 /* PEACOCK */
 
 :root {
-  /* SPACING */
+	/* SPACING */
 
-  --bar-heights: 30px;
+	--bar-heights: 30px;
 
-  --nav-side-padding: 20px;
-  --nav-vert-padding: 5px;
+	--nav-side-padding: 20px;
+	--nav-vert-padding: 5px;
 
-  --tab-padding: 10px;
+	--tab-padding: 10px;
 
-  /* ROUNDEDNESS */
+	/* ROUNDEDNESS */
 
-  --round-corners: 4px;
+	--round-corners: 4px;
 
-  /* COLORS */
+	/* COLORS */
 
-  --accent: var(--nord8);
-  --background: var(--nord4);
-  --foreground: var(--nord0);
+	--accent: var(--nord8);
+	
+	--background: var(--nord4);
+	--background-secondary: var(--nord5);
 
-  --foreground-secondary: var(--nord1);
+	--foreground: var(--nord0);
+	--foreground-secondary: var(--nord1);
 
-  --yellow: #FFD563;
+	--yellow: #FFD563;
 
-  --navbar-color: #f7f7f7;
+	--navbar-color: #f7f7f7;
 
-  --lighter-1: rgba(255,255,255,0.35);
+	--lighter-1: rgba(255,255,255,0.35);
 
-  --darker-1: rgba(0,0,0,0.06);
-  --darker-2: rgba(0,0,0,0.1);
+	--darker-1: rgba(0,0,0,0.06);
+	--darker-2: rgba(0,0,0,0.1);
 
-  --outline: rgba(0,0,0,0.1);
+	--outline: rgba(0,0,0,0.1);
 
-  /* STATES */
+	/* STATES */
 
-  --disabled-opacity: 0.25;
+	--disabled-opacity: 0.25;
 
-  /* ANIMATIONS */
+	/* ANIMATIONS */
 
-  --transition: all 0.1s cubic-bezier(0.77, 0, 0.175, 1);
+	--transition: all 0.1s cubic-bezier(0.77, 0, 0.175, 1);
 
-  --spinner-offset: 187;
-  --spinner-duration: 1.4s;
+	--spinner-offset: 187;
+	--spinner-duration: 1.4s;
 }
 
 /* CIRCULAR STD FONT */
 
 @font-face {
-    font-family: 'Circular Std';
-    src: url('assets://fonts/CircularStd-MediumItalic.ttf');
-    font-weight: 500;
-    font-style: italic;
+		font-family: 'Circular Std';
+		src: url('assets://fonts/CircularStd-MediumItalic.ttf');
+		font-weight: 500;
+		font-style: italic;
 }
 
 @font-face {
-    font-family: 'Circular Std';
-    src: url('assets://fonts/CircularStd-Black.ttf');
-    font-weight: 900;
-    font-style: normal;
+		font-family: 'Circular Std';
+		src: url('assets://fonts/CircularStd-Black.ttf');
+		font-weight: 900;
+		font-style: normal;
 }
 
 @font-face {
-    font-family: 'Circular Std';
-    src: url('assets://fonts/CircularStd-Medium.ttf');
-    font-weight: 500;
-    font-style: normal;
+		font-family: 'Circular Std';
+		src: url('assets://fonts/CircularStd-Medium.ttf');
+		font-weight: 500;
+		font-style: normal;
 }
 
 @font-face {
-    font-family: 'Circular Std';
-    src: url('assets://fonts/CircularStd-Bold.ttf');
-    font-weight: bold;
-    font-style: normal;
+		font-family: 'Circular Std';
+		src: url('assets://fonts/CircularStd-Bold.ttf');
+		font-weight: bold;
+		font-style: normal;
 }
 
 @font-face {
-    font-family: 'Circular Std';
-    src: url('assets://fonts/CircularStd-BlackItalic.ttf');
-    font-weight: 900;
-    font-style: italic;
+		font-family: 'Circular Std';
+		src: url('assets://fonts/CircularStd-BlackItalic.ttf');
+		font-weight: 900;
+		font-style: italic;
 }
 
 @font-face {
-    font-family: 'Circular Std';
-    src: url('assets://fonts/CircularStd-BookItalic.ttf');
-    font-weight: normal;
-    font-style: italic;
+		font-family: 'Circular Std';
+		src: url('assets://fonts/CircularStd-BookItalic.ttf');
+		font-weight: normal;
+		font-style: italic;
 }
 
 @font-face {
-    font-family: 'Circular Std';
-    src: url('assets://fonts/CircularStd-BoldItalic.ttf');
-    font-weight: bold;
-    font-style: italic;
+		font-family: 'Circular Std';
+		src: url('assets://fonts/CircularStd-BoldItalic.ttf');
+		font-weight: bold;
+		font-style: italic;
 }
 
 @font-face {
-    font-family: 'Circular Std';
-    src: url('assets://fonts/CircularStd-Book.ttf');
-    font-weight: normal;
-    font-style: normal;
+		font-family: 'Circular Std';
+		src: url('assets://fonts/CircularStd-Book.ttf');
+		font-weight: normal;
+		font-style: normal;
 }
 
 /* APPLY TO EVERYTHING */
 
 * {
-  font-family: "Circular Std" !important;
-  margin: 0px;
-  outline: none;
-  user-select: none;
-  color: var(--foreground);
-  text-decoration: none;
+	font-family: "Circular Std" !important;
+	margin: 0px;
+	outline: none;
+	user-select: none;
+	color: var(--foreground);
+	text-decoration: none;
 }
 
 body {
-  background: var(--background);
+	background: var(--background);
 }
 
 *, *::after, *::before {
@@ -153,9 +155,9 @@ body {
 /* DEFAULT BUTTON */
 
 button {
-  border: none; background: none;
+	border: none; background: none;
 
-  display: flex;
-  align-items: center;
-  justify-content: center;
+	display: flex;
+	align-items: center;
+	justify-content: center;
 }

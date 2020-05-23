@@ -39,9 +39,9 @@ exports.removeHistoryItem = async () => history.delete(id);
 exports.clearHistory = async () => history.clear();
 
 exports.logHistory = async function (site, title) {
-  let id = v1();
-  let item = { "url": site, "title": title, "time": + new Date() };
-  return history.set(id, item);
+	let id = v1();
+	let item = { "url": site, "title": title, "time": + new Date() };
+	return history.set(id, item);
 }
 
 // Manage bookmarks:
@@ -50,26 +50,26 @@ exports.getBookmarks = async () => bookmarks.get(); // Returns all contents of b
 exports.removeBookmark = async id => bookmarks.delete(id);
 
 exports.addBookmark = async function (site, title) {
-  let id = v1();
-  let item = { "url": site, "title": title };
-  return bookmarks.set(id, item);
+	let id = v1();
+	let item = { "url": site, "title": title };
+	return bookmarks.set(id, item);
 }
 
 exports.isBookmarked = async function (url) {
-  try {
-    let bookmarks = bookmarks.get();
-  } catch (error) {
-    return false;
-  }
-  var exists = false;
-  for (var i = 0; i < bookmarks.length; i++) {
-    if(bookmarks[i].url === url){ exists = bookmarks[i]; break; }
-  }
-  return exists;
+	try {
+		let bookmarks = bookmarks.get();
+	} catch (error) {
+		return false;
+	}
+	var exists = false;
+	for (var i = 0; i < bookmarks.length; i++) {
+		if(bookmarks[i].url === url){ exists = bookmarks[i]; break; }
+	}
+	return exists;
 }
 
 exports.renameBookmark = async function (id, name) {
-  let bookmark = history.get(id);
-  bookmark.title = name;
-  history.set(id, bookmark);
+	let bookmark = history.get(id);
+	bookmark.title = name;
+	history.set(id, bookmark);
 }

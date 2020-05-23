@@ -1,7 +1,4 @@
-const { ipcMain, app,
-	BrowserWindow, contentTracing } = require('electron');
-
-const { openProcessManager } = require('electron-process-manager');
+const { app, BrowserWindow } = require('electron');
 
 const { format } = require('url');
 const { join } = require('path');
@@ -10,20 +7,14 @@ let mainWindow;
 
 process.noDeprecation = true;
 
-ipcMain.on('openProcessManager', async e => {
-	openProcessManager();
-});
-
-app.disableHardwareAcceleration();
-
 async function createWindow() {
 	process.env['ELECTRON_DISABLE_SECURITY_WARNINGS'] = 'true';
 
-  mainWindow = new BrowserWindow({
+  	mainWindow = new BrowserWindow({
 		title: 'Peacock',
 		frame: false,
 		minWidth: 500,
-    minHeight: 450,
+    	minHeight: 450,
 		backgroundColor: '#FFFFFF',
 		webPreferences: {
 			nodeIntegration: true,
@@ -45,7 +36,7 @@ async function createWindow() {
 
 	mainWindow.maximize();
 
-	mainWindow.webContents.on('crashed', async (e) => { console.log('crashed', e); });
+	mainWindow.webContents.on('crashed', async (e) => console.log('crashed', e));
 
 	// Emitted when the window is closed.
 	mainWindow.on('closed', async () => {

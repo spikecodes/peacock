@@ -1,15 +1,18 @@
 /* VARIABLE ALTERING */
 
 :root {
-  --lighter-1: rgba(0,0,0,0.1);
+	--lighter-1: rgba(0,0,0,0.1);
 
-  --darker-1: rgba(255,255,255,0.1);
-  --darker-2: rgba(255,255,255,0.2);
+	--darker-1: rgba(255,255,255,0.1);
+	--darker-2: rgba(255,255,255,0.2);
 
-  --outline: #232831;
+	--outline: #232831;
 
-  --background: var(--nord0);
-  --foreground: var(--nord4);
+	--background: var(--nord0);
+	--background-secondary: var(--nord1);
+
+	--foreground: var(--nord4);
+	--foreground-secondary: var(--nord5);
 }
 
 /* STYLING CHANGE */
@@ -20,20 +23,20 @@ html, body { background: var(--nord0) !important; }
 #titlebar { background: var(--nord0); }
 
 .tab-close:hover {
-  background: var(--lighter-1);
+	background: var(--lighter-1);
 }
 
 .tab.selected {
-  background: var(--nord1);
-  box-shadow: -1px 0px 0px 0px var(--outline), 1px 0px 0px 0px var(--outline), 0px -1px 0px 0px var(--nord1), inset 0px -1px 0px 0px var(--outline);
+	background: var(--nord1);
+	box-shadow: -1px 0px 0px 0px var(--outline), 1px 0px 0px 0px var(--outline), 0px -1px 0px 0px var(--nord1), inset 0px -1px 0px 0px var(--outline);
 }
 
 .tab.selected > .tab-label:after {
-  background: linear-gradient(90deg, transparent, var(--nord1));
+	background: linear-gradient(90deg, transparent, var(--nord1));
 }
 
 .tab:not(.selected) > .tab-label:after {
-  background: linear-gradient(90deg, transparent, var(--nord0));
+	background: linear-gradient(90deg, transparent, var(--nord0));
 }
 
 #new-tab { margin-left: 3px; }
@@ -46,13 +49,13 @@ html, body { background: var(--nord0) !important; }
 .insecure { background: #ff2c2c30 !important; }
 
 #window-controls > .button > span {
-  color: var(--nord4) !important;
+	color: var(--nord4) !important;
 }
 
 /* ICON AND TEXT INVERSION */
 
 img[src$="svg"]:not(.extension) {
-  filter: invert(90%) sepia(9%) saturate(224%) hue-rotate(180deg) brightness(99%) contrast(91%);
+	filter: invert(90%) sepia(9%) saturate(224%) hue-rotate(180deg) brightness(99%) contrast(91%);
 }
 
 svg { fill: var(--nord4) !important; }
@@ -77,13 +80,13 @@ li img { background: var(--nord4); border-radius: 50%; }
 /* JSON VIEWER */
 
 .json-string {
-  color: var(--yellow);
+	color: var(--yellow);
 }
 
 a.json-toggle, span.json-label {
-  color: #54c0ff;
+	color: #54c0ff;
 }
 
 .json-literal {
-  color: #40dc38;
+	color: #40dc38;
 }

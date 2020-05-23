@@ -72,9 +72,9 @@ let pointerlockchange = async (e) => {
 			duration: 5000
 		});
 
-    document.addEventListener("keydown", esc_pointer);
+	document.addEventListener("keydown", esc_pointer);
 	} else {
-    document.removeEventListener("keydown", esc_pointer);
+	document.removeEventListener("keydown", esc_pointer);
   }
 };
 let fullscreenchange = async (e) => {
@@ -86,9 +86,9 @@ let fullscreenchange = async (e) => {
 			duration: 5000
 		});
 
-    document.addEventListener("keydown", esc_fullscreen);
+	document.addEventListener("keydown", esc_fullscreen);
 	} else {
-    document.removeEventListener("keydown", esc_fullscreen);
+	document.removeEventListener("keydown", esc_fullscreen);
   }
 }
 

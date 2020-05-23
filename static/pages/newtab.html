@@ -1,232 +1,232 @@
 <!DOCTYPE html>
 <style>
-  html, body {
-    background: none !important; 
-  }
-  * {
-    box-sizing: border-box; 
-  }
+	html, body {
+		background: none !important; 
+	}
+	* {
+		box-sizing: border-box; 
+	}
 
-  .background-plate {
-    position: fixed; top: 0; left: 0;
-    width: 100%; height: 100%;
-    opacity: 0.6;
-    z-index: -1 !important;
-    background-color: var(--nord1);
-  }
-  .container {
-    max-width: 1500px;
-    flex-grow: 1;
-    margin: 0 auto;
-    position: relative;
-    width: auto;
-  }
+	.background-plate {
+		position: fixed; top: 0; left: 0;
+		width: 100%; height: 100%;
+		opacity: 0.6;
+		z-index: -1 !important;
+		background-color: var(--nord1);
+	}
+	.container {
+		max-width: 1500px;
+		flex-grow: 1;
+		margin: 0 auto;
+		position: relative;
+		width: auto;
+	}
 
-  .title {
-    margin-top: 10px;
-    color: var(--nord5);
-    font-size: 60px;
-  }
-  .icon {
-    margin-top: 80px;
-  }
-  .settings {
-    font-size: 27.00px;
-    height: 50px !important;
-  }
-  .bookmarks {
-    font-size: 27.00px;
-    height: 50px !important;
-  }
-  .history {
-    font-size: 27.00px;
-    height: 50px !important;
-  }
+	.title {
+		margin-top: 10px;
+		color: var(--nord5);
+		font-size: 60px;
+	}
+	.icon {
+		margin-top: 80px;
+	}
+	.settings {
+		font-size: 27.00px;
+		height: 50px !important;
+	}
+	.bookmarks {
+		font-size: 27.00px;
+		height: 50px !important;
+	}
+	.history {
+		font-size: 27.00px;
+		height: 50px !important;
+	}
 
-  .plus {
-    margin-top: 67.50px;
-    margin-bottom: auto;
-    font-size: 50px;
-    color: white;
-    border-radius: 8px;
-  }
-  .del {
-    position: absolute;
-    top: 10px; right: 10px;
-    width: 25px; height: 25px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    background-color: var(--background);
-    color: var(--foreground);
-    border-radius: 5px;
-    font-size: 15px;
-    opacity: 0;
-  }
-  .columns {
-    width: 92%;
-    margin-top: 80px;
-    margin-left: auto; margin-right: auto;
-  }
-  .columns:after {
-    content: "";
-    display: table;
-    clear: both;
-  }
-  .columns-t {
-    width: 92%;
-    margin-left: auto; margin-right: auto;
-  }
-  .columns-t:after {
-    content: "";
-    display: table;
-    clear: both;
-  }
-  .column {
-    background-color: rgba(67, 76, 94, 0.2);
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    color: white;
-    backdrop-filter: blur(10px);
-    border-radius: 10px;
-    text-align: center;
-    float: left; margin: 1%;
-    width: 14.666%; height: 200px;
-    padding: 10px;
-  } 
-  .column:hover > .del {
-    opacity: 0.7;
-  }
-  .column-t {
-    background-color: rgba(67, 76, 94, 0.2);
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    color: white;
-    backdrop-filter: blur(10px);
-    border-radius: 10px;
-    text-align: center;
-    float: left; margin: 1%;
-    width: 31.333%; height: 200px;
-    padding: 10px;
-  }
-  @media screen and (max-width: 1200px) {
-    .column {
-      width: 31.333%;
-    }
-  }
-  @media screen and (max-width: 600px) {
-    .column {
-      width: 100%;
-    }
-  }
+	.plus {
+		margin-top: 67.50px;
+		margin-bottom: auto;
+		font-size: 50px;
+		color: white;
+		border-radius: 8px;
+	}
+	.del {
+		position: absolute;
+		top: 10px; right: 10px;
+		width: 25px; height: 25px;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		background-color: var(--background);
+		color: var(--foreground);
+		border-radius: 5px;
+		font-size: 15px;
+		opacity: 0;
+	}
+	.columns {
+		width: 92%;
+		margin-top: 80px;
+		margin-left: auto; margin-right: auto;
+	}
+	.columns:after {
+		content: "";
+		display: table;
+		clear: both;
+	}
+	.columns-t {
+		width: 92%;
+		margin-left: auto; margin-right: auto;
+	}
+	.columns-t:after {
+		content: "";
+		display: table;
+		clear: both;
+	}
+	.column {
+		background-color: rgba(67, 76, 94, 0.2);
+		border: 1px solid rgba(255, 255, 255, 0.3);
+		color: white;
+		backdrop-filter: blur(10px);
+		border-radius: 10px;
+		text-align: center;
+		float: left; margin: 1%;
+		width: 14.666%; height: 200px;
+		padding: 10px;
+	} 
+	.column:hover > .del {
+		opacity: 0.7;
+	}
+	.column-t {
+		background-color: rgba(67, 76, 94, 0.2);
+		border: 1px solid rgba(255, 255, 255, 0.3);
+		color: white;
+		backdrop-filter: blur(10px);
+		border-radius: 10px;
+		text-align: center;
+		float: left; margin: 1%;
+		width: 31.333%; height: 200px;
+		padding: 10px;
+	}
+	@media screen and (max-width: 1200px) {
+		.column {
+			width: 31.333%;
+		}
+	}
+	@media screen and (max-width: 600px) {
+		.column {
+			width: 100%;
+		}
+	}
 
-  @keyframes animatetop {
-      from{top: -300px;opacity: 0;}
-       to{top: 0;opacity: 1;}
-  }
+	@keyframes animatetop {
+			from{top: -300px;opacity: 0;}
+			 to{top: 0;opacity: 1;}
+	}
 
-  .jump {
-    transition: all 0.1s;
-  }
+	.jump {
+		transition: all 0.1s;
+	}
 
-  .jump:hover { 
-    position: relative; 
-    transform: translateY(-5px);
-    background-color: rgba(67, 76, 94, 0.4); 
-    backdrop-filter: blur(5px);
-  }
+	.jump:hover { 
+		position: relative; 
+		transform: translateY(-5px);
+		background-color: rgba(67, 76, 94, 0.4); 
+		backdrop-filter: blur(5px);
+	}
 
-  .shift-down-1 { position: relative; animation: animatetop 1.5s; }
-  .shift-down-2 { position: relative; animation: animatetop 1.4s; }
-  .shift-down-3 { position: relative; animation: animatetop 1.3s; }
-  .shift-down-4 { position: relative; animation: animatetop 1.2s; }
-  .shift-down-5 { position: relative; animation: animatetop 1.1s; }
-  .shift-down-6 { position: relative; animation: animatetop 1s; }
-  .shift-down-7 { position: relative; animation: animatetop 0.9s; }
-  .shift-down-8 { position: relative; animation: animatetop 0.8s; }
-  .shift-down-9 { position: relative; animation: animatetop 0.7s; }
+	.shift-down-1 { position: relative; animation: animatetop 1.5s; }
+	.shift-down-2 { position: relative; animation: animatetop 1.4s; }
+	.shift-down-3 { position: relative; animation: animatetop 1.3s; }
+	.shift-down-4 { position: relative; animation: animatetop 1.2s; }
+	.shift-down-5 { position: relative; animation: animatetop 1.1s; }
+	.shift-down-6 { position: relative; animation: animatetop 1s; }
+	.shift-down-7 { position: relative; animation: animatetop 0.9s; }
+	.shift-down-8 { position: relative; animation: animatetop 0.8s; }
+	.shift-down-9 { position: relative; animation: animatetop 0.7s; }
 </style>
 
 <html>
-  <head>
-    <link rel="stylesheet" type="text/css" href="assets://global.css">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>New tab</title>
-  </head>
-  
-  <body>
-    <div class="background-plate"></div>
-    <div class="container">
-      <div class="icon shift-down-1">
-        <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="120" height="120" viewBox="0 0 475 475">
-          <defs>
-            <clipPath id="clip-Tom">
-              <rect width="475" height="475"/>
-            </clipPath>
-          </defs>
-          <g id="Tom" clip-path="url(#clip-Tom)">
-            <rect width="475" height="475" fill="rgba(255,255,255,0)"/>
-            <g id="Tom-2" data-name="Tom" transform="translate(-204.873 -85.217)">
-              <path id="Path_75" data-name="Path 75" d="M8614.993,5056.311s9.433,6.629,26.689,21.727a721.4,721.4,0,0,1,83.857,87.554c58.728,72.382,103.063,199.18,103.063,199.18s-57.824-1.7-107.855-30.269-80.4-74.654-80.4-74.654-32.758-54.895-37.435-109.653S8614.993,5056.311,8614.993,5056.311Z" transform="translate(-8393 -4808.963)" fill="#63e4ff"/>
-              <path id="Path_76" data-name="Path 76" d="M8825.027,5371.808c-.765-1.277,2.245-123.1-32.481-230.835-32.461-100.711-102.855-187.924-102.855-187.924s58.563-47.832,143.7-47.832,139.835,47.955,139.835,47.955-63.06,72.259-99.971,176.949S8825.027,5371.808,8825.027,5371.808Z" transform="translate(-8389.444 -4816)" fill="#313a43"/>
-              <path id="Path_77" data-name="Path 77" d="M8825.881,5049.424a807.928,807.928,0,0,0-73.294,68.472c-24.458,25.8-50.355,57.538-71.441,89.625-54.207,82.481-80.064,157.488-80.064,157.488s48.237,2.442,90.366-15.534,63.174-33.85,91.831-63.692,53.022-87.248,57.367-135.381C8845.586,5095.644,8825.881,5049.424,8825.881,5049.424Z" transform="translate(-8165.514 -4809.2)" fill="#ffd563"/>
-              <path id="Path_78" data-name="Path 78" d="M8894.168,5200s31.388,25.232,48.28,49.171,28.346,54.283,28.346,54.283-72.937,57.735-131.511,138.646-93.268,177.257-93.268,177.257,10.214-137.4,47.251-242.239S8894.168,5200,8894.168,5200Z" transform="translate(-8310.256 -5063.125)" fill="#ff6363"/>
-              <path id="Path_79" data-name="Path 79" d="M8819.748,5199.525s-28.564,23.527-48.9,52.03-30.179,58.863-30.179,58.863,72.058,52.951,127.523,133.862,86.426,175.1,86.426,175.1-.375-138.884-35.443-243.722S8819.748,5199.525,8819.748,5199.525Z" transform="translate(-8518.822 -5063.145)" fill="#6c63ff"/>
-              <path id="Tom-3" data-name="Tom" d="M124.5,192.219c2.8-44.469-29.019-50.025-33.059-54.074s3.113-6.922,9.676-12.468c5.949-5.029,11.979-11.81,12.7-13.909,7.846-22.826,18.288-20.411,32.122-20.411s21.532,17.159,21.532,39.967-11.3,16.873-11.3,60.894,40.622,72.339,45.084,121.3c1.771,19.438-17.324,43.619-28.513,68.782-16.774,37.723-29.316,74.34-33.747,74.34-4.686,0-17.608-35.424-33.625-74.34-9.573-23.26-27.06-48.377-25.135-66.281C85.332,268.657,121.7,236.689,124.5,192.219Z" transform="translate(297.357 99.462)" fill="#fff"/>
-              <path id="Subtraction_28" data-name="Subtraction 28" d="M-7448.722-4864.651h0l-28.689-1.136a8.086,8.086,0,0,0,.19-1.6c0-.637-1-2.185-2.75-4.246a75.085,75.085,0,0,0-6.677-6.815c-3.668-3.415-5.808-5.881-6.939-8a7.553,7.553,0,0,1-.654-6.222c1.069-3.495,3.518-5.5,6.718-5.5a9.843,9.843,0,0,1,6.967,3.247,12.328,12.328,0,0,1,3.334,8.571,31.85,31.85,0,0,0,3.177,12.26c1.944,4.172,4.088,6.764,5.595,6.764a1.224,1.224,0,0,0,.394-.063c1.016-.36,1.741-1.513,2.155-3.426a26.043,26.043,0,0,0,.4-6,69.12,69.12,0,0,0-.783-8.24,63.542,63.542,0,0,1-1.967-7.044,30.425,30.425,0,0,1-.745-5.658,7.085,7.085,0,0,1,.938-4.286,7.265,7.265,0,0,1,5.892-2.922,7.3,7.3,0,0,1,5.893,2.922,7.253,7.253,0,0,1,1.006,4.309,30.121,30.121,0,0,1-.657,5.656,62.5,62.5,0,0,1-1.86,7.023c-.016.157-1.582,15.716.6,18.135a.86.86,0,0,0,.646.319c1.933,0,4.593-2.8,6.94-7.308s3.8-9.567,3.8-13.233a16.651,16.651,0,0,1,2.619-9.418,7.568,7.568,0,0,1,6.125-3.656,6.93,6.93,0,0,1,3.825,1.223,8.3,8.3,0,0,1,3.761,6.32,11.564,11.564,0,0,1-.541,4.981,11.494,11.494,0,0,1-2.751,4.465c-2.33,2.323-3,2.579-3.654,2.827-.622.237-1.209.46-3.271,2.627a147.827,147.827,0,0,0-9.677,12l.64,1.121Z" transform="translate(7900.352 5059.217)" fill="#fff"/>
-            </g>
-          </g>
-        </svg>
-        
-      </div>
-      <h1 class="title shift-down-2">Peacock</h1>
-      <div class="columns">
-        <a class="column shift-down-4 jump">
-          <img class="plus" width="45">
-          <img class="del">
-        </a>
-        <a class="column shift-down-5 jump">
-          <img class="plus" width="45">
-          <img class="del">
-        </a>
-        <a class="column shift-down-6 jump">
-          <img class="plus" width="45">
-          <img class="del">
-        </a>
-        <a class="column shift-down-7 jump">
-          <img class="plus" width="45">
-          <img class="del">
-        </a>
-        <a class="column shift-down-8 jump">
-          <img class="plus" width="45">
-          <img class="del">
-        </a>
-        <a class="column shift-down-9 jump">
-          <img class="plus" width="45">
-          <img class="del">
-        </a>
-      </div>
-      <div class="columns-t">
-        <a class="column-t settings shift-down-7 jump" href="peacock://settings">
-          <svg viewBox="0 0 24 24" width="30" height="30">
-            <path fill="none" d="M0 0h24v24H0z"></path>
-            <path fill="white" d="M9.954 2.21a9.99 9.99 0 0 1 4.091-.002A3.993 3.993 0 0 0 16 5.07a3.993 3.993 0 0 0 3.457.261A9.99 9.99 0 0 1 21.5 8.876 3.993 3.993 0 0 0 20 12c0 1.264.586 2.391 1.502 3.124a10.043 10.043 0 0 1-2.046 3.543 3.993 3.993 0 0 0-3.456.261 3.993 3.993 0 0 0-1.954 2.86 9.99 9.99 0 0 1-4.091.004A3.993 3.993 0 0 0 8 18.927a3.993 3.993 0 0 0-3.457-.26A9.99 9.99 0 0 1 2.5 15.121 3.993 3.993 0 0 0 4 11.999a3.993 3.993 0 0 0-1.502-3.124 10.043 10.043 0 0 1 2.046-3.543A3.993 3.993 0 0 0 8 5.071a3.993 3.993 0 0 0 1.954-2.86zM12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"></path>
-          </svg>
-        </a>
-        <a class="column-t bookmarks shift-down-8 jump" href="peacock://bookmarks">
-          <svg viewBox="0 0 24 24" width="30" height="30">
-            <path fill="none" d="M0 0h24v24H0z"></path> 
-            <path fill="white" d="M5 2h14a1 1 0 0 1 1 1v19.143a.5.5 0 0 1-.766.424L12 18.03l-7.234 4.536A.5.5 0 0 1 4 22.143V3a1 1 0 0 1 1-1zm13 2H6v15.432l6-3.761 6 3.761V4z"></path>
-          </svg>
-        </a>
-        <a class="column-t history shift-down-9 jump" href="peacock://history">
-          <svg viewBox="0 0 24 24" width="30" height="30">
-            <path fill="none" d="M0 0H24V24H0z"></path>
-            <path fill="white" d="M12 2c5.523 0 10 4.477 10 10s-4.477 10-10 10S2 17.523 2 12h2c0 4.418 3.582 8 8 8s8-3.582 8-8-3.582-8-8-8C9.25 4 6.824 5.387 5.385 7.5H8v2H2v-6h2V6c1.824-2.43 4.729-4 8-4zm1 5v4.585l3.243 3.243-1.415 1.415L11 12.413V7h2z"></path>
-          </svg>
-        </a>
-      </div>
-    </div>
-  </body>
+	<head>
+		<link rel="stylesheet" type="text/css" href="assets://global.css">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<title>New tab</title>
+	</head>
+	
+	<body>
+		<div class="background-plate"></div>
+		<div class="container">
+			<div class="icon shift-down-1">
+				<svg width="120" height="120" viewBox="0 0 475 475">
+					<defs>
+						<clipPath id="clip-Tom">
+							<rect width="475" height="475"/>
+						</clipPath>
+					</defs>
+					<g id="Tom" clip-path="url(#clip-Tom)">
+						<rect width="475" height="475" fill="rgba(255,255,255,0)"/>
+						<g id="Tom-2" data-name="Tom" transform="translate(-204.873 -85.217)">
+							<path id="Path_75" data-name="Path 75" d="M8614.993,5056.311s9.433,6.629,26.689,21.727a721.4,721.4,0,0,1,83.857,87.554c58.728,72.382,103.063,199.18,103.063,199.18s-57.824-1.7-107.855-30.269-80.4-74.654-80.4-74.654-32.758-54.895-37.435-109.653S8614.993,5056.311,8614.993,5056.311Z" transform="translate(-8393 -4808.963)" fill="#63e4ff"/>
+							<path id="Path_76" data-name="Path 76" d="M8825.027,5371.808c-.765-1.277,2.245-123.1-32.481-230.835-32.461-100.711-102.855-187.924-102.855-187.924s58.563-47.832,143.7-47.832,139.835,47.955,139.835,47.955-63.06,72.259-99.971,176.949S8825.027,5371.808,8825.027,5371.808Z" transform="translate(-8389.444 -4816)" fill="#313a43"/>
+							<path id="Path_77" data-name="Path 77" d="M8825.881,5049.424a807.928,807.928,0,0,0-73.294,68.472c-24.458,25.8-50.355,57.538-71.441,89.625-54.207,82.481-80.064,157.488-80.064,157.488s48.237,2.442,90.366-15.534,63.174-33.85,91.831-63.692,53.022-87.248,57.367-135.381C8845.586,5095.644,8825.881,5049.424,8825.881,5049.424Z" transform="translate(-8165.514 -4809.2)" fill="#ffd563"/>
+							<path id="Path_78" data-name="Path 78" d="M8894.168,5200s31.388,25.232,48.28,49.171,28.346,54.283,28.346,54.283-72.937,57.735-131.511,138.646-93.268,177.257-93.268,177.257,10.214-137.4,47.251-242.239S8894.168,5200,8894.168,5200Z" transform="translate(-8310.256 -5063.125)" fill="#ff6363"/>
+							<path id="Path_79" data-name="Path 79" d="M8819.748,5199.525s-28.564,23.527-48.9,52.03-30.179,58.863-30.179,58.863,72.058,52.951,127.523,133.862,86.426,175.1,86.426,175.1-.375-138.884-35.443-243.722S8819.748,5199.525,8819.748,5199.525Z" transform="translate(-8518.822 -5063.145)" fill="#6c63ff"/>
+							<path id="Tom-3" data-name="Tom" d="M124.5,192.219c2.8-44.469-29.019-50.025-33.059-54.074s3.113-6.922,9.676-12.468c5.949-5.029,11.979-11.81,12.7-13.909,7.846-22.826,18.288-20.411,32.122-20.411s21.532,17.159,21.532,39.967-11.3,16.873-11.3,60.894,40.622,72.339,45.084,121.3c1.771,19.438-17.324,43.619-28.513,68.782-16.774,37.723-29.316,74.34-33.747,74.34-4.686,0-17.608-35.424-33.625-74.34-9.573-23.26-27.06-48.377-25.135-66.281C85.332,268.657,121.7,236.689,124.5,192.219Z" transform="translate(297.357 99.462)" fill="#fff"/>
+							<path id="Subtraction_28" data-name="Subtraction 28" d="M-7448.722-4864.651h0l-28.689-1.136a8.086,8.086,0,0,0,.19-1.6c0-.637-1-2.185-2.75-4.246a75.085,75.085,0,0,0-6.677-6.815c-3.668-3.415-5.808-5.881-6.939-8a7.553,7.553,0,0,1-.654-6.222c1.069-3.495,3.518-5.5,6.718-5.5a9.843,9.843,0,0,1,6.967,3.247,12.328,12.328,0,0,1,3.334,8.571,31.85,31.85,0,0,0,3.177,12.26c1.944,4.172,4.088,6.764,5.595,6.764a1.224,1.224,0,0,0,.394-.063c1.016-.36,1.741-1.513,2.155-3.426a26.043,26.043,0,0,0,.4-6,69.12,69.12,0,0,0-.783-8.24,63.542,63.542,0,0,1-1.967-7.044,30.425,30.425,0,0,1-.745-5.658,7.085,7.085,0,0,1,.938-4.286,7.265,7.265,0,0,1,5.892-2.922,7.3,7.3,0,0,1,5.893,2.922,7.253,7.253,0,0,1,1.006,4.309,30.121,30.121,0,0,1-.657,5.656,62.5,62.5,0,0,1-1.86,7.023c-.016.157-1.582,15.716.6,18.135a.86.86,0,0,0,.646.319c1.933,0,4.593-2.8,6.94-7.308s3.8-9.567,3.8-13.233a16.651,16.651,0,0,1,2.619-9.418,7.568,7.568,0,0,1,6.125-3.656,6.93,6.93,0,0,1,3.825,1.223,8.3,8.3,0,0,1,3.761,6.32,11.564,11.564,0,0,1-.541,4.981,11.494,11.494,0,0,1-2.751,4.465c-2.33,2.323-3,2.579-3.654,2.827-.622.237-1.209.46-3.271,2.627a147.827,147.827,0,0,0-9.677,12l.64,1.121Z" transform="translate(7900.352 5059.217)" fill="#fff"/>
+						</g>
+					</g>
+				</svg>
+				
+			</div>
+			<h1 class="title shift-down-2">Peacock</h1>
+			<div class="columns">
+				<a class="column shift-down-4 jump">
+					<img class="plus" width="45">
+					<img class="del">
+				</a>
+				<a class="column shift-down-5 jump">
+					<img class="plus" width="45">
+					<img class="del">
+				</a>
+				<a class="column shift-down-6 jump">
+					<img class="plus" width="45">
+					<img class="del">
+				</a>
+				<a class="column shift-down-7 jump">
+					<img class="plus" width="45">
+					<img class="del">
+				</a>
+				<a class="column shift-down-8 jump">
+					<img class="plus" width="45">
+					<img class="del">
+				</a>
+				<a class="column shift-down-9 jump">
+					<img class="plus" width="45">
+					<img class="del">
+				</a>
+			</div>
+			<div class="columns-t">
+				<a class="column-t settings shift-down-7 jump" href="peacock://settings">
+					<svg viewBox="0 0 24 24" width="24" height="24">
+						<path fill="none" d="M0 0h24v24H0z"/>
+						<path fill="white" d="M3.34 17a10.018 10.018 0 0 1-.978-2.326 3 3 0 0 0 .002-5.347A9.99 9.99 0 0 1 4.865 4.99a3 3 0 0 0 4.631-2.674 9.99 9.99 0 0 1 5.007.002 3 3 0 0 0 4.632 2.672c.579.59 1.093 1.261 1.525 2.01.433.749.757 1.53.978 2.326a3 3 0 0 0-.002 5.347 9.99 9.99 0 0 1-2.501 4.337 3 3 0 0 0-4.631 2.674 9.99 9.99 0 0 1-5.007-.002 3 3 0 0 0-4.632-2.672A10.018 10.018 0 0 1 3.34 17zm5.66.196a4.993 4.993 0 0 1 2.25 2.77c.499.047 1 .048 1.499.001A4.993 4.993 0 0 1 15 17.197a4.993 4.993 0 0 1 3.525-.565c.29-.408.54-.843.748-1.298A4.993 4.993 0 0 1 18 12c0-1.26.47-2.437 1.273-3.334a8.126 8.126 0 0 0-.75-1.298A4.993 4.993 0 0 1 15 6.804a4.993 4.993 0 0 1-2.25-2.77c-.499-.047-1-.048-1.499-.001A4.993 4.993 0 0 1 9 6.803a4.993 4.993 0 0 1-3.525.565 7.99 7.99 0 0 0-.748 1.298A4.993 4.993 0 0 1 6 12c0 1.26-.47 2.437-1.273 3.334a8.126 8.126 0 0 0 .75 1.298A4.993 4.993 0 0 1 9 17.196zM12 15a3 3 0 1 1 0-6 3 3 0 0 1 0 6zm0-2a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"/>
+					</svg>
+				</a>
+				<a class="column-t bookmarks shift-down-8 jump" href="peacock://bookmarks">
+					<svg viewBox="0 0 24 24" width="30" height="30">
+						<path fill="none" d="M0 0h24v24H0z"></path> 
+						<path fill="white" d="M5 2h14a1 1 0 0 1 1 1v19.143a.5.5 0 0 1-.766.424L12 18.03l-7.234 4.536A.5.5 0 0 1 4 22.143V3a1 1 0 0 1 1-1zm13 2H6v15.432l6-3.761 6 3.761V4z"></path>
+					</svg>
+				</a>
+				<a class="column-t history shift-down-9 jump" href="peacock://history">
+					<svg viewBox="0 0 24 24" width="30" height="30">
+						<path fill="none" d="M0 0H24V24H0z"></path>
+						<path fill="white" d="M12 2c5.523 0 10 4.477 10 10s-4.477 10-10 10S2 17.523 2 12h2c0 4.418 3.582 8 8 8s8-3.582 8-8-3.582-8-8-8C9.25 4 6.824 5.387 5.385 7.5H8v2H2v-6h2V6c1.824-2.43 4.729-4 8-4zm1 5v4.585l3.243 3.243-1.415 1.415L11 12.413V7h2z"></path>
+					</svg>
+				</a>
+			</div>
+		</div>
+	</body>
 </html>
 
 <script>
@@ -237,15 +237,15 @@ let items = document.querySelectorAll('.column');
 
 let cross = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='24' height='24'%3E%3Cpath fill='none' d='M0 0h24v24H0z'/%3E%3Cpath d='M12 10.586l4.95-4.95 1.414 1.414-4.95 4.95 4.95 4.95-1.414 1.414-4.95-4.95-4.95 4.95-1.414-1.414 4.95-4.95-4.95-4.95L7.05 5.636z'/%3E%3C/svg%3E`;
 let add = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='24' height='24'%3E%3Cpath fill='none'
-      d='M0 0h24v24H0z'/%3E%3Cpath fill='white' d='M11 11V5h2v6h6v2h-6v6h-2v-6H5v-2z'/%3E%3C/svg%3E`;
+			d='M0 0h24v24H0z'/%3E%3Cpath fill='white' d='M11 11V5h2v6h6v2h-6v6h-2v-6H5v-2z'/%3E%3C/svg%3E`;
 let earth = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='24' height='24'%3E%3Cpath fill='none'
-    d='M0 0h24v24H0z'/%3E%3Cpath fill='white' d='M6.235 6.453a8 8 0 0 0 8.817 12.944c.115-.75-.137-1.47-.24-1.722-.23-.56-.988-1.517-2.253-2.844-.338-.355-.316-.628-.195-1.437l.013-.091c.082-.554.22-.882 2.085-1.178.948-.15 1.197.228 1.542.753l.116.172c.328.48.571.59.938.756.165.075.37.17.645.325.652.373.652.794.652 1.716v.105c0 .391-.038.735-.098 1.034a8.002 8.002 0 0 0-3.105-12.341c-.553.373-1.312.902-1.577 1.265-.135.185-.327 1.132-.95 1.21-.162.02-.381.006-.613-.009-.622-.04-1.472-.095-1.744.644-.173.468-.203 1.74.356 2.4.09.105.107.3.046.519-.08.287-.241.462-.292.498-.096-.056-.288-.279-.419-.43-.313-.365-.705-.82-1.211-.96-.184-.051-.386-.093-.583-.135-.549-.115-1.17-.246-1.315-.554-.106-.226-.105-.537-.105-.865 0-.417 0-.888-.204-1.345a1.276 1.276 0 0 0-.306-.43zM12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z'/%3E%3C/svg%3E`;
+		d='M0 0h24v24H0z'/%3E%3Cpath fill='white' d='M6.235 6.453a8 8 0 0 0 8.817 12.944c.115-.75-.137-1.47-.24-1.722-.23-.56-.988-1.517-2.253-2.844-.338-.355-.316-.628-.195-1.437l.013-.091c.082-.554.22-.882 2.085-1.178.948-.15 1.197.228 1.542.753l.116.172c.328.48.571.59.938.756.165.075.37.17.645.325.652.373.652.794.652 1.716v.105c0 .391-.038.735-.098 1.034a8.002 8.002 0 0 0-3.105-12.341c-.553.373-1.312.902-1.577 1.265-.135.185-.327 1.132-.95 1.21-.162.02-.381.006-.613-.009-.622-.04-1.472-.095-1.744.644-.173.468-.203 1.74.356 2.4.09.105.107.3.046.519-.08.287-.241.462-.292.498-.096-.056-.288-.279-.419-.43-.313-.365-.705-.82-1.211-.96-.184-.051-.386-.093-.583-.135-.549-.115-1.17-.246-1.315-.554-.106-.226-.105-.537-.105-.865 0-.417 0-.888-.204-1.345a1.276 1.276 0 0 0-.306-.43zM12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z'/%3E%3C/svg%3E`;
 
 let body = document.querySelector('body');
 let del = document.querySelectorAll('.del');
 for (let i = 0; i < del.length; i++) {
-  del[i].setAttribute('src', cross);
-  del[i].setAttribute('onclick', `clearItem(${i});`);
+	del[i].setAttribute('src', cross);
+	del[i].setAttribute('onclick', `clearItem(${i});`);
 }
 
 // Load in theming
@@ -258,61 +258,61 @@ let loadItems = sendSync('newTab', 'loadItems');
 body.style = `background: url('${ backgroundTheme }') no-repeat center center fixed !important;background-size:cover !important;text-align: center;`;
 
 function setItem(item, url, index) {
-  let icon = item.querySelector('.plus');
-  if (url === '') {
-    icon.setAttribute('src', add);
-    item.setAttribute('onclick', `newItem(${index})`);
-  } else {
-    item.setAttribute('onclick', `window.location.href = '${url}'`);
-    try {
-      let origin = (new URL(url)).origin;
-      icon.setAttribute('src', `${origin}/favicon.ico`);
-    } catch (e) {
-      icon.setAttribute('src', earth);
-    }
-    icon.onerror = () => { icon.setAttribute('src', earth); }
-  }
+	let icon = item.querySelector('.plus');
+	if (url === '') {
+		icon.setAttribute('src', add);
+		item.setAttribute('onclick', `newItem(${index})`);
+	} else {
+		item.setAttribute('onclick', `window.location.href = '${url}'`);
+		try {
+			let origin = (new URL(url)).origin;
+			icon.setAttribute('src', `${origin}/favicon.ico`);
+		} catch (e) {
+			icon.setAttribute('src', earth);
+		}
+		icon.onerror = () => { icon.setAttribute('src', earth); }
+	}
 }
 
 function newItem(i) {
-  if (!allowNew) { allowNew = true; return; }
-  let url = prompt('Enter slot url:');
+	if (!allowNew) { allowNew = true; return; }
+	let url = prompt('Enter slot url:');
 
-  if(!url || url == '') return;
-  try { new URL(url) }
-  catch (e) {
-    try {
-      url = 'https://www.' + url;
-      new URL(url);
-    } catch (e) {
-      try {
-        url = 'https://' + url;
-        new URL(url);
-      } catch (e) {
-        alert('Invalid URL.');
-        return;
-      }
-    }
-  }
+	if(!url || url == '') return;
+	try { new URL(url) }
+	catch (e) {
+		try {
+			url = 'https://www.' + url;
+			new URL(url);
+		} catch (e) {
+			try {
+				url = 'https://' + url;
+				new URL(url);
+			} catch (e) {
+				alert('Invalid URL.');
+				return;
+			}
+		}
+	}
 
-  loadItems[i] = url;
-  setItem(items[i], url, i);
-  send('newTab', 'saveItem', {id: i, domain: url});
+	loadItems[i] = url;
+	setItem(items[i], url, i);
+	send('newTab', 'saveItem', {id: i, domain: url});
 }
 
 function clearItem(i) {
-  allowNew = false;
-  loadItems[i] = "";
-  setItem(items[i], "", i);
-  send('newTab', 'saveItem', {id: i, domain: ""});
+	allowNew = false;
+	loadItems[i] = "";
+	setItem(items[i], "", i);
+	send('newTab', 'saveItem', {id: i, domain: ""});
 }
 
 function update() {
-  for (let i = 0; i < items.length; i++) {
-    let item = items[i];
-    let url = loadItems[i];
-    setItem(item, url, i);
-  }
+	for (let i = 0; i < items.length; i++) {
+		let item = items[i];
+		let url = loadItems[i];
+		setItem(item, url, i);
+	}
 }
 
 update();
