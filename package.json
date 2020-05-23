@@ -1,7 +1,7 @@
 {
 	"name": "peacock",
 	"productName": "Peacock",
-	"version": "2.4.0-beta.3.1",
+	"version": "2.4.0-beta.3",
 	"description": "Open source experimental private-by-default web browser.",
 	"main": "main.js",
 	"repository": {
@@ -11,12 +11,12 @@
 	"keywords": [
 		"browser",
 		"web",
-		"web3",
+		"security",
 		"privacy",
 		"internet"
 	],
 	"build": {
-		"appId": "com.codiscite.peacock",
+		"appId": "com.peacockweb.peacock",
 		"productName": "Peacock",
 		"win": {
 			"target": [
@@ -40,12 +40,6 @@
 			],
 			"icon": "images/peacock.png"
 		},
-		"publish": [
-			{
-				"provider": "generic",
-				"url": "https://gitlab.com"
-			}
-		],	  
 		"nsis": {
 			"oneClick": "false",
 			"allowToChangeInstallationDirectory": "true",
@@ -69,23 +63,22 @@
 	"scripts": {
 		"start": "electron .",
 		"build-linux": "electron-builder --linux --publish always",
-    	"build-win": "electron-builder --win --publish always"
+		"build-win": "electron-builder --win --publish always"
 	},
 	"author": "Spike Raxstone <19519553+spikecodes@users.noreply.github.com>",
 	"license": "MIT",
 	"devDependencies": {
-		"electron": "^9.0.0",
+		"electron": "^10.0.0-beta.1",
 		"electron-builder": "^22.6.1"
 	},
 	"dependencies": {
-		"@cliqz/adblocker-electron": "^1.14.2",
+		"@cliqz/adblocker-electron": "^1.15.0",
 		"cross-fetch": "^3.0.4",
-		"electron-context-menu": "^2.0.0",
-		"electron-process-manager": "^1.0.0",
+		"electron-context-menu": "^2.0.1",
 		"electron-store": "^5.1.1",
 		"electron-updater": "^4.3.1",
 		"sortablejs": "^1.10.2",
-		"uuid": "^7.0.3",
+		"uuid": "^8.1.0",
 		"v8-compile-cache": "^2.1.0"
 	}
 }
