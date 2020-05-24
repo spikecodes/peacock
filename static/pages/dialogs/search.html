@@ -8,7 +8,11 @@
 			height: 100%;
 			width: 100%;
 			flex-direction: column;
-			border-radius: var(--border-radius);
+			border-radius: var(--round-corners);
+			border: 2px solid var(--accent);
+			border-top: 2px solid transparent;
+			box-sizing: border-box;
+			overflow: hidden;
 		}
 
 		button {
@@ -22,7 +26,7 @@
 
 		button:hover,
 		#suggestionSelected {
-			background: var(--foreground-secondary);
+			background: var(--background-secondary);
 		}
 	</style>
 </head>
@@ -34,10 +38,7 @@
 	body, html { background: transparent !important; }
 </style>
 <script>
-	let {
-		remote,
-		ipcRenderer
-	} = require('electron');
+	let { remote, ipcRenderer } = require('electron');
 
 	let results = document.getElementsByTagName('main')[0];
 

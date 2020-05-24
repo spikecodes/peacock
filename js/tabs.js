@@ -309,7 +309,7 @@ exports.newView = function (url='peacock://newtab', active=true) {
 		cb({ url: 'https://ipfs.io/ipfs/' + hash });
 	}, () => {});
 
-	// PDF READER
+	// PDF & JSON READER
 
 	tabSession.webRequest.onResponseStarted(async (det) => {
 		let type = det.responseHeaders['Content-Type'] || det.responseHeaders['content-type'];
@@ -317,11 +317,12 @@ exports.newView = function (url='peacock://newtab', active=true) {
 
 		if(!resource || !type) return;
 		let query = '?url=' + encodeURIComponent(det.url);
-		if(resource == 'mainFrame' && type[0].includes('application/json')) {
-			view.webContents.loadURL(join(__dirname, '..', 'static', 'json-viewer', 'index.html') + query);
-		} else if (resource == 'mainFrame' && type[0].includes('application/pdf')) {
-			view.webContents.loadURL(join(__dirname, '..', 'static', 'pdf', 'index.html') + query);
-		}
+		
+		if(resource == 'mainFrame' && type[0].includes('application/json') && store.get('settings.json_viewer')) {
+			view.webContents.loadURL('file://' + join(__dirname, '..', 'static', 'json-viewer', 'index.html') + query);
+		} // else if (resource == 'mainFrame' && type[0].includes('application/pdf') && store.get('settings.pdf_viewer')) {
+		// 	view.webContents.loadURL(join(__dirname, '..', 'static', 'pdf', 'index.html') + query);
+		// }
 	});
 
 	// tabSession.protocol.registerFileProtocol('pdf', (req, cb) => {

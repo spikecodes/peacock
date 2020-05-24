@@ -33,10 +33,10 @@ function searchBounds () {
 	let navCenter = document.getElementById('nav-center');
 
 	bounds.x = Math.ceil(navCenter.getBoundingClientRect().left + window.scrollX);
-	bounds.y = Math.ceil(navCenter.getBoundingClientRect().top + window.scrollY
-		+ parseFloat(getComputedStyle(navCenter, null).height.replace("px", ""))) + 5;
+	bounds.y = Math.floor(navCenter.getBoundingClientRect().top + window.scrollY
+		+ parseFloat(getComputedStyle(navCenter, null).height.replace("px", "")) - 2);
 	bounds.width = Math.floor(parseFloat(getComputedStyle(navCenter, null).width.replace("px", "")));
-	bounds.height = 240;
+	bounds.height = 244;
 
 	if(winBounds.x >= 0) bounds.x += winBounds.x;
 	if(winBounds.y >= 0) bounds.y += winBounds.y;
@@ -44,17 +44,17 @@ function searchBounds () {
 	return bounds;
 };
 
-search.initialize(searchBounds());
-
 // STORAGE
 
 const Store = require('electron-store');
 window.store = new Store();
 
+if(store.get('settings.search_suggestions')) search.initialize(searchBounds());
+
 if (!store.get('settings')) {
 	let data = {
 		search_engine: 'DuckDuckGo',
-		theme: 'Default',
+		theme: 'System',
 		newTab: { backgroundTheme: 'https://source.unsplash.com/1280x720/daily?peacock', items: ['', '', '', '', ''] }
 	};
 	store.set('settings', data);
@@ -403,13 +403,13 @@ async function loadTheme() {
 	let themeObj = store.get('settings.theme').toLowerCase();
 	let newTheme = themeObj;
 
-	if (window.darkMode && themeObj == 'default') newTheme = 'dark';
+	if (window.darkMode && themeObj == 'system') newTheme = 'dark';
 
 	if (window.theme != newTheme) {
 		if (themeObj === 'light') {
 			window.theme = 'light';
 			if (document.querySelector('head link[href*="css/themes"]')) document.querySelector('head link[href*="css/themes"]').remove();
-		} else if (themeObj === 'default') {
+		} else if (themeObj === 'system') {
 			if (window.darkMode) {
 				// If Dark Mode
 				window.theme = 'dark';
@@ -786,7 +786,12 @@ let menuTemp = [
 
 // document.getElementById('shield').addEventListener('click', toggleAdblock);
 
-// document.getElementById('home').addEventListener('click', async () => tabs.current().webContents.loadURL('peacock://newtab'));
+if(store.get('settings.home') && document.getElementById('home')) {
+	document.getElementById('home').style.display = 'flex';
+	document.getElementById('home').addEventListener('click', async () => tabs.current().webContents.loadURL('peacock://newtab'));
+} else {
+	document.getElementById('home').style.display = 'none';
+}
 document.getElementById('back').addEventListener('click', async () => keyboardShortcut('backPage'));
 document.getElementById('forward').addEventListener('click', async () => keyboardShortcut('forwardPage'));
 document.getElementById('refresh').addEventListener('mousedown', async e => {
@@ -831,7 +836,7 @@ document.getElementById('url').addEventListener('keypress', async e => {
 document.getElementById('url').addEventListener('focus', async e => {
 	e.preventDefault();
 
-	document.getElementById('nav-center').style.border = 'var(--accent) 2px solid';
+	document.getElementById('nav-center').style.border = '2px solid var(--accent)';
 
 	document.getElementById('url').value = tabs.current().webContents.getURL();
 	document.getElementById('url').select();
@@ -839,15 +844,23 @@ document.getElementById('url').addEventListener('focus', async e => {
 	document.getElementById('url').placeholder = '';
 });
 
-document.getElementById('url').addEventListener('input', async e => {
-	search.show(document.getElementById('url').value, searchBounds());
-});
+if(store.get('settings.search_suggestions')) {
+	document.getElementById('url').addEventListener('input', async e => {
+		document.getElementById('nav-center').style.border = '2px solid var(--accent)';
+		document.getElementById('nav-center').style.borderBottom = '2px solid var(--background-secondary)';
+
+		search.show(document.getElementById('url').value, searchBounds());
+	});
+}
 
 document.getElementById('url').addEventListener('blur', async () => {
 	document.getElementById('nav-center').removeAttribute('style');
 
 	document.getElementById('url').setSelectionRange(0,0);
 	document.getElementById('url').placeholder = document.getElementById('url').getAttribute('data-placeholder');
+
+	if(!store.get('settings.search_suggestions')) return;
+
 	setTimeout(function() {
 		search.hide();
 		web.setSearchIcon(tabs.current().webContents.getURL());
@@ -901,7 +914,7 @@ remote.getCurrentWindow().on('closed', async () => {
 });
 
 remote.getCurrentWindow().on('move', async () => {
-	search.hide();
+	if(store.get('settings.search_suggestions')) search.hide();
 	document.getElementById('url').blur();
 });
 
