@@ -30,7 +30,7 @@
 			"target": [
 				"dmg"
 			],
-			"icon": "images/peacock.icns"
+			"icon": "images/peacock.png"
 		},
 		"linux": {
 			"category": "Network",
