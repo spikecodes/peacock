@@ -19,14 +19,14 @@
 				background-color: var(--background-secondary);
 				position: fixed;
 				top: 0; left: 0;
-				width: 100px;
+				width: 75px;
 				height: 100%;
 				transition: width 0.2s ease-in-out, left 0.2s ease-in-out;
 				overflow: hidden;
 				z-index: 10;
 			}
 			#sidebar:hover {
-				width: 250px;
+				width: 235px;
 				box-shadow: 1px 0px 1.5em 1px var(--background);
 			}
 			#logo {
@@ -65,7 +65,7 @@
 			}
 			#menu {
 				padding: 5px;
-				margin-top: 25px;
+				margin-top: 100px;
 				max-width: 90px;
 			}
 			#version {
@@ -78,7 +78,7 @@
 				opacity: 0.5;
 			}
 			.sideicon, .sideicon > path {
-				margin-left: 25px;
+				margin-left: 15px;
 				cursor: pointer;
 			}
 			.sideicon > path:last-child {
@@ -94,12 +94,12 @@
 				font-size: 19px;
 				text-align: left;
 				position: relative;
-				top: 32px; left: 95px;
+				top: 30px; left: 80px;
 				font-weight: 500;
 				cursor: pointer;
 			}
 			.entry {
-				width: 250px;
+				width: 235px;
 				cursor: pointer;
 			}
 
@@ -129,7 +129,7 @@
 		<h1 class="title">SETTINGS</h1>
 		<div id="sidebar">
 			<div id="logo">
-				<svg width="55" height="55" viewBox="0 0 475 475">
+				<svg width="45" height="45" viewBox="0 0 475 475">
 					<defs>
 						<clipPath id="clip-Tom">
 							<rect width="475" height="475"/>
@@ -168,7 +168,7 @@
 		const settings = [
 			{
 				"name": "general",
-				"icon": `<svg class="sideicon" viewBox="0 0 24 24" width="40" height="40">
+				"icon": `<svg class="sideicon" viewBox="0 0 24 24" width="35" height="35">
 						<path fill="none" d="M0 0h24v24H0z"/>
 						<path d="M3.34 17a10.018 10.018 0 0 1-.978-2.326 3 3 0 0 0 .002-5.347A9.99 9.99 0 0 1 4.865 4.99a3 3 0 0 0 4.631-2.674 9.99 9.99 0 0 1 5.007.002 3 3 0 0 0 4.632 2.672c.579.59 1.093 1.261 1.525 2.01.433.749.757 1.53.978 2.326a3 3 0 0 0-.002 5.347 9.99 9.99 0 0 1-2.501 4.337 3 3 0 0 0-4.631 2.674 9.99 9.99 0 0 1-5.007-.002 3 3 0 0 0-4.632-2.672A10.018 10.018 0 0 1 3.34 17zm5.66.196a4.993 4.993 0 0 1 2.25 2.77c.499.047 1 .048 1.499.001A4.993 4.993 0 0 1 15 17.197a4.993 4.993 0 0 1 3.525-.565c.29-.408.54-.843.748-1.298A4.993 4.993 0 0 1 18 12c0-1.26.47-2.437 1.273-3.334a8.126 8.126 0 0 0-.75-1.298A4.993 4.993 0 0 1 15 6.804a4.993 4.993 0 0 1-2.25-2.77c-.499-.047-1-.048-1.499-.001A4.993 4.993 0 0 1 9 6.803a4.993 4.993 0 0 1-3.525.565 7.99 7.99 0 0 0-.748 1.298A4.993 4.993 0 0 1 6 12c0 1.26-.47 2.437-1.273 3.334a8.126 8.126 0 0 0 .75 1.298A4.993 4.993 0 0 1 9 17.196zM12 15a3 3 0 1 1 0-6 3 3 0 0 1 0 6zm0-2a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"/>
 					</svg>`,
@@ -187,7 +187,7 @@
 			},
 			{
 				"name": "appearance",
-				"icon": `<svg class="sideicon" viewBox="0 0 24 24" width="40" height="40">
+				"icon": `<svg class="sideicon" viewBox="0 0 24 24" width="35" height="35">
 						<path fill="none" d="M0 0h24v24H0z"/>
 						<path d="M3 3h18a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1zm17 8H4v8h16v-8zm0-2V5H4v4h16zm-5-3h4v2h-4V6z"/>
 					</svg>`,
@@ -222,7 +222,7 @@
 			},
 			{
 				"name": "customization",
-				"icon": `<svg class="sideicon" viewBox="0 0 24 24" width="40" height="40">
+				"icon": `<svg class="sideicon" viewBox="0 0 24 24" width="35" height="35">
 						<path fill="none" d="M0 0h24v24H0z"/>
 						<path d="M5 5v3h14V5H5zM4 3h16a1 1 0 0 1 1 1v5a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1zm2 9h6a1 1 0 0 1 1 1v3h1v6h-4v-6h1v-2H5a1 1 0 0 1-1-1v-2h2v1zm11.732 1.732l1.768-1.768 1.768 1.768a2.5 2.5 0 1 1-3.536 0z"/>
 					</svg>`,
@@ -247,7 +247,7 @@
 			},
 			{
 				"name": "privacy",
-				"icon": `<svg class="sideicon" viewBox="0 0 24 24" width="40" height="40">
+				"icon": `<svg class="sideicon" viewBox="0 0 24 24" width="35" height="35">
 						<path fill="none" d="M0 0h24v24H0z"/>
 						<path d="M12 3c5.392 0 9.878 3.88 10.819 9-.94 5.12-5.427 9-10.819 9-5.392 0-9.878-3.88-10.819-9C2.121 6.88 6.608 3 12 3zm0 16a9.005 9.005 0 0 0 8.777-7 9.005 9.005 0 0 0-17.554 0A9.005 9.005 0 0 0 12 19zm0-2.5a4.5 4.5 0 1 1 0-9 4.5 4.5 0 0 1 0 9zm0-2a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z"/>
 					</svg>`,
@@ -276,7 +276,7 @@
 			},
 			{
 				"name": "security",
-				"icon": `<svg class="sideicon" viewBox="0 0 24 24" width="40" height="40">
+				"icon": `<svg class="sideicon" viewBox="0 0 24 24" width="35" height="35">
 						<path fill="none" d="M0 0h24v24H0z"/>
 						<path d="M12 1l8.217 1.826a1 1 0 0 1 .783.976v9.987a6 6 0 0 1-2.672 4.992L12 23l-6.328-4.219A6 6 0 0 1 3 13.79V3.802a1 1 0 0 1 .783-.976L12 1zm0 2.049L5 4.604v9.185a4 4 0 0 0 1.781 3.328L12 20.597l5.219-3.48A4 4 0 0 0 19 13.79V4.604L12 3.05zM12 7a2 2 0 0 1 1.001 3.732L13 15h-2v-4.268A2 2 0 0 1 12 7z"/>
 					</svg>`,
