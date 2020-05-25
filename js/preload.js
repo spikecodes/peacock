@@ -14,15 +14,21 @@ async function modifyDefault (defaultVar, name, value) {
 	}
 }
 
+Array.prototype.random = function () {
+	return this[Math.floor((Math.random()*this.length))];
+}
+
 modifyDefault(document, 'referrer', '');
-modifyDefault(navigator, 'doNotTrack', '1');
 modifyDefault(navigator, 'deviceMemory', undefined);
-modifyDefault(navigator, 'hardwareConcurrency', Math.round(Math.random()) == 0 ? 4 : 8);
-modifyDefault(navigator, 'appCodeName', Math.round(Math.random()) == 0 ? 'Mozilla' : 'Peacock');
-modifyDefault(navigator, 'appName', Math.round(Math.random()) == 0 ? 'Netscape' : 'Peacock');
-modifyDefault(navigator, 'mimeTypes', Math.round(Math.random()) == 0 ? {} : navigator.mimeTypes);
-modifyDefault(navigator, 'plugins', Math.round(Math.random()) == 0 ? {} : navigator.plugins);
-modifyDefault(screen, 'colorDepth', Math.round(Math.random()) == 0 ? 24 : 32);
+modifyDefault(navigator, 'hardwareConcurrency', [4,8].random());
+modifyDefault(navigator, 'appCodeName', ['Mozilla', 'Peacock'].random());
+modifyDefault(navigator, 'appName', ['Netscape', 'Peacock'].random());
+modifyDefault(navigator, 'mimeTypes', [{}, navigator.mimeTypes].random());
+modifyDefault(navigator, 'plugins', [{}, navigator.plugins].random());
+modifyDefault(navigator, 'platform', 'Win32');
+modifyDefault(screen, 'colorDepth', [24, 32, 48].random());
+modifyDefault(screen, 'pixelDepth', [24, 32, 48].random());
+modifyDefault(history, 'length', 1);
 window.close = e => { ipcRenderer.send('closeCurrentTab', remote.getCurrentWebContents().id); };
 navigator.getBattery = () => {};
 if(navigator.mediaDevices) navigator.mediaDevices.enumerateDevices = ()=>{return new Promise((r)=>{r(undefined)})}

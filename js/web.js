@@ -1,9 +1,5 @@
 var firstTime = true;
 
-let { remote } = require('electron');
-function webContents(webview) { return remote.webContents.fromId(webview.getWebContentsId()); }
-exports.webContents = webContents;
-
 const topbarHeight = 70;
 
 function setURLBar(url) {
@@ -80,6 +76,8 @@ exports.loadStop = function(view, extensions) {
 }
 
 exports.failLoad = function(event, view, errorCode, errorDescription, validatedURL) {
+	console.log('Failed to load', validatedURL, errorDescription);
+	
 	if(errorCode != -27 && errorCode != -3 && view.webContents.getURL() == validatedURL) {
 		window.error = {errorCode: errorCode,
 			errorDescription: errorDescription,

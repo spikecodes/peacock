@@ -78,8 +78,7 @@ if (!store.get('flags')) store.set('flags', [
 	'--no-crash-upload',
 	'--no-default-browser-check',
 	'--disable-breakpad',
-	'--disable-plugins',
-	'--https-only'
+	'--disable-plugins'
 ]);
 
 web.init(document);
@@ -165,6 +164,7 @@ ipcMain.on('siteInfo', async (e, action) => {
 
 			let req = https.request(options, res => {
 				let cert = res.connection.getPeerCertificate();
+				// new Date() >= new Date(cert.valid_from) && new Date() <= new Date(cert.valid_to)
 				showCertificateDialog(cert);
 			});
 
@@ -611,7 +611,7 @@ async function toggleSiteInfo() {
 			height: 330,
 			x: remote.getCurrentWindow().getBounds().x + siteInfoEl.getBoundingClientRect().left + window.scrollX,
 			y: remote.getCurrentWindow().getBounds().y + siteInfoEl.getBoundingClientRect().top + window.scrollY +
-				(parseFloat(getComputedStyle(siteInfo, null).height.replace("px", "")) * 3),
+				(parseFloat(getComputedStyle(siteInfoEl, null).height.replace("px", "")) * 3),
 			parent: remote.getCurrentWindow(),
 			webPreferences: {
 				nodeIntegration: true,

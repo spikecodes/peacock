@@ -141,9 +141,10 @@ exports.initBrowserView = async (view) => {
 	view.webContents.on('did-navigate-in-page', async (e, url) => { web.didNavigate(url, view, storage) });
 	view.webContents.on('preload-error', async (e, path, err) => { console.error("PRELOAD ERROR", err); });
 	view.webContents.session.on('will-download', this.handleDownload);
-	view.webContents.on('certificate-error', async (e, url, err) => {
+	view.webContents.on('certificate-error', async (e, url, err, cert, callback) => {
 		e.preventDefault();
-		console.log(err);
+		callback(true);
+		console.log('certificate-error', err);
 	});
 }
 
@@ -517,11 +518,5 @@ exports.showDialog = async (text) => {
 }
 
 document.getElementById('new-tab').addEventListener('click', async () => this.newView('peacock://newtab'));
-
-remote.app.on('certificate-error', (event, webContents, url, error, certificate, callback) => {
-	console.log(certificate, error);
-	event.preventDefault();
-	callback(true);
-});
 
 // this.initDownloads();

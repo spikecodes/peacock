@@ -1,7 +1,7 @@
 {
 	"name": "peacock",
 	"productName": "Peacock",
-	"version": "2.4.0-beta.3",
+	"version": "2.4.0-beta.4",
 	"description": "Open source experimental private-by-default web browser.",
 	"main": "main.js",
 	"repository": {
