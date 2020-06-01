@@ -2,8 +2,8 @@
 <p align="center">
   <img src="images/peacock.png" style="display: block;margin-left: auto;margin-right: auto;" data-canonical-src="https://i.imgur.com/Gdko6yP.png" width="300" height="300" align="center"/><br><br>
   🦚 Open source experimental private-by-default web browser.<br>
-  <a href="https://invite.gg/peacock">Discord</a> |
-  <a href="https://github.com/Codiscite/peacock/releases/latest">Download</a> |
+  <a href="https://github.com/peacockweb/peacock/wiki">Docs</a> |
+  <a href="#download">Download</a> |
   <a href="#faq">FAQ</a>
   <br><br>
   <img alt="GitHub Workflow Status" src="https://img.shields.io/github/workflow/status/Codiscite/peacock/build?style=for-the-badge">
@@ -13,6 +13,7 @@
 
 ## Contents
 
+- [Documentation](https://github.com/peacockweb/peacock/wiki)
 - [Download](#download)
 	- [Windows](#windows)
 	- [Mac](#mac)
@@ -20,6 +21,7 @@
 - [Screenshots](#screenshots)
 - [Building](#building)
 - [FAQ](#faq)
+- [Privacy](https://github.com/peacockweb/peacock/wiki/Privacy)
 
 ## Download
 
@@ -89,9 +91,9 @@ Both of the build commands use [`electron-builder`](https://electron.build) and 
 Both Firefox and Brave are spectacular and every day, Peacock gets closer and closer to their status of privacy. Peacock isn't stable enough yet to be used as a daily driver, but is an awesome experiment nonetheless to test the limits of the web and help make the internet a safer place.
 
 ### How do I know Peacock doesn't take telemetry?
-Peacock is built around on open source technologies and therefore we love transparency. You're welcome to perform your own audits on our entirely open source code! We also include a [`components.md`](docs/components.md) file which breaks down all the technologies used in the production of Peacock.
+Peacock is built around on open source technologies and therefore we love transparency. You're welcome to perform your own audits on our entirely open source code! We also include a [Components](https://github.com/peacockweb/peacock/wiki/Components) entry in our docs which breaks down all the technologies used in the production of Peacock.
 
-### Just how experimental is Peacock really? Can I process any sensitive data on it yet?
+### How experimental is Peacock? Can I process any sensitive data on it yet?
 Using should hold off on doing anything too sensitive on Peacock for now, it's still in development and bugs are getting patched all the time, but like all apps, some may be missed along the way.
 
 ### Why use Electron?
