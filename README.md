@@ -27,7 +27,7 @@
 
 ### Windows
 
-Download the `.exe` file from our [releases page](/releases/latest).
+Download the `.exe` file from our [releases page](https://github.com/peacockweb/peacock/releases/latest).
 
 Releasing Peacock for the Windows package, Chocolatey, might be our next step.
 
@@ -43,7 +43,7 @@ Here, you can download Linux builds for Peacock. Hopefully Peacock will have a F
 
 **Ubuntu, Debian and Debian derivatives**
 
-Download the `.deb` file from our [releases page](/releases/latest).
+Download the `.deb` file from our [releases page](https://github.com/peacockweb/peacock/releases/latest).
 
 <br>
 
@@ -57,7 +57,7 @@ Download Peacock from the Arch User Repository [here](https://aur.archlinux.org/
 
 **AppImage (Everything else)**
 
-Download the `.AppImage` file from our [releases page](/releases/latest).
+Download the `.AppImage` file from our [releases page](https://github.com/peacockweb/peacock/releases/latest).
 
 ## Screenshots
 New screenshots coming soon!
