@@ -67,7 +67,6 @@ store.set('searchEngines', [
 	{ name: 'Bing', url: 'https://www.bing.com/search?q=' },
 ]);
 
-if (!store.get('blocked')) store.set('blocked', 0);
 if (!store.get('permissions')) store.set('permissions', {});
 if (!store.get('flags')) store.set('flags', [
 	// '--disable-reading-from-canvas'
@@ -320,12 +319,6 @@ async function enableAdBlocking(session) {
 
 	ElectronBlocker.fromPrebuiltAdsAndTracking(fetch).then(blocker => {
 		blocker.enableBlockingInSession(session);
-		blocker.on('request-blocked', async () => {
-			store.set('blocked', store.get('blocked') + 1);
-
-			if (!session.ads_blocked) session.ads_blocked = 0;
-			session.ads_blocked++;
-		});
 	});
 }
 
