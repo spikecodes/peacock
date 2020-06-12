@@ -11,6 +11,8 @@
   <a href="https://discord.gg/PZjDSX3"><img alt="Discord" src="https://img.shields.io/discord/630199884229771314?color=%237289DA&label=discord&logo=Discord&logoColor=white&style=for-the-badge"></a>
 </p><br>
 
+# ⚠️ Peacock development is temporarily paused.
+
 ## Contents
 
 - [Documentation](https://github.com/peacockweb/peacock/wiki)
